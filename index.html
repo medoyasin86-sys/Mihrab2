@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محراب رمضان 2026 - الإصدار الكامل الشامل</title>
+    <title>محراب رمضان 2026 - الإصدار الشامل</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --masjid: #004d40; --gold: #d4af37; --bg: #fdfbf7; --text: #2c3e50; --sunnah: #2e7d32; }
+        :root { --masjid: #004d40; --gold: #d4af37; --bg: #fdfbf7; --text: #2c3e50; --sunnah: #2e7d32; --silver: #bdc3c7; --bronze: #cd7f32; }
         body { font-family: 'Amiri', serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
         .container { max-width: 900px; margin: auto; background: white; border: 2px solid var(--gold); border-radius: 25px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
         
@@ -16,7 +16,15 @@
         .timer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .city-box { background: #fffef0; border: 1px solid var(--gold); padding: 15px; border-radius: 20px; text-align: center; }
 
-        /* جداول المهام */
+        /* البوديوم */
+        .podium-container { display: flex; justify-content: space-around; align-items: flex-end; margin: 20px 0; background: #f9f9f9; padding: 20px; border-radius: 20px; border: 1px solid #eee; }
+        .podium-item { display: flex; flex-direction: column; align-items: center; width: 30%; }
+        .podium-rank { width: 100%; text-align: center; color: white; border-radius: 10px 10px 0 0; padding: 5px 0; font-weight: bold; }
+        .rank-1 { height: 80px; background: var(--gold); }
+        .rank-2 { height: 60px; background: var(--silver); }
+        .rank-3 { height: 40px; background: var(--bronze); }
+        .podium-name { margin-top: 5px; font-weight: bold; font-size: 0.9rem; }
+
         .task-card { background: white; border: 1px solid #eee; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-right: 6px solid var(--masjid); }
         .task-card.sunnah-card { border-right-color: var(--sunnah); }
         .task-card.azkar-card { border-right-color: #f39c12; }
@@ -47,6 +55,17 @@
         <input type="date" id="main-date" style="padding:5px; border-radius:10px; border:1px solid var(--gold);">
     </div>
 
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div>
+            <h4 style="text-align:center; margin:5px;">🏆 الترتيب اليومي</h4>
+            <div id="podium-daily" class="podium-container"></div>
+        </div>
+        <div>
+            <h4 style="text-align:center; margin:5px;">🌟 الترتيب السنوي</h4>
+            <div id="podium-yearly" class="podium-container"></div>
+        </div>
+    </div>
+
     <div class="timer-grid">
         <div class="city-box"><h3>🇴🇲 صلالة</h3><div id="clock-salalah" style="font-size:1.3rem; font-weight:bold;">00:00:00</div></div>
         <div class="city-box"><h3>🇪🇬 كفر الشيخ</h3><div id="clock-kafr" style="font-size:1.3rem; font-weight:bold;">00:00:00</div></div>
@@ -71,30 +90,12 @@
                 <span>📖 رقم الجزء في الختمة <a href="https://quran.com/" class="link-btn" target="_blank">المصحف</a></span>
                 <input type="number" id="q-part" min="0" max="30" onchange="updateQ(this.value)" style="width:50px;">
             </div>
-            <div class="row">
-                <span>☀️ أذكار الصباح <a href="https://alazkar.today/" class="link-btn" target="_blank">قراءة</a></span>
-                <input type="checkbox" id="c-morning" onchange="saveCheck('morning', 20, this.checked)">
-            </div>
-            <div class="row">
-                <span>🌙 أذكار المساء <a href="https://alazkar.today/" class="link-btn" target="_blank">قراءة</a></span>
-                <input type="checkbox" id="c-evening" onchange="saveCheck('evening', 20, this.checked)">
-            </div>
-            <div class="row">
-                <span>😴 أذكار النوم <a href="https://alazkar.today/" class="link-btn" target="_blank">قراءة</a></span>
-                <input type="checkbox" id="c-sleep" onchange="saveCheck('sleep', 10, this.checked)">
-            </div>
-            <div class="row">
-                <span>👑 سورة الملك <a href="https://quran.com/67" class="link-btn" target="_blank">قراءة</a> <span class="points-tag">15ن</span></span>
-                <input type="checkbox" id="c-mulk" onchange="saveCheck('mulk', 15, this.checked)">
-            </div>
-            <div class="row">
-                <span>🕌 سورة الكهف (للجمعة) <a href="https://quran.com/18" class="link-btn" target="_blank">قراءة</a> <span class="points-tag">30ن</span></span>
-                <input type="checkbox" id="c-kahf" onchange="saveCheck('kahf', 30, this.checked)">
-            </div>
-            <div class="row">
-                <span>📜 خواتيم البقرة <a href="https://quran.com/2?startingVerse=285" class="link-btn" target="_blank">قراءة</a> <span class="points-tag">10ن</span></span>
-                <input type="checkbox" id="c-baqara" onchange="saveCheck('baqara', 10, this.checked)">
-            </div>
+            <div class="row"><span>☀️ أذكار الصباح <a href="https://alazkar.today/" class="link-btn" target="_blank">قراءة</a></span><input type="checkbox" id="c-morning" onchange="saveCheck('morning', 20, this.checked)"></div>
+            <div class="row"><span>🌙 أذكار المساء <a href="https://alazkar.today/" class="link-btn" target="_blank">قراءة</a></span><input type="checkbox" id="c-evening" onchange="saveCheck('evening', 20, this.checked)"></div>
+            <div class="row"><span>😴 أذكار النوم <a href="https://alazkar.today/" class="link-btn" target="_blank">قراءة</a></span><input type="checkbox" id="c-sleep" onchange="saveCheck('sleep', 10, this.checked)"></div>
+            <div class="row"><span>👑 سورة الملك <a href="https://quran.com/67" class="link-btn" target="_blank">قراءة</a> <span class="points-tag">15ن</span></span><input type="checkbox" id="c-mulk" onchange="saveCheck('mulk', 15, this.checked)"></div>
+            <div class="row"><span>🕌 سورة الكهف <a href="https://quran.com/18" class="link-btn" target="_blank">قراءة</a> <span class="points-tag">30ن</span></span><input type="checkbox" id="c-kahf" onchange="saveCheck('kahf', 30, this.checked)"></div>
+            <div class="row"><span>📜 خواتيم البقرة <a href="https://quran.com/2?startingVerse=285" class="link-btn" target="_blank">قراءة</a> <span class="points-tag">10ن</span></span><input type="checkbox" id="c-baqara" onchange="saveCheck('baqara', 10, this.checked)"></div>
         </div>
     </div>
 </div>
@@ -106,20 +107,14 @@
     let currentUser = null;
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
     
-    const prayers = [
-        {id:'fajr', n:'الفجر', icon:'🌅'},
-        {id:'dhuhr', n:'الظهر', icon:'☀️'},
-        {id:'asr', n:'العصر', icon:'🌤️'},
-        {id:'maghrib', n:'المغرب', icon:'🌇'},
-        {id:'isha', n:'العشاء', icon:'🌃'}
-    ];
-
+    const prayers = [{id:'fajr', n:'الفجر', icon:'🌅'},{id:'dhuhr', n:'الظهر', icon:'☀️'},{id:'asr', n:'العصر', icon:'🌤️'},{id:'maghrib', n:'المغرب', icon:'🌇'},{id:'isha', n:'العشاء', icon:'🌃'}];
     const sunan = [
-        {id:'s_f_pre', n:'🌅 سنة الفجر (2 قبلية)', p:15},
-        {id:'s_d_pre', n:'☀️ سنة الظهر/الجمعة (4 قبلية)', p:20},
-        {id:'s_d_post', n:'☀️ سنة الظهر/الجمعة (2 بعدية)', p:10},
-        {id:'s_m_post', n:'🌇 سنة المغرب (2 بعدية)', p:10},
-        {id:'s_i_post', n:'🌃 سنة العشاء (2 بعدية)', p:10},
+        {id:'s_f_pre', n:'🌅 سنة الفجر', p:15},
+        {id:'duha', n:'☀️ صلاة الضحى', p:15},
+        {id:'s_d_pre', n:'☀️ سنة الظهر (قبل)', p:20},
+        {id:'s_d_post', n:'☀️ سنة الظهر (بعد)', p:10},
+        {id:'s_m_post', n:'🌇 سنة المغرب', p:10},
+        {id:'s_i_post', n:'🌃 سنة العشاء', p:10},
         {id:'shaf', n:'🕯️ صلاة الشفع', p:10},
         {id:'witr', n:'🌙 صلاة الوتر', p:20},
         {id:'traweeh', n:'🕌 القيام', p:60}
@@ -130,7 +125,7 @@
         document.getElementById('main-date').onchange = sync;
         setInterval(() => {
             const diff = new Date("2026-02-18") - new Date();
-            document.getElementById('ramadan-countdown').innerText = `⏳ متبقي على رمضان: ${Math.floor(diff/(1000*60*60*24))} يوم و ${Math.floor((diff%(1000*60*60*24))/(1000*60*60))} ساعة`;
+            document.getElementById('ramadan-countdown').innerText = `⏳ متبقي على رمضان: ${Math.floor(diff/(1000*60*60*24))} يوم`;
             const now = new Date();
             document.getElementById('clock-salalah').innerText = now.toLocaleTimeString('ar-OM');
             document.getElementById('clock-kafr').innerText = new Date(now.getTime() - 7200000).toLocaleTimeString('ar-EG');
@@ -142,25 +137,59 @@
         const date = document.getElementById('main-date').value;
         const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(new Date(date));
         document.getElementById('hijri-date').innerText = hijri;
-        db.ref('osraty/' + date).on('value', snap => render(snap.val() || {}, hijri));
+        
+        db.ref('osraty').on('value', snap => {
+            const allDaysData = snap.val() || {};
+            const currentDayData = allDaysData[date] || {};
+            updatePodiums(allDaysData, currentDayData);
+            render(currentDayData, hijri);
+        });
     }
 
-    function render(allData, hijriText) {
+    function updatePodiums(allData, currentDayData) {
+        // حساب اليومي
+        let daily = users.map(u => {
+            let s = 0; Object.values(currentDayData[u] || {}).forEach(v => { if(v.p) s += v.p; });
+            return { name: u, score: s };
+        }).sort((a,b) => b.score - a.score);
+
+        // حساب السنوي (الإجمالي)
+        let yearlyMap = {}; users.forEach(u => yearlyMap[u] = 0);
+        Object.values(allData).forEach(day => {
+            users.forEach(u => {
+                Object.values(day[u] || {}).forEach(v => { if(v.p) yearlyMap[u] += v.p; });
+            });
+        });
+        let yearly = users.map(u => ({ name: u, score: yearlyMap[u] })).sort((a,b) => b.score - a.score);
+
+        renderPodium(daily, 'podium-daily');
+        renderPodium(yearly, 'podium-yearly');
+    }
+
+    function renderPodium(data, elementId) {
+        const p = [data[1], data[0], data[2]]; // ترتيب بصري: 2 ثم 1 ثم 3
+        document.getElementById(elementId).innerHTML = p.map((u, i) => u ? `
+            <div class="podium-item">
+                <div class="podium-rank rank-${i===0?2:i===1?1:3}">${u.score}</div>
+                <div class="podium-name">${u.name}</div>
+            </div>
+        ` : '').join('');
+    }
+
+    function render(udDay, hijriText) {
         document.getElementById('user-grid').innerHTML = users.map(u => {
-            let score = 0; const ud = allData[u] || {};
-            Object.values(ud).forEach(v => { if(v.p) score += v.p; });
-            return `<div class="comp-card ${u===currentUser?'active':''}" onclick="setUser('${u}')"><b>${u}</b><br>${score}ن</div>`;
+            let s = 0; Object.values(udDay[u] || {}).forEach(v => { if(v.p) s += v.p; });
+            return `<div class="comp-card ${u===currentUser?'active':''}" onclick="setUser('${u}')"><b>${u}</b><br>${s}ن</div>`;
         }).join('');
 
         if(currentUser) {
             document.getElementById('app-body').style.display = 'block';
-            const ud = allData[currentUser] || {};
+            const ud = udDay[currentUser] || {};
             const isFri = new Date(document.getElementById('main-date').value).getDay() === 5;
             const isRamadan = hijriText.includes('رمضان');
 
             document.getElementById('fard-list').innerHTML = prayers.map(p => {
-                let id = p.id; let name = p.n;
-                if(isFri && id==='dhuhr') { id='jumuah'; name='الجمعة'; }
+                let id = p.id; let name = p.n; if(isFri && id==='dhuhr') { id='jumuah'; name='الجمعة'; }
                 const v = ud[id]?.type || '';
                 return `<div class="row"><span>${p.icon} ${name}</span><div class="btn-group">
                     <button class="${v==='m'?'active-m':''}" onclick="saveFard('${id}','m',100)">مسجد</button>
@@ -171,9 +200,8 @@
             }).join('');
 
             document.getElementById('sunnah-list').innerHTML = sunan.map(s => {
-                let displayName = s.n;
-                if(s.id === 'traweeh' && isRamadan) displayName = '🕌 التراويح والقيام';
-                return `<div class="row"><span>${displayName} <span class="points-tag">${s.p}ن</span></span>
+                let dName = s.n; if(s.id === 'traweeh' && isRamadan) dName = '🕌 التراويح والقيام';
+                return `<div class="row"><span>${dName} <span class="points-tag">${s.p}ن</span></span>
                 <input type="checkbox" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)"></div>`;
             }).join('');
 
