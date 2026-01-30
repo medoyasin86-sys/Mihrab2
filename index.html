@@ -305,7 +305,8 @@
     }
 
     function renderUsers(dayData) {
-        const isFri = new Date(document.getElementById('main-date').value).getDay() === 5;
+        const selectedDate = new Date(document.getElementById('main-date').value);
+        const isFri = selectedDate.getDay() === 5;
         document.getElementById('user-grid').innerHTML = users.map(u => {
             const ud = dayData[u] || {};
             let score = 0; Object.values(ud).forEach(v => score += (v.p || 0));
@@ -317,7 +318,14 @@
                 if(!ud[id]) missing.push(p.icon + " " + name); 
             });
             sunan.forEach(s => { if(!ud[s.id]?.done) missing.push(s.icon + " " + s.n); });
-            azkar.forEach(a => { if(!ud[a.id]?.done) missing.push(a.icon + " " + a.n); });
+            azkar.forEach(a => { 
+                // التحقق من سورة الكهف: تظهر فقط إذا كان اليوم جمعة
+                if(a.id === 'kahf') {
+                    if(isFri && !ud[a.id]?.done) missing.push(a.icon + " " + a.n);
+                } else {
+                    if(!ud[a.id]?.done) missing.push(a.icon + " " + a.n);
+                }
+            });
             return `<div class="comp-card ${u===currentUser?'active':''}" onclick="setUser('${u}')">
                     <div style="display:flex; justify-content:space-between"><b>👤 ${u}</b> <span class="points-tag">${score}ن</span></div>
                     <div class="remaining-box">${missing.length > 0 ? missing.map(m => `<span class="rem-item">${m}</span>`).join('') : '✨ طاعاتك كاملة'}</div>
@@ -327,7 +335,9 @@
 
     function renderTasks(ud, isRamadan) {
         document.getElementById('app-body').style.display = 'block';
-        const isFri = new Date(document.getElementById('main-date').value).getDay() === 5;
+        const selectedDate = new Date(document.getElementById('main-date').value);
+        const isFri = selectedDate.getDay() === 5;
+        
         document.getElementById('fard-list').innerHTML = prayers.map(p => {
             let id = p.id; let name = p.n; if(isFri && id==='dhuhr') { id='jumuah'; name='الجمعة'; }
             const v = ud[id]?.type || '';
@@ -338,13 +348,20 @@
                 <button class="${v==='q'?'active-q':''}" onclick="saveFard('${id}','q',10)">🔄<span>قضاء</span></button>
             </div></div>`;
         }).join('');
+        
         document.getElementById('sunnah-list').innerHTML = sunan.map(s =>  {
             let dName = (s.id==='traweeh' && isRamadan) ? "صلاة التراويح" : s.n;
             return `<div class="row"><span>${s.icon} ${dName} ${s.r ? `<span class="rakat-tag">${s.r}</span>` : ''} <span class="points-tag">${s.p}ن</span></span>
                 <input type="checkbox" style="width:22px; height:22px;" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)"></div>`;
         }).join('');
-        document.getElementById('azkar-list').innerHTML = azkar.map(a => `<div class="row"><span>${a.icon} ${a.n} <span class="points-tag">${a.p}ن</span> <a href="${a.l}" target="_blank" class="link-btn">🔗 اقرأ</a></span>
-                <input type="checkbox" style="width:22px; height:22px;" ${ud[a.id]?.done?'checked':''} onchange="saveCheck('${a.id}',${a.p},this.checked)"></div>`).join('');
+        
+        // تعديل عرض قائمة الأذكار لإخفاء سورة الكهف في غير يوم الجمعة
+        document.getElementById('azkar-list').innerHTML = azkar.map(a => {
+            if(a.id === 'kahf' && !isFri) return ''; // إخفاء الكهف إذا لم يكن يوم جمعة
+            return `<div class="row"><span>${a.icon} ${a.n} <span class="points-tag">${a.p}ن</span> <a href="${a.l}" target="_blank" class="link-btn">🔗 اقرأ</a></span>
+                <input type="checkbox" style="width:22px; height:22px;" ${ud[a.id]?.done?'checked':''} onchange="saveCheck('${a.id}',${a.p},this.checked)"></div>`;
+        }).join('');
+        
         document.getElementById('q-part').value = ud.q_part || 0;
     }
 
