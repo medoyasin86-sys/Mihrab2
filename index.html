@@ -25,7 +25,6 @@
         .btn-group { display: flex; gap: 3px; flex-wrap: wrap; }
         .btn-group button { border: 1px solid #ddd; padding: 5px 8px; border-radius: 8px; cursor: pointer; font-family: 'Amiri'; font-size: 0.75rem; }
         
-        /* التميز اللوني للأزرار */
         .active-m { background: var(--masjid) !important; color: white !important; }
         .active-h { background: #e65100 !important; color: white !important; }
         .active-s { background: #4a148c !important; color: white !important; }
@@ -73,11 +72,12 @@
                 <input type="number" id="q-part" min="0" max="30" onchange="updateQ(this.value)" style="width:50px;">
             </div>
             <div class="row">
-                <span>☀️ أذكار الصباح والمساء <a href="https://alazkar.today/" class="link-btn" target="_blank">فتح الأذكار</a></span>
-                <div style="display:flex; gap:10px;">
-                    <label>☀️ <input type="checkbox" id="c-morning" onchange="saveCheck('morning', 20, this.checked)"></label>
-                    <label>🌙 <input type="checkbox" id="c-evening" onchange="saveCheck('evening', 20, this.checked)"></label>
-                </div>
+                <span>☀️ أذكار الصباح <a href="https://alazkar.today/" class="link-btn" target="_blank">قراءة</a></span>
+                <input type="checkbox" id="c-morning" onchange="saveCheck('morning', 20, this.checked)">
+            </div>
+            <div class="row">
+                <span>🌙 أذكار المساء <a href="https://alazkar.today/" class="link-btn" target="_blank">قراءة</a></span>
+                <input type="checkbox" id="c-evening" onchange="saveCheck('evening', 20, this.checked)">
             </div>
             <div class="row">
                 <span>😴 أذكار النوم <a href="https://alazkar.today/" class="link-btn" target="_blank">قراءة</a></span>
@@ -122,7 +122,7 @@
         {id:'s_i_post', n:'🌃 سنة العشاء (2 بعدية)', p:10},
         {id:'shaf', n:'🕯️ صلاة الشفع', p:10},
         {id:'witr', n:'🌙 صلاة الوتر', p:20},
-        {id:'traweeh', n:'🕌 التراويح والقيام', p:60}
+        {id:'traweeh', n:'🕌 القيام', p:60}
     ];
 
     function init() {
@@ -140,11 +140,12 @@
 
     function sync() {
         const date = document.getElementById('main-date').value;
-        document.getElementById('hijri-date').innerText = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(new Date(date));
-        db.ref('osraty/' + date).on('value', snap => render(snap.val() || {}));
+        const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(new Date(date));
+        document.getElementById('hijri-date').innerText = hijri;
+        db.ref('osraty/' + date).on('value', snap => render(snap.val() || {}, hijri));
     }
 
-    function render(allData) {
+    function render(allData, hijriText) {
         document.getElementById('user-grid').innerHTML = users.map(u => {
             let score = 0; const ud = allData[u] || {};
             Object.values(ud).forEach(v => { if(v.p) score += v.p; });
@@ -155,6 +156,7 @@
             document.getElementById('app-body').style.display = 'block';
             const ud = allData[currentUser] || {};
             const isFri = new Date(document.getElementById('main-date').value).getDay() === 5;
+            const isRamadan = hijriText.includes('رمضان');
 
             document.getElementById('fard-list').innerHTML = prayers.map(p => {
                 let id = p.id; let name = p.n;
@@ -168,10 +170,12 @@
                 </div></div>`;
             }).join('');
 
-            document.getElementById('sunnah-list').innerHTML = sunan.map(s => `
-                <div class="row"><span>${s.n} <span class="points-tag">${s.p}ن</span></span>
-                <input type="checkbox" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)"></div>
-            `).join('');
+            document.getElementById('sunnah-list').innerHTML = sunan.map(s => {
+                let displayName = s.n;
+                if(s.id === 'traweeh' && isRamadan) displayName = '🕌 التراويح والقيام';
+                return `<div class="row"><span>${displayName} <span class="points-tag">${s.p}ن</span></span>
+                <input type="checkbox" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)"></div>`;
+            }).join('');
 
             document.getElementById('q-part').value = ud.q_part || 0;
             document.getElementById('c-morning').checked = ud.morning?.done || false;
