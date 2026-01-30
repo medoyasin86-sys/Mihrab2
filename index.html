@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محراب العائلة 2026 - الإصدار الفاخر</title>
+    <title>محراب الصفوة 2026 - الإصدار التحفيزي</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
@@ -23,91 +23,71 @@
         body { font-family: 'Amiri', serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; line-height: 1.6; }
         .container { max-width: 900px; margin: auto; background: white; border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 30px; padding: 25px; box-shadow: 0 15px 50px rgba(0,0,0,0.08); }
         
-        .ramadan-bar { background: var(--royal-green); color: #f1d37e; padding: 15px; text-align: center; border-radius: 20px; margin-bottom: 25px; font-weight: bold; border: 1px solid var(--deep-gold); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .ramadan-bar { background: var(--royal-green); color: #f1d37e; padding: 15px; text-align: center; border-radius: 20px; margin-bottom: 25px; font-weight: bold; border: 1px solid var(--deep-gold); }
         
-        .timer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-        .city-box { background: white; border-bottom: 4px solid var(--deep-gold); padding: 15px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
-
-        /* البوديوم المبتكر */
         .rank-titles { text-align: center; margin: 10px 0; font-family: 'Reem Kufi'; color: var(--masjid); font-size: 1.2rem; }
-        .podium-container { display: flex; justify-content: space-around; align-items: flex-end; margin: 20px 0; background: #fff; padding: 20px; border-radius: 25px; border: 1px solid #f1f1f1; position: relative; }
+        .podium-container { display: flex; justify-content: space-around; align-items: flex-end; margin: 20px 0; background: #fff; padding: 20px; border-radius: 25px; border: 1px solid #f1f1f1; }
         .podium-item { display: flex; flex-direction: column; align-items: center; width: 22%; }
-        .podium-rank { width: 100%; text-align: center; color: white; border-radius: 12px 12px 0 0; padding: 8px 0; font-weight: bold; font-size: 1rem; box-shadow: inset 0 -5px 10px rgba(0,0,0,0.1); }
+        .podium-rank { width: 100%; text-align: center; color: white; border-radius: 12px 12px 0 0; padding: 8px 0; font-weight: bold; font-size: 0.9rem; }
         .rank-1 { height: 100px; background: var(--gold-gradient); color: var(--royal-green); }
         .rank-2 { height: 80px; background: var(--silver); }
         .rank-3 { height: 60px; background: var(--bronze); }
         .rank-4 { height: 45px; background: #ecf0f1; color: #7f8c8d; }
-        .podium-name { margin-top: 8px; font-weight: bold; font-size: 0.95rem; color: var(--masjid); }
 
-        /* شبكة المستخدمين */
-        .user-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
-        .comp-card { background: white; border: 1px solid #eee; padding: 15px; border-radius: 20px; text-align: right; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
+        .user-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; }
+        .comp-card { background: white; border: 1px solid #eee; padding: 15px; border-radius: 20px; text-align: right; cursor: pointer; transition: 0.3s; }
         .comp-card.active { border: 2px solid var(--deep-gold); background: #fdfaf0; }
-        .user-meta { display: flex; justify-content: space-between; align-items: center; }
-        .remaining-tasks { font-size: 0.75rem; color: #666; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f5f5f5; }
-        .remaining-tasks b { color: var(--masjid); }
+        
+        /* تفاصيل المتبقي */
+        .remaining-box { margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 12px; font-size: 0.8rem; }
+        .rem-item { display: inline-block; background: #fff; padding: 2px 8px; border-radius: 6px; margin: 2px; border: 1px solid #eee; color: #555; }
+        .motivation-text { font-weight: bold; color: var(--deep-gold); display: block; margin-bottom: 5px; font-size: 0.9rem; }
 
         .task-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; border-right: 8px solid var(--masjid); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .task-card.sunnah-card { border-right-color: var(--sunnah); }
-        .task-card.azkar-card { border-right-color: #f39c12; }
-        
         .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
-        .btn-group button { border: 1px solid #ddd; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Amiri'; font-size: 0.8rem; transition: 0.3s; background: white; }
+        .btn-group button { border: 1px solid #ddd; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Amiri'; font-size: 0.8rem; }
         .active-m { background: var(--masjid) !important; color: white !important; }
         .active-h { background: #e65100 !important; color: white !important; }
         .active-s { background: #4a148c !important; color: white !important; }
-        .active-q { background: #5d4037 !important; color: white !important; }
-
+        
         .points-tag { font-size: 0.7rem; background: var(--gold-gradient); color: var(--royal-green); padding: 2px 8px; border-radius: 8px; font-weight: bold; }
-        .rakat-tag { font-size: 0.7rem; background: #f0f4f0; color: var(--sunnah); padding: 2px 8px; border-radius: 8px; margin-left: 5px; border: 1px solid #e0eee0; }
-        .link-btn { text-decoration: none; color: var(--deep-gold); font-weight: bold; font-size: 0.8rem; margin-right: 10px; border-bottom: 1px solid var(--deep-gold); }
+        .rakat-tag { font-size: 0.7rem; background: #f0f4f0; color: var(--sunnah); padding: 2px 8px; border-radius: 8px; border: 1px solid #e0eee0; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="ramadan-countdown" class="ramadan-bar">⏳ يترقب المحبون رمضان بعد...</div>
+    <div id="ramadan-countdown" class="ramadan-bar">⏳ يترقب المحبون رمضان...</div>
 
-    <div style="text-align:center; margin-bottom:30px;">
-        <h1 style="font-family:'Reem Kufi'; color: var(--royal-green); margin:0; letter-spacing: 1px;">⚜️ مِحرابُ الصفوة 2026</h1>
-        <div id="hijri-date" style="color:var(--deep-gold); font-size: 1.2rem; font-weight:bold; margin:10px;"></div>
-        <input type="date" id="main-date" style="padding:8px 15px; border-radius:12px; border:1px solid var(--deep-gold); background: #fffcf5; font-family: 'Amiri';">
+    <div style="text-align:center; margin-bottom:20px;">
+        <h1 style="font-family:'Reem Kufi'; color: var(--royal-green); margin:0;">⚜️ مِحرابُ الصفوة 2026</h1>
+        <div id="hijri-date" style="color:var(--deep-gold); font-weight:bold; margin:5px;"></div>
+        <input type="date" id="main-date" style="padding:8px; border-radius:12px; border:1px solid var(--deep-gold);">
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
-        <div>
-            <h4 class="rank-titles">🏆 سِجِلُّ الصدارة اليومي</h4>
-            <div id="podium-daily" class="podium-container"></div>
-        </div>
-        <div>
-            <h4 class="rank-titles">🌟 مَجدُ الختام السنوي</h4>
-            <div id="podium-yearly" class="podium-container"></div>
-        </div>
-    </div>
-
-    <div class="timer-grid">
-        <div class="city-box"><h3>🇴🇲 صلالة</h3><div id="clock-salalah" style="font-size:1.5rem; font-weight:bold; color:var(--masjid);">00:00:00</div></div>
-        <div class="city-box"><h3>🇪🇬 كفر الشيخ</h3><div id="clock-kafr" style="font-size:1.5rem; font-weight:bold; color:var(--masjid);">00:00:00</div></div>
+    <div id="podiums">
+        <h4 class="rank-titles">🏆 سِجِلُّ الصدارة اليومي</h4>
+        <div id="podium-daily" class="podium-container"></div>
+        <h4 class="rank-titles">🌟 مَجدُ الختام السنوي</h4>
+        <div id="podium-yearly" class="podium-container"></div>
     </div>
 
     <div id="user-grid" class="user-grid"></div>
 
     <div id="app-body" style="display:none;">
         <div class="task-card">
-            <h3 style="color:var(--masjid)">🕋 الصلوات المفروضة <span style="font-size:0.75rem; color:#888; font-weight:normal;">(100ن مسجد | 50ن جماعة | 25ن فردي)</span></h3>
+            <h3 style="color:var(--masjid)">🕋 الصلوات المفروضة</h3>
             <div id="fard-list"></div>
         </div>
-
-        <div class="task-card sunnah-card">
+        <div class="task-card" style="border-right-color: var(--sunnah)">
             <h3 style="color:var(--sunnah)">✨ السنن والقيام</h3>
             <div id="sunnah-list"></div>
         </div>
-
-        <div class="task-card azkar-card">
+        <div class="task-card" style="border-right-color: #f39c12">
             <h3 style="color:#f39c12">📑 الأذكار والأوراد</h3>
             <div class="row">
                 <span>📖 ورد القرآن (رقم الجزء) <span class="points-tag">100ن</span></span>
-                <input type="number" id="q-part" min="0" max="30" onchange="updateQ(this.value)" style="width:60px; padding:5px; border-radius:8px; border:1px solid #ddd;">
+                <input type="number" id="q-part" min="0" max="30" onchange="updateQ(this.value)" style="width:50px;">
             </div>
             <div id="azkar-list"></div>
         </div>
@@ -122,22 +102,22 @@
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
     const prayers = [{id:'fajr', n:'الفجر', icon:'🌅'},{id:'dhuhr', n:'الظهر', icon:'☀️'},{id:'asr', n:'العصر', icon:'🌤️'},{id:'maghrib', n:'المغرب', icon:'🌇'},{id:'isha', n:'العشاء', icon:'🌃'}];
     const sunan = [
-        {id:'s_f_pre', n:'سنة الفجر', r:'2 ركعة', p:15},
-        {id:'duha', n:'الضحى', r:'2-8 ركعة', p:15},
-        {id:'s_d_pre', n:'سنة الظهر (قبل)', r:'4 ركعة', p:20},
-        {id:'s_d_post', n:'سنة الظهر (بعد)', r:'2 ركعة', p:10},
-        {id:'s_m_post', n:'سنة المغرب', r:'2 ركعة', p:10},
-        {id:'s_i_post', n:'سنة العشاء', r:'2 ركعة', p:10},
-        {id:'traweeh', n:'صلاة القيام', r:'8+ ركعة', p:60},
-        {id:'shaf_witr', n:'الشفع والوتر', r:'3 ركعة', p:30}
+        {id:'s_f_pre', n:'سنة الفجر', r:'2ر', p:15, icon:'✨'},
+        {id:'duha', n:'الضحى', r:'2ر+', p:15, icon:'⛅'},
+        {id:'s_d_pre', n:'سنة الظهر قبل', r:'4ر', p:20, icon:'✨'},
+        {id:'s_d_post', n:'سنة الظهر بعد', r:'2ر', p:10, icon:'✨'},
+        {id:'s_m_post', n:'سنة المغرب', r:'2ر', p:10, icon:'✨'},
+        {id:'s_i_post', n:'سنة العشاء', r:'2ر', p:10, icon:'✨'},
+        {id:'traweeh', n:'صلاة القيام', r:'8ر+', p:60, icon:'📿'},
+        {id:'shaf_witr', n:'الشفع والوتر', r:'3ر', p:30, icon:'🌙'}
     ];
     const azkar = [
-        {id:'morning', n:'أذكار الصباح', p:20, l:'https://alazkar.today/'},
-        {id:'evening', n:'أذكار المساء', p:20, l:'https://alazkar.today/'},
-        {id:'sleep', n:'أذكار النوم', p:10, l:'https://alazkar.today/'},
-        {id:'mulk', n:'سورة الملك', p:15, l:'https://quran.com/67'},
-        {id:'kahf', n:'سورة الكهف', p:30, l:'https://quran.com/18'},
-        {id:'baqara', n:'خواتيم البقرة', p:10, l:'https://quran.com/2?startingVerse=285'}
+        {id:'morning', n:'أذكار الصباح', p:20, icon:'☀️'},
+        {id:'evening', n:'أذكار المساء', p:20, icon:'🌙'},
+        {id:'sleep', n:'أذكار النوم', p:10, icon:'😴'},
+        {id:'mulk', n:'سورة الملك', p:15, icon:'👑'},
+        {id:'kahf', n:'سورة الكهف', p:30, icon:'🕌'},
+        {id:'baqara', n:'خواتيم البقرة', p:10, icon:'📜'}
     ];
 
     function init() {
@@ -146,9 +126,6 @@
         setInterval(() => {
             const diff = new Date("2026-02-18") - new Date();
             document.getElementById('ramadan-countdown').innerText = `⏳ متبقي على نفحات رمضان: ${Math.floor(diff/(1000*60*60*24))} يوم`;
-            const now = new Date();
-            document.getElementById('clock-salalah').innerText = now.toLocaleTimeString('ar-OM');
-            document.getElementById('clock-kafr').innerText = new Date(now.getTime() - 7200000).toLocaleTimeString('ar-EG');
         }, 1000);
         sync();
     }
@@ -158,97 +135,96 @@
         const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(new Date(date));
         document.getElementById('hijri-date').innerText = hijri;
         db.ref('osraty').on('value', snap => {
-            const allData = snap.val() || {};
-            const currentDay = allData[date] || {};
-            updatePodiums(allData, currentDay);
-            render(currentDay, hijri);
+            const all = snap.val() || {};
+            const day = all[date] || {};
+            updatePodiums(all, day);
+            renderUsers(day);
+            if(currentUser) renderTasks(day[currentUser] || {}, hijri.includes('رمضان'));
         });
     }
 
-    function updatePodiums(allData, currentDay) {
-        const calculateTotal = (userData) => {
-            let s = 0; if(!userData) return 0;
-            Object.values(userData).forEach(v => { if(v.p) s += v.p; });
-            if(userData.q_part) s += (userData.q_part * 100);
-            return s;
-        };
-
-        let daily = users.map(u => ({ name: u, score: calculateTotal(currentDay[u]), data: currentDay[u] || {} }))
-                         .sort((a,b) => b.score - a.score);
-
-        let yearlyMap = {}; users.forEach(u => yearlyMap[u] = 0);
-        Object.values(allData).forEach(day => {
-            users.forEach(u => yearlyMap[u] += calculateTotal(day[u]));
-        });
-        let yearly = users.map(u => ({ name: u, score: yearlyMap[u] })).sort((a,b) => b.score - a.score);
-
-        renderPodium(daily, 'podium-daily');
-        renderPodium(yearly, 'podium-yearly');
+    function getMotivation(remCount) {
+        if(remCount === 0) return "👑 ملك الطاعات! اكتملت العبادات";
+        if(remCount < 5) return "💪 بطل! اقتربت من الختام";
+        if(remCount < 12) return "🚀 همة عالية.. استمر يا محب";
+        return "🌱 بداية موفقة.. استعن بالله";
     }
 
-    function renderPodium(data, elementId) {
-        const p = [data[1], data[0], data[2], data[3]]; // ترتيب العرض: ثاني، أول، ثالث، رابع
-        document.getElementById(elementId).innerHTML = p.map((u, i) => u ? `
-            <div class="podium-item">
-                <div class="podium-rank rank-${i===0?2:i===1?1:i===2?3:4}">${u.score}</div>
-                <div class="podium-name">${u.name}</div>
-            </div>
-        ` : '').join('');
-    }
-
-    function render(udDay, hijriText) {
-        const isRamadan = hijriText.includes('رمضان');
-        
+    function renderUsers(dayData) {
         document.getElementById('user-grid').innerHTML = users.map(u => {
-            const ud = udDay[u] || {};
-            let score = 0; Object.values(ud).forEach(v => { if(v.p) score += v.p; });
-            if(ud.q_part) score += (ud.q_part * 100);
-            
-            // حساب المتبقي
-            const doneCount = Object.keys(ud).filter(k => k !== 'q_part' && (ud[k].done || ud[k].type)).length;
-            const totalTasks = prayers.length + sunan.length + azkar.length;
-            const remaining = totalTasks - doneCount;
+            const ud = dayData[u] || {};
+            let score = 0; Object.values(ud).forEach(v => score += (v.p || 0));
+            score += (ud.q_part * 100 || 0);
+
+            // حساب المفقودات تفصيلياً
+            let missing = [];
+            prayers.forEach(p => { if(!ud[p.id]) missing.push(p.icon + " " + p.n); });
+            sunan.forEach(s => { if(!ud[s.id]?.done) missing.push(s.icon + " " + s.n); });
+            azkar.forEach(a => { if(!ud[a.id]?.done) missing.push(a.icon + " " + a.n); });
 
             return `
                 <div class="comp-card ${u===currentUser?'active':''}" onclick="setUser('${u}')">
-                    <div class="user-meta"><b>${u}</b> <span class="points-tag">${score}ن</span></div>
-                    <div class="remaining-tasks">متبقي اليوم: <b>${remaining} عبادة</b></div>
+                    <div style="display:flex; justify-content:space-between"><b>👤 ${u}</b> <span class="points-tag">${score}ن</span></div>
+                    <div class="remaining-box">
+                        <span class="motivation-text">${getMotivation(missing.length)}</span>
+                        ${missing.length > 0 ? missing.map(m => `<span class="rem-item">${m}</span>`).join('') : '✨ يومك مكتمل بالخير'}
+                    </div>
                 </div>
             `;
         }).join('');
+    }
 
-        if(currentUser) {
-            const ud = udDay[currentUser] || {};
-            document.getElementById('app-body').style.display = 'block';
-            const isFri = new Date(document.getElementById('main-date').value).getDay() === 5;
+    function renderTasks(ud, isRamadan) {
+        document.getElementById('app-body').style.display = 'block';
+        const isFri = new Date(document.getElementById('main-date').value).getDay() === 5;
 
-            document.getElementById('fard-list').innerHTML = prayers.map(p => {
-                let id = p.id; let name = p.n; if(isFri && id==='dhuhr') { id='jumuah'; name='الجمعة'; }
-                const v = ud[id]?.type || '';
-                return `<div class="row"><span>${p.icon} ${name}</span><div class="btn-group">
-                    <button class="${v==='m'?'active-m':''}" onclick="saveFard('${id}','m',100)">مسجد</button>
-                    <button class="${v==='h'?'active-h':''}" onclick="saveFard('${id}','h',50)">جماعة</button>
-                    <button class="${v==='s'?'active-s':''}" onclick="saveFard('${id}','s',25)">فردي</button>
-                </div></div>`;
-            }).join('');
+        document.getElementById('fard-list').innerHTML = prayers.map(p => {
+            let id = p.id; let name = p.n; if(isFri && id==='dhuhr') { id='jumuah'; name='الجمعة'; }
+            const v = ud[id]?.type || '';
+            return `<div class="row"><span>${p.icon} ${name}</span><div class="btn-group">
+                <button class="${v==='m'?'active-m':''}" onclick="saveFard('${id}','m',100)">🕌</button>
+                <button class="${v==='h'?'active-h':''}" onclick="saveFard('${id}','h',50)">👥</button>
+                <button class="${v==='s'?'active-s':''}" onclick="saveFard('${id}','s',25)">👤</button>
+            </div></div>`;
+        }).join('');
 
-            document.getElementById('sunnah-list').innerHTML = sunan.map(s => {
-                let dName = s.n; if(s.id === 'traweeh' && isRamadan) dName = "صلاة التراويح";
-                return `<div class="row">
-                    <span>${dName} <span class="rakat-tag">${s.r}</span> <span class="points-tag">${s.p}ن</span></span>
-                    <input type="checkbox" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)">
-                </div>`;
-            }).join('');
+        document.getElementById('sunnah-list').innerHTML = sunan.map(s => {
+            let dName = (s.id==='traweeh' && isRamadan) ? "صلاة التراويح" : s.n;
+            return `<div class="row">
+                <span>${s.icon} ${dName} <span class="rakat-tag">${s.r}</span></span>
+                <input type="checkbox" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)">
+            </div>`;
+        }).join('');
 
-            document.getElementById('azkar-list').innerHTML = azkar.map(a => `
-                <div class="row">
-                    <span>${a.n} <span class="points-tag">${a.p}ن</span> <a href="${a.l}" class="link-btn" target="_blank">قراءة</a></span>
-                    <input type="checkbox" ${ud[a.id]?.done?'checked':''} onchange="saveCheck('${a.id}',${a.p},this.checked)">
-                </div>
-            `).join('');
+        document.getElementById('azkar-list').innerHTML = azkar.map(a => `
+            <div class="row">
+                <span>${a.icon} ${a.n} <span class="points-tag">${a.p}ن</span></span>
+                <input type="checkbox" ${ud[a.id]?.done?'checked':''} onchange="saveCheck('${a.id}',${a.p},this.checked)">
+            </div>
+        `).join('');
+        document.getElementById('q-part').value = ud.q_part || 0;
+    }
 
-            document.getElementById('q-part').value = ud.q_part || 0;
-        }
+    function updatePodiums(all, day) {
+        const calc = (data) => {
+            let s = 0; if(!data) return 0;
+            Object.values(data).forEach(v => s += (v.p || 0));
+            s += (data.q_part * 100 || 0); return s;
+        };
+        let daily = users.map(u => ({ name: u, score: calc(day[u]) })).sort((a,b) => b.score - a.score);
+        let yearlyMap = {}; users.forEach(u => yearlyMap[u] = 0);
+        Object.values(all).forEach(d => users.forEach(u => yearlyMap[u] += calc(d[u])));
+        let yearly = users.map(u => ({ name: u, score: yearlyMap[u] })).sort((a,b) => b.score - a.score);
+        
+        const renderP = (data, id) => {
+            const p = [data[1], data[0], data[2], data[3]];
+            document.getElementById(id).innerHTML = p.map((u, i) => `
+                <div class="podium-item">
+                    <div class="podium-rank rank-${i===0?2:i===1?1:i===2?3:4}">${u.score}</div>
+                    <div style="font-size:0.8rem">${u.name}</div>
+                </div>`).join('');
+        };
+        renderP(daily, 'podium-daily'); renderP(yearly, 'podium-yearly');
     }
 
     function setUser(u) { currentUser = u; sync(); }
