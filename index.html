@@ -40,11 +40,12 @@
         
         .remaining-box { margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 12px; font-size: 0.8rem; }
         .rem-item { display: inline-block; background: #fff; padding: 2px 8px; border-radius: 6px; margin: 2px; border: 1px solid #eee; color: #555; }
-        .motivation-text { font-weight: bold; color: var(--deep-gold); display: block; margin-bottom: 5px; font-size: 0.9rem; }
-
+        
         .task-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; border-right: 8px solid var(--masjid); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
-        .btn-group button { border: 1px solid #ddd; padding: 6px 8px; border-radius: 10px; cursor: pointer; font-family: 'Amiri'; font-size: 0.75rem; background: white; transition: 0.2s; }
+        
+        .btn-group button { border: 1px solid #ddd; padding: 8px 10px; border-radius: 12px; cursor: pointer; font-family: 'Amiri'; font-size: 0.9rem; background: white; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 55px; }
+        .btn-group button span { font-size: 0.65rem; font-weight: bold; }
         
         .active-m { background: var(--masjid) !important; color: white !important; }
         .active-h { background: #e65100 !important; color: white !important; }
@@ -52,7 +53,7 @@
         .active-q { background: #c62828 !important; color: white !important; }
         
         .points-tag { font-size: 0.7rem; background: var(--gold-gradient); color: var(--royal-green); padding: 2px 8px; border-radius: 8px; font-weight: bold; }
-        .link-btn { text-decoration: none; color: var(--deep-gold); font-size: 0.75rem; margin-right: 8px; border-bottom: 1px dotted var(--deep-gold); }
+        .link-btn { text-decoration: none; color: var(--deep-gold); font-size: 0.75rem; margin-right: 8px; border-bottom: 1px dotted var(--deep-gold); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -75,7 +76,7 @@
 
     <div id="app-body" style="display:none;">
         <div class="task-card">
-            <h3 style="color:var(--masjid)">🕋 الصلوات المفروضة <span style="font-size:0.7rem; font-weight:normal; color:#666;">(مسجد 100ن | جماعة 50ن | فردي 25ن | قضاء 10ن)</span></h3>
+            <h3 style="color:var(--masjid)">🕋 الصلوات المفروضة</h3>
             <div id="fard-list"></div>
         </div>
         <div class="task-card" style="border-right-color: var(--sunnah)">
@@ -86,7 +87,7 @@
             <h3 style="color:#f39c12">📑 الأذكار والأوراد</h3>
             <div class="row">
                 <span>📖 ورد القرآن (رقم الجزء) <span class="points-tag">100ن</span></span>
-                <input type="number" id="q-part" min="0" max="30" onchange="updateQ(this.value)" style="width:50px;">
+                <input type="number" id="q-part" min="0" max="30" onchange="updateQ(this.value)" style="width:50px; padding:5px; border-radius:8px; border:1px solid #ddd;">
             </div>
             <div id="azkar-list"></div>
         </div>
@@ -99,13 +100,7 @@
     
     let currentUser = null;
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
-    const prayers = [
-        {id:'fajr', n:'الفجر', icon:'🌅'},
-        {id:'dhuhr', n:'الظهر', icon:'☀️'},
-        {id:'asr', n:'العصر', icon:'🌤️'},
-        {id:'maghrib', n:'المغرب', icon:'🌇'},
-        {id:'isha', n:'العشاء', icon:'🌃'}
-    ];
+    const prayers = [{id:'fajr', n:'الفجر', icon:'🌅'},{id:'dhuhr', n:'الظهر', icon:'☀️'},{id:'asr', n:'العصر', icon:'🌤️'},{id:'maghrib', n:'المغرب', icon:'🌇'},{id:'isha', n:'العشاء', icon:'🌃'}];
     const sunan = [
         {id:'s_f_pre', n:'سنة الفجر', p:15, icon:'🕯️'},
         {id:'duha', n:'صلاة الضحى', p:15, icon:'🌦️'},
@@ -154,38 +149,31 @@
             const ud = dayData[u] || {};
             let score = 0; Object.values(ud).forEach(v => score += (v.p || 0));
             score += (ud.q_part * 100 || 0);
-
             let missing = [];
             prayers.forEach(p => { if(!ud[p.id]) missing.push(p.icon + " " + p.n); });
             sunan.forEach(s => { if(!ud[s.id]?.done) missing.push(s.icon + " " + s.n); });
             azkar.forEach(a => { if(!ud[a.id]?.done) missing.push(a.icon + " " + a.n); });
-
-            const motivation = missing.length === 0 ? "👑 ملك الطاعات!" : missing.length < 5 ? "💪 بطل.. اقتربت" : "🌱 استعن بالله";
-
             return `
                 <div class="comp-card ${u===currentUser?'active':''}" onclick="setUser('${u}')">
                     <div style="display:flex; justify-content:space-between"><b>👤 ${u}</b> <span class="points-tag">${score}ن</span></div>
                     <div class="remaining-box">
-                        <span class="motivation-text">${motivation}</span>
-                        ${missing.length > 0 ? missing.map(m => `<span class="rem-item">${m}</span>`).join('') : '✨ العبادات مكتملة'}
+                        ${missing.length > 0 ? missing.map(m => `<span class="rem-item">${m}</span>`).join('') : '✨ طاعاتك كاملة'}
                     </div>
-                </div>
-            `;
+                </div>`;
         }).join('');
     }
 
     function renderTasks(ud, isRamadan) {
         document.getElementById('app-body').style.display = 'block';
         const isFri = new Date(document.getElementById('main-date').value).getDay() === 5;
-
         document.getElementById('fard-list').innerHTML = prayers.map(p => {
             let id = p.id; let name = p.n; if(isFri && id==='dhuhr') { id='jumuah'; name='الجمعة'; }
             const v = ud[id]?.type || '';
             return `<div class="row"><span>${p.icon} ${name}</span><div class="btn-group">
-                <button class="${v==='m'?'active-m':''}" onclick="saveFard('${id}','m',100)">مسجد</button>
-                <button class="${v==='h'?'active-h':''}" onclick="saveFard('${id}','h',50)">جماعة</button>
-                <button class="${v==='s'?'active-s':''}" onclick="saveFard('${id}','s',25)">فردي</button>
-                <button class="${v==='q'?'active-q':''}" onclick="saveFard('${id}','q',10)">قضاء</button>
+                <button class="${v==='m'?'active-m':''}" onclick="saveFard('${id}','m',100)">🕌<span>مسجد</span></button>
+                <button class="${v==='h'?'active-h':''}" onclick="saveFard('${id}','h',50)">👥<span>جماعة</span></button>
+                <button class="${v==='s'?'active-s':''}" onclick="saveFard('${id}','s',25)">👤<span>فردي</span></button>
+                <button class="${v==='q'?'active-q':''}" onclick="saveFard('${id}','q',10)">🔄<span>قضاء</span></button>
             </div></div>`;
         }).join('');
 
@@ -193,16 +181,15 @@
             let dName = (s.id==='traweeh' && isRamadan) ? "صلاة التراويح" : s.n;
             return `<div class="row">
                 <span>${s.icon} ${dName} <span class="points-tag">${s.p}ن</span></span>
-                <input type="checkbox" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)">
+                <input type="checkbox" style="width:22px; height:22px;" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)">
             </div>`;
         }).join('');
 
         document.getElementById('azkar-list').innerHTML = azkar.map(a => `
             <div class="row">
                 <span>${a.icon} ${a.n} <span class="points-tag">${a.p}ن</span> <a href="${a.l}" target="_blank" class="link-btn">🔗 اقرأ</a></span>
-                <input type="checkbox" ${ud[a.id]?.done?'checked':''} onchange="saveCheck('${a.id}',${a.p},this.checked)">
-            </div>
-        `).join('');
+                <input type="checkbox" style="width:22px; height:22px;" ${ud[a.id]?.done?'checked':''} onchange="saveCheck('${a.id}',${a.p},this.checked)">
+            </div>`).join('');
         document.getElementById('q-part').value = ud.q_part || 0;
     }
 
@@ -217,7 +204,7 @@
         document.getElementById('podium-daily').innerHTML = p.map((u, i) => u ? `
             <div class="podium-item">
                 <div class="podium-rank rank-${i===0?2:i===1?1:i===2?3:4}">${u.score}</div>
-                <div style="font-size:0.8rem">${u.name}</div>
+                <div style="font-size:0.8rem; font-weight:bold;">${u.name}</div>
             </div>` : '').join('');
     }
 
