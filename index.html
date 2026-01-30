@@ -44,12 +44,15 @@
 
         .task-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; border-right: 8px solid var(--masjid); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
-        .btn-group button { border: 1px solid #ddd; padding: 6px 10px; border-radius: 10px; cursor: pointer; font-family: 'Amiri'; font-size: 0.8rem; }
+        .btn-group button { border: 1px solid #ddd; padding: 6px 8px; border-radius: 10px; cursor: pointer; font-family: 'Amiri'; font-size: 0.75rem; background: white; transition: 0.2s; }
+        
         .active-m { background: var(--masjid) !important; color: white !important; }
         .active-h { background: #e65100 !important; color: white !important; }
         .active-s { background: #4a148c !important; color: white !important; }
+        .active-q { background: #c62828 !important; color: white !important; }
         
         .points-tag { font-size: 0.7rem; background: var(--gold-gradient); color: var(--royal-green); padding: 2px 8px; border-radius: 8px; font-weight: bold; }
+        .link-btn { text-decoration: none; color: var(--deep-gold); font-size: 0.75rem; margin-right: 8px; border-bottom: 1px dotted var(--deep-gold); }
     </style>
 </head>
 <body>
@@ -66,15 +69,13 @@
     <div id="podiums">
         <h4 class="rank-titles">🏆 سِجِلُّ الصدارة اليومي</h4>
         <div id="podium-daily" class="podium-container"></div>
-        <h4 class="rank-titles">🌟 مَجدُ الختام السنوي</h4>
-        <div id="podium-yearly" class="podium-container"></div>
     </div>
 
     <div id="user-grid" class="user-grid"></div>
 
     <div id="app-body" style="display:none;">
         <div class="task-card">
-            <h3 style="color:var(--masjid)">🕋 الصلوات المفروضة</h3>
+            <h3 style="color:var(--masjid)">🕋 الصلوات المفروضة <span style="font-size:0.7rem; font-weight:normal; color:#666;">(مسجد 100ن | جماعة 50ن | فردي 25ن | قضاء 10ن)</span></h3>
             <div id="fard-list"></div>
         </div>
         <div class="task-card" style="border-right-color: var(--sunnah)">
@@ -99,11 +100,11 @@
     let currentUser = null;
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
     const prayers = [
-        {id:'fajr', n:'الفجر', icon:'🌅', p:'100/25ن'},
-        {id:'dhuhr', n:'الظهر', icon:'☀️', p:'100/25ن'},
-        {id:'asr', n:'العصر', icon:'🌤️', p:'100/25ن'},
-        {id:'maghrib', n:'المغرب', icon:'🌇', p:'100/25ن'},
-        {id:'isha', n:'العشاء', icon:'🌃', p:'100/25ن'}
+        {id:'fajr', n:'الفجر', icon:'🌅'},
+        {id:'dhuhr', n:'الظهر', icon:'☀️'},
+        {id:'asr', n:'العصر', icon:'🌤️'},
+        {id:'maghrib', n:'المغرب', icon:'🌇'},
+        {id:'isha', n:'العشاء', icon:'🌃'}
     ];
     const sunan = [
         {id:'s_f_pre', n:'سنة الفجر', p:15, icon:'🕯️'},
@@ -117,12 +118,12 @@
         {id:'witr', n:'صلاة الوتر', p:15, icon:'☝️'}
     ];
     const azkar = [
-        {id:'morning', n:'أذكار الصباح', p:20, icon:'🌞'},
-        {id:'evening', n:'أذكار المساء', p:20, icon:'🌜'},
-        {id:'sleep', n:'أذكار النوم', p:10, icon:'🛌'},
-        {id:'mulk', n:'سورة الملك', p:15, icon:'💎'},
-        {id:'kahf', n:'سورة الكهف', p:30, icon:'🕌'},
-        {id:'baqara', n:'خواتيم البقرة', p:10, icon:'✍️'}
+        {id:'morning', n:'أذكار الصباح', p:20, icon:'🌞', l:'https://alazkar.today/morning'},
+        {id:'evening', n:'أذكار المساء', p:20, icon:'🌜', l:'https://alazkar.today/evening'},
+        {id:'sleep', n:'أذكار النوم', p:10, icon:'🛌', l:'https://alazkar.today/sleep'},
+        {id:'mulk', n:'سورة الملك', p:15, icon:'💎', l:'https://quran.com/67'},
+        {id:'kahf', n:'سورة الكهف', p:30, icon:'🕌', l:'https://quran.com/18'},
+        {id:'baqara', n:'خواتيم البقرة', p:10, icon:'✍️', l:'https://quran.com/2?startingVerse=285'}
     ];
 
     function init() {
@@ -148,13 +149,6 @@
         });
     }
 
-    function getMotivation(remCount) {
-        if(remCount === 0) return "👑 ملك الطاعات! اكتملت العبادات";
-        if(remCount < 5) return "💪 بطل! اقتربت من الختام";
-        if(remCount < 12) return "🚀 همة عالية.. استمر يا محب";
-        return "🌱 بداية موفقة.. استعن بالله";
-    }
-
     function renderUsers(dayData) {
         document.getElementById('user-grid').innerHTML = users.map(u => {
             const ud = dayData[u] || {};
@@ -166,12 +160,14 @@
             sunan.forEach(s => { if(!ud[s.id]?.done) missing.push(s.icon + " " + s.n); });
             azkar.forEach(a => { if(!ud[a.id]?.done) missing.push(a.icon + " " + a.n); });
 
+            const motivation = missing.length === 0 ? "👑 ملك الطاعات!" : missing.length < 5 ? "💪 بطل.. اقتربت" : "🌱 استعن بالله";
+
             return `
                 <div class="comp-card ${u===currentUser?'active':''}" onclick="setUser('${u}')">
                     <div style="display:flex; justify-content:space-between"><b>👤 ${u}</b> <span class="points-tag">${score}ن</span></div>
                     <div class="remaining-box">
-                        <span class="motivation-text">${getMotivation(missing.length)}</span>
-                        ${missing.length > 0 ? missing.map(m => `<span class="rem-item">${m}</span>`).join('') : '✨ يومك مكتمل بالخير'}
+                        <span class="motivation-text">${motivation}</span>
+                        ${missing.length > 0 ? missing.map(m => `<span class="rem-item">${m}</span>`).join('') : '✨ العبادات مكتملة'}
                     </div>
                 </div>
             `;
@@ -185,10 +181,11 @@
         document.getElementById('fard-list').innerHTML = prayers.map(p => {
             let id = p.id; let name = p.n; if(isFri && id==='dhuhr') { id='jumuah'; name='الجمعة'; }
             const v = ud[id]?.type || '';
-            return `<div class="row"><span>${p.icon} ${name} <span class="points-tag">${p.p}</span></span><div class="btn-group">
-                <button class="${v==='m'?'active-m':''}" onclick="saveFard('${id}','m',100)">🕌</button>
-                <button class="${v==='h'?'active-h':''}" onclick="saveFard('${id}','h',50)">👥</button>
-                <button class="${v==='s'?'active-s':''}" onclick="saveFard('${id}','s',25)">👤</button>
+            return `<div class="row"><span>${p.icon} ${name}</span><div class="btn-group">
+                <button class="${v==='m'?'active-m':''}" onclick="saveFard('${id}','m',100)">مسجد</button>
+                <button class="${v==='h'?'active-h':''}" onclick="saveFard('${id}','h',50)">جماعة</button>
+                <button class="${v==='s'?'active-s':''}" onclick="saveFard('${id}','s',25)">فردي</button>
+                <button class="${v==='q'?'active-q':''}" onclick="saveFard('${id}','q',10)">قضاء</button>
             </div></div>`;
         }).join('');
 
@@ -202,7 +199,7 @@
 
         document.getElementById('azkar-list').innerHTML = azkar.map(a => `
             <div class="row">
-                <span>${a.icon} ${a.n} <span class="points-tag">${a.p}ن</span></span>
+                <span>${a.icon} ${a.n} <span class="points-tag">${a.p}ن</span> <a href="${a.l}" target="_blank" class="link-btn">🔗 اقرأ</a></span>
                 <input type="checkbox" ${ud[a.id]?.done?'checked':''} onchange="saveCheck('${a.id}',${a.p},this.checked)">
             </div>
         `).join('');
@@ -210,25 +207,18 @@
     }
 
     function updatePodiums(all, day) {
-        const calc = (data) => {
-            let s = 0; if(!data) return 0;
-            Object.values(data).forEach(v => s += (v.p || 0));
-            s += (data.q_part * 100 || 0); return s;
+        const calc = (d) => {
+            let s = 0; if(!d) return 0;
+            Object.values(d).forEach(v => s += (v.p || 0));
+            s += (d.q_part * 100 || 0); return s;
         };
         let daily = users.map(u => ({ name: u, score: calc(day[u]) })).sort((a,b) => b.score - a.score);
-        let yearlyMap = {}; users.forEach(u => yearlyMap[u] = 0);
-        Object.values(all).forEach(d => users.forEach(u => yearlyMap[u] += calc(d[u])));
-        let yearly = users.map(u => ({ name: u, score: yearlyMap[u] })).sort((a,b) => b.score - a.score);
-        
-        const renderP = (data, id) => {
-            const p = [data[1], data[0], data[2], data[3]];
-            document.getElementById(id).innerHTML = p.map((u, i) => `
-                <div class="podium-item">
-                    <div class="podium-rank rank-${i===0?2:i===1?1:i===2?3:4}">${u.score}</div>
-                    <div style="font-size:0.8rem">${u.name}</div>
-                </div>`).join('');
-        };
-        renderP(daily, 'podium-daily'); renderP(yearly, 'podium-yearly');
+        const p = [daily[1], daily[0], daily[2], daily[3]];
+        document.getElementById('podium-daily').innerHTML = p.map((u, i) => u ? `
+            <div class="podium-item">
+                <div class="podium-rank rank-${i===0?2:i===1?1:i===2?3:4}">${u.score}</div>
+                <div style="font-size:0.8rem">${u.name}</div>
+            </div>` : '').join('');
     }
 
     function setUser(u) { currentUser = u; sync(); }
