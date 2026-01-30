@@ -10,8 +10,10 @@
     <style>
         :root { 
             --royal-green: #00332c; --masjid: #004d40; 
-            --gold-gradient: linear-gradient(135deg, rgba(212, 175, 55, 0.9) 0%, rgba(241, 211, 126, 0.9) 50%, rgba(184, 134, 11, 0.9) 100%);
-            --deep-gold: #b8860b; --glass-bg: rgba(255, 255, 255, 0.65);
+            --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f1d37e 50%, #b8860b 100%);
+            --silver-gradient: linear-gradient(135deg, #bdc3c7 0%, #ecf0f1 100%);
+            --bronze-gradient: linear-gradient(135deg, #cd7f32 0%, #e67e22 100%);
+            --deep-gold: #b8860b; --glass-bg: rgba(255, 255, 255, 0.75);
             --glass-border: rgba(255, 255, 255, 0.4); --text: #1a252f; --sunnah: #1b5e20; 
         }
         body { font-family: 'Amiri', serif; background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); background-attachment: fixed; color: var(--text); margin: 0; padding: 10px; line-height: 1.6; }
@@ -23,10 +25,18 @@
         .timer-val { color: #e65100; font-weight: bold; font-size: 0.9rem; display: block; margin: 5px 0; }
         .mini-imsakiya { font-size: 0.7rem; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 8px; }
         .imsak-item { background: rgba(255,255,255,0.5); padding: 4px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.3); }
-        .podium-container { display: flex; justify-content: space-around; align-items: flex-end; margin: 10px 0 25px; background: rgba(255, 255, 255, 0.2); padding: 20px; border-radius: 35px; border: 1px solid var(--glass-border); }
-        .podium-rank { width: 100%; text-align: center; color: white; border-radius: 18px 18px 8px 8px; padding: 10px 0; font-weight: bold; }
-        .rank-1 { height: 100px; background: var(--gold-gradient); color: var(--royal-green); box-shadow: 0 8px 20px rgba(212,175,55,0.4); }
-        .rank-2 { height: 80px; background: #bdc3c7; } .rank-3 { height: 65px; background: #cd7f32; }
+        
+        /* Podium Styles */
+        .podium-container { display: flex; justify-content: space-around; align-items: flex-end; margin: 10px 0 25px; background: rgba(255, 255, 255, 0.2); padding: 20px 10px; border-radius: 35px; border: 1px solid var(--glass-border); min-height: 160px; }
+        .podium-column { width: 22%; display: flex; flex-direction: column; align-items: center; }
+        .podium-bar { width: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border-radius: 12px 12px 5px 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; font-size: 1.2rem; }
+        .rank-1 { height: 110px; background: var(--gold-gradient); color: #000; z-index: 3; }
+        .rank-2 { height: 85px; background: var(--silver-gradient); color: #333; z-index: 2; }
+        .rank-3 { height: 65px; background: var(--bronze-gradient); z-index: 1; }
+        .rank-4 { height: 45px; background: #e0e0e0; color: #666; }
+        .user-name-pod { font-size: 0.85rem; font-weight: bold; margin-top: 8px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
+        .score-tag-pod { font-size: 0.75rem; color: var(--masjid); margin-bottom: 4px; font-weight: bold; }
+
         .comp-card { background: rgba(255, 255, 255, 0.45); padding: 15px; border-radius: 28px; cursor: pointer; transition: 0.3s; border: 1px solid var(--glass-border); }
         .comp-card.active { background: rgba(255, 255, 255, 0.85); border: 2.5px solid var(--deep-gold); transform: translateY(-3px); }
         .remaining-box { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
@@ -51,7 +61,7 @@
     <div id="ramadan-countdown" class="ramadan-bar">⏳ يترقب المحبون رمضان...</div>
     
     <div class="hadith-ticker">
-        <marquee id="hadith-text" scrollamount="3">📖 قال ﷺ: «الدين النصيحة» .. جاري جلب حديث اليوم ..</marquee>
+        <marquee id="hadith-text" scrollamount="3">📖 جاري جلب حديث اليوم ..</marquee>
     </div>
 
     <div class="prayer-times-box">
@@ -70,12 +80,15 @@
     <div style="text-align:center; margin-bottom:20px;">
         <h1 style="font-family:'Reem Kufi'; color: var(--royal-green); margin:0;">⚜️ نلتقي على طاعة الله 2026</h1>
         <div id="hijri-date" style="color:var(--deep-gold); font-weight:bold; margin:5px;"></div>
-        <input type="date" id="main-date">
+        <input type="date" id="main-date" style="padding:5px; border-radius:10px; border:1px solid var(--masjid);">
     </div>
 
-    <div id="podiums">
-        <h4 style="text-align:center; font-family:'Reem Kufi'; color:var(--masjid); margin:5px;">🏆 الصدارة اليومية</h4>
+    <div id="podium-area">
+        <h4 style="text-align:center; font-family:'Reem Kufi'; color:var(--masjid); margin:5px 0;">🏆 متصدر اليوم</h4>
         <div id="podium-daily" class="podium-container"></div>
+
+        <h4 style="text-align:center; font-family:'Reem Kufi'; color:var(--deep-gold); margin:20px 0 5px 0;">🌟 حصاد عام 2026 التراكمي</h4>
+        <div id="podium-yearly" class="podium-container" style="background: rgba(184, 134, 11, 0.05);"></div>
     </div>
 
     <div id="user-grid" style="display:grid; grid-template-columns:1fr; gap:10px; margin-bottom:20px;"></div>
@@ -92,7 +105,7 @@
         <div class="task-card" style="border-right-color: #f39c12">
             <h3 style="color:#f39c12; margin:0 0 10px 0;">📑 الأوراد اليومية</h3>
             <div class="row">
-                <span>📖 ورد القرآن (جزء) <span class="points-tag">100ن للجزء</span></span>
+                <span>📖 ورد القرآن (أجزاء) <span class="points-tag">100ن للجزء</span></span>
                 <input type="number" id="q-part" min="0" max="30" step="0.25" onchange="updateQ(this.value)" style="width:60px; border-radius:8px; border:1px solid #ccc; padding:5px;">
             </div>
             <div id="azkar-list"></div>
@@ -109,7 +122,7 @@
 </div>
 
 <script>
-    // تكوين Firebase
+    // Firebase Config
     const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1", storageBucket: "ebada-656e1.firebasestorage.app", messagingSenderId: "705608653939", appId: "1:705608653939:web:5ab3609a6f7ccc8675de06" };
     firebase.initializeApp(firebaseConfig); const db = firebase.database();
     
@@ -118,36 +131,13 @@
     const prayers = [{id:'fajr', n:'الفجر', icon:'🌅'},{id:'dhuhr', n:'الظهر', icon:'☀️'},{id:'asr', n:'العصر', icon:'🌤️'},{id:'maghrib', n:'المغرب', icon:'🌇'},{id:'isha', n:'العشاء', icon:'🌃'}];
     const sunan = [{id:'s_f_pre', n:'سنة الفجر', r:'2ر', p:20},{id:'duha', n:'الضحى', r:'2ر+', p:20},{id:'s_d_pre', n:'سنة الظهر (قبل)', r:'4ر', p:20},{id:'s_d_post', n:'سنة الظهر (بعد)', r:'2ر', p:15},{id:'s_m_post', n:'سنة المغرب', r:'2ر', p:15},{id:'s_i_post', n:'سنة العشاء', r:'2ر', p:15},{id:'traweeh', n:'قيام الليل/تراويح', r:'8ر', p:60},{id:'witr', n:'الوتر', r:'1ر', p:20}];
     const azkar = [{id:'morning', n:'أذكار الصباح', p:25},{id:'evening', n:'أذكار المساء', p:25},{id:'sleep', n:'أذكار النوم', p:15},{id:'mulk', n:'سورة الملك', p:20},{id:'kahf', n:'سورة الكهف', p:40}];
-    
-    // الأوقات (صلالة +4، مصر +2)
-    const timetable = {
-        salalah: { fajr: "05:18", dhuhr: "12:32", asr: "15:48", maghrib: "18:12", isha: "19:28" },
-        kafr: { fajr: "05:22", dhuhr: "12:12", asr: "15:15", maghrib: "17:42", isha: "19:08" }
-    };
-
-    const ahadith = [
-        "قال ﷺ: مَنْ صَامَ رَمَضَانَ إِيمَانًا وَاحْتِسَابًا غُفِرَ لَهُ مَا تَقَدَّمَ مِنْ ذَنْبِهِ",
-        "قال ﷺ: أحب الأعمال إلى الله أدومها وإن قل",
-        "قال ﷺ: البِرُّ حُسْنُ الخُلُقِ، وَالإِثْمُ مَا حَاكَ فِي صَدْرِكَ",
-        "قال ﷺ: من سلك طريقًا يلتمس فيه علمًا سهل الله له به طريقًا إلى الجنة",
-        "قال ﷺ: صَلَاةُ الجماعةِ أَفْضَلُ مِنْ صَلَاةِ الفَذِّ بِسَبْعٍ وَعِشْرِينَ دَرَجَةً",
-        "قال ﷺ: مَنْ قَرَأَ حَرْفًا مِنْ كِتَابِ اللَّهِ فَلَهُ بِهِ حَسَنَةٌ، وَالحَسَنَةُ بِعَشْرِ أَمْثَالِهَا"
-    ];
+    const timetable = { salalah: { fajr: "05:18", dhuhr: "12:32", asr: "15:48", maghrib: "18:12", isha: "19:28" }, kafr: { fajr: "05:22", dhuhr: "12:12", asr: "15:15", maghrib: "17:42", isha: "19:08" } };
+    const ahadith = ["قال ﷺ: مَنْ صَامَ رَمَضَانَ إِيمَانًا وَاحْتِسَابًا غُفِرَ لَهُ مَا تَقَدَّمَ مِنْ ذَنْبِهِ", "قال ﷺ: أحب الأعمال إلى الله أدومها وإن قل", "قال ﷺ: البِرُّ حُسْنُ الخُلُقِ", "قال ﷺ: من سلك طريقًا يلتمس فيه علمًا سهل الله له طريقًا إلى الجنة"];
 
     function format12h(timeStr) {
-        let [h, m] = timeStr.split(':');
-        h = parseInt(h);
-        const ampm = h >= 12 ? 'م' : 'ص';
-        h = h % 12 || 12;
+        let [h, m] = timeStr.split(':'); h = parseInt(h);
+        const ampm = h >= 12 ? 'م' : 'ص'; h = h % 12 || 12;
         return `${h}:${m} ${ampm}`;
-    }
-
-    function setDailyHadith() {
-        const now = new Date();
-        const start = new Date(now.getFullYear(), 0, 0);
-        const diff = now - start;
-        const dayIdx = Math.floor(diff / (1000 * 60 * 60 * 24));
-        document.getElementById('hadith-text').innerText = `📖 ${ahadith[dayIdx % ahadith.length]}`;
     }
 
     function updateCityTimer(cityKey, offset, timerId, imsakId) {
@@ -155,7 +145,6 @@
         const cityNow = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3600000 * offset));
         const times = timetable[cityKey];
         let nextP = null; let nextTime = null;
-        
         for (let p in times) {
             const [h, m] = times[p].split(':');
             const pDate = new Date(cityNow); pDate.setHours(h, m, 0);
@@ -166,50 +155,77 @@
             nextTime = new Date(cityNow); nextTime.setDate(nextTime.getDate() + 1);
             nextTime.setHours(h, m, 0); nextP = "fajr";
         }
-        
         const diff = nextTime - cityNow;
-        const hh = Math.floor(diff / 3600000);
-        const mm = Math.floor((diff % 3600000) / 60000);
-        const ss = Math.floor((diff % 60000) / 1000);
-        
+        const hh = Math.floor(diff / 3600000), mm = Math.floor((diff % 3600000) / 60000), ss = Math.floor((diff % 60000) / 1000);
         const pNames = {fajr:'الفجر', dhuhr:'الظهر', asr:'العصر', maghrib:'المغرب', isha:'العشاء'};
         document.getElementById(timerId).innerText = `باقي لـ ${pNames[nextP]}: ${hh}:${mm}:${ss}`;
-        
-        document.getElementById(imsakId).innerHTML = Object.entries(times).map(([k, v]) => `
-            <div class="imsak-item"><b>${pNames[k]}</b><br>${format12h(v)}</div>`).join('');
+        document.getElementById(imsakId).innerHTML = Object.entries(times).map(([k, v]) => `<div class="imsak-item"><b>${pNames[k]}</b><br>${format12h(v)}</div>`).join('');
+    }
+
+    // --- Logic Core ---
+    
+    function calcScore(dayData) {
+        if (!dayData) return 0;
+        let s = 0;
+        Object.values(dayData).forEach(v => { if (v && v.p) s += v.p; });
+        if (dayData.q_part) s += (dayData.q_part * 100);
+        return s;
     }
 
     function sync() {
         const date = document.getElementById('main-date').value;
         const isFri = new Date(date).getDay() === 5;
-        const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(new Date(date));
-        document.getElementById('hijri-date').innerText = hijri;
+        document.getElementById('hijri-date').innerText = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(new Date(date));
         
         db.ref('osraty').on('value', snap => {
-            const all = snap.val() || {}; const day = all[date] || {};
+            const all = snap.val() || {}; 
+            const day = all[date] || {};
             updatePodiums(all, day);
             renderUsers(day, isFri);
             if(currentUser) renderTasks(day[currentUser] || {}, isFri);
         });
     }
 
+    function updatePodiums(all, day) {
+        // Daily
+        let daily = users.map(u => ({ name: u, score: calcScore(day[u]) })).sort((a,b) => b.score - a.score);
+        // Yearly
+        let yearly = users.map(u => {
+            let total = 0;
+            Object.values(all).forEach(d => total += calcScore(d[u]));
+            return { name: u, score: total };
+        }).sort((a,b) => b.score - a.score);
+
+        const build = (data, containerId) => {
+            // Visual Order: 4th, 2nd, 1st, 3rd
+            const order = [data[3], data[1], data[0], data[2]];
+            const classes = ['rank-4', 'rank-2', 'rank-1', 'rank-3'];
+            const labels = ['4', '2', '1', '3'];
+
+            document.getElementById(containerId).innerHTML = order.map((u, i) => u ? `
+                <div class="podium-column">
+                    <span class="score-tag-pod">${u.score}ن</span>
+                    <div class="podium-bar ${classes[i]}">${labels[i]}</div>
+                    <div class="user-name-pod">${u.name}</div>
+                </div>` : '').join('');
+        };
+
+        build(daily, 'podium-daily');
+        build(yearly, 'podium-yearly');
+    }
+
     function renderUsers(dayData, isFri) {
         document.getElementById('user-grid').innerHTML = users.map(u => {
             const ud = dayData[u] || {};
-            let score = (ud.q_part * 100 || 0); 
-            Object.values(ud).forEach(v => { if(v.p) score += v.p; });
-            
+            let score = calcScore(ud);
             let missing = [];
             prayers.forEach(p => { 
                 let id = (isFri && p.id==='dhuhr') ? 'jumuah' : p.id;
                 if(!ud[id]) missing.push(p.n); 
             });
-            sunan.forEach(s => { if(!ud[s.id]?.done) missing.push(s.n); });
-            azkar.forEach(a => { if(!ud[a.id]?.done) missing.push(a.n); });
-
             return `<div class="comp-card ${u===currentUser?'active':''}" onclick="setUser('${u}')">
                 <div style="display:flex; justify-content:space-between"><b>👤 ${u}</b> <span class="points-tag">${score}ن</span></div>
-                <div class="remaining-box">${missing.length > 0 ? missing.map(m => `<span class="rem-item">${m}</span>`).join('') : '✅ اكتملت الطاعات'}</div>
+                <div class="remaining-box">${missing.length > 0 ? missing.map(m => `<span class="rem-item">${m}</span>`).join('') : '✅'}</div>
             </div>`;
         }).join('');
     }
@@ -221,36 +237,20 @@
             let name = (isFri && p.id==='dhuhr') ? 'صلاة الجمعة' : p.n;
             const v = ud[id]?.type || '';
             return `<div class="row"><span>${p.icon} ${name}</span><div class="btn-group">
-                <button class="${v==='m'?'active-m':''}" onclick="saveFard('${id}','m',100)">مسجد (100)</button>
-                <button class="${v==='h'?'active-h':''}" onclick="saveFard('${id}','h',70)">جماعة (70)</button>
-                <button class="${v==='s'?'active-s':''}" onclick="saveFard('${id}','s',40)">فردي (40)</button>
-                <button class="${v==='q'?'active-q':''}" onclick="saveFard('${id}','q',20)">قضاء (20)</button>
+                <button class="${v==='m'?'active-m':''}" onclick="saveFard('${id}','m',100)">مسجد</button>
+                <button class="${v==='h'?'active-h':''}" onclick="saveFard('${id}','h',70)">جماعة</button>
+                <button class="${v==='s'?'active-s':''}" onclick="saveFard('${id}','s',40)">فردي</button>
             </div></div>`;
         }).join('');
 
         document.getElementById('sunnah-list').innerHTML = sunan.map(s => `
-            <div class="row"><span>${s.n} <small>(${s.r})</small> <span class="points-tag">${s.p}ن</span></span>
-            <input type="checkbox" style="transform:scale(1.5);" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)"></div>`).join('');
+            <div class="row"><span>${s.n} <span class="points-tag">${s.p}ن</span></span>
+            <input type="checkbox" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)"></div>`).join('');
 
         document.getElementById('azkar-list').innerHTML = azkar.map(a => `
             <div class="row"><span>${a.n} <span class="points-tag">${a.p}ن</span></span>
-            <input type="checkbox" style="transform:scale(1.5);" ${ud[a.id]?.done?'checked':''} onchange="saveCheck('${a.id}',${a.p},this.checked)"></div>`).join('');
-        
+            <input type="checkbox" ${ud[a.id]?.done?'checked':''} onchange="saveCheck('${a.id}',${a.p},this.checked)"></div>`).join('');
         document.getElementById('q-part').value = ud.q_part || 0;
-    }
-
-    function updatePodiums(all, day) {
-        const calc = (d) => {
-            let s = 0; if(!d) return 0;
-            Object.values(d).forEach(v => { if(v.p) s += v.p; });
-            s += (d.q_part * 100 || 0); return s;
-        };
-        let daily = users.map(u => ({ name: u, score: calc(day[u]) })).sort((a,b) => b.score - a.score);
-        const p = [daily[1], daily[0], daily[2]];
-        document.getElementById('podium-daily').innerHTML = p.map((u, i) => u ? `
-            <div style="width:30%; display:flex; flex-direction:column; align-items:center;">
-            <div class="podium-rank rank-${i===0?2:i===1?1:3}">${u.score}ن</div>
-            <div style="font-size:0.8rem; font-weight:bold; margin-top:5px;">${u.name}</div></div>` : '').join('');
     }
 
     function setUser(u) { currentUser = u; sync(); }
@@ -264,27 +264,19 @@
         document.getElementById('chat-input').value = '';
     }
 
-    // تهيئة التطبيق
+    // Init
     document.getElementById('main-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('main-date').onchange = sync;
     const diffR = new Date("2026-02-18") - new Date();
     document.getElementById('ramadan-countdown').innerText = `⏳ متبقي على رمضان 2026: ${Math.floor(diffR/(1000*60*60*24))} يوم`;
     
-    setInterval(() => { 
-        updateCityTimer('salalah', 4, 'salalah-timer', 'salalah-imsak'); 
-        updateCityTimer('kafr', 2, 'kafr-timer', 'kafr-imsak'); 
-    }, 1000);
-
+    setInterval(() => { updateCityTimer('salalah', 4, 'salalah-timer', 'salalah-imsak'); updateCityTimer('kafr', 2, 'kafr-timer', 'kafr-imsak'); }, 1000);
     db.ref('osraty_chat').limitToLast(15).on('value', snap => {
         const box = document.getElementById('chat-box'); box.innerHTML = '';
-        snap.forEach(child => {
-            const d = child.val();
-            box.innerHTML += `<div class="msg"><b>${d.user}:</b> ${d.msg} <small style="color:#999; font-size:0.6rem;">${d.time}</small></div>`;
-        });
+        snap.forEach(child => { const d = child.val(); box.innerHTML += `<div class="msg"><b>${d.user}:</b> ${d.msg} <small style="color:#999; font-size:0.6rem;">${d.time}</small></div>`; });
         box.scrollTop = box.scrollHeight;
     });
-
-    setDailyHadith();
+    document.getElementById('hadith-text').innerText = ahadith[Math.floor(Math.random()*ahadith.length)];
     sync();
 </script>
 </body>
