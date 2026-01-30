@@ -25,14 +25,14 @@
         
         .ramadan-bar { background: var(--royal-green); color: #f1d37e; padding: 15px; text-align: center; border-radius: 20px; margin-bottom: 25px; font-weight: bold; border: 1px solid var(--deep-gold); }
         
-        .rank-titles { text-align: center; margin: 10px 0; font-family: 'Reem Kufi'; color: var(--masjid); font-size: 1.2rem; }
-        .podium-container { display: flex; justify-content: space-around; align-items: flex-end; margin: 20px 0; background: #fff; padding: 20px; border-radius: 25px; border: 1px solid #f1f1f1; }
+        .rank-titles { text-align: center; margin: 15px 0 5px; font-family: 'Reem Kufi'; color: var(--masjid); font-size: 1.1rem; }
+        .podium-container { display: flex; justify-content: space-around; align-items: flex-end; margin: 10px 0 20px; background: #fff; padding: 15px; border-radius: 25px; border: 1px solid #f1f1f1; }
         .podium-item { display: flex; flex-direction: column; align-items: center; width: 22%; }
-        .podium-rank { width: 100%; text-align: center; color: white; border-radius: 12px 12px 0 0; padding: 8px 0; font-weight: bold; font-size: 0.9rem; }
-        .rank-1 { height: 100px; background: var(--gold-gradient); color: var(--royal-green); }
-        .rank-2 { height: 80px; background: var(--silver); }
-        .rank-3 { height: 60px; background: var(--bronze); }
-        .rank-4 { height: 45px; background: #ecf0f1; color: #7f8c8d; }
+        .podium-rank { width: 100%; text-align: center; color: white; border-radius: 12px 12px 0 0; padding: 8px 0; font-weight: bold; font-size: 0.85rem; }
+        .rank-1 { height: 90px; background: var(--gold-gradient); color: var(--royal-green); }
+        .rank-2 { height: 70px; background: var(--silver); }
+        .rank-3 { height: 55px; background: var(--bronze); }
+        .rank-4 { height: 40px; background: #ecf0f1; color: #7f8c8d; }
 
         .user-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 25px; }
         .comp-card { background: white; border: 1px solid #eee; padding: 15px; border-radius: 20px; text-align: right; cursor: pointer; transition: 0.3s; }
@@ -44,9 +44,8 @@
         .task-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; border-right: 8px solid var(--masjid); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
         .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; flex-wrap: wrap; gap: 10px; }
         
-        /* جعل الأزرار على خط واحد */
         .btn-group { display: flex; gap: 4px; flex-wrap: nowrap; }
-        .btn-group button { border: 1px solid #ddd; padding: 6px 4px; border-radius: 10px; cursor: pointer; font-family: 'Amiri'; font-size: 0.75rem; background: white; transition: 0.2s; display: flex; flex-direction: column; align-items: center; min-width: 48px; }
+        .btn-group button { border: 1px solid #ddd; padding: 6px 4px; border-radius: 10px; cursor: pointer; font-family: 'Amiri'; font-size: 0.75rem; background: white; transition: 0.2s; display: flex; flex-direction: column; align-items: center; min-width: 50px; }
         .btn-group button span { font-size: 0.6rem; font-weight: bold; }
         
         .active-m { background: var(--masjid) !important; color: white !important; }
@@ -56,7 +55,7 @@
         
         .points-tag { font-size: 0.7rem; background: var(--gold-gradient); color: var(--royal-green); padding: 2px 8px; border-radius: 8px; font-weight: bold; margin-right: 5px; }
         .rakat-tag { font-size: 0.7rem; background: #f0f4f0; color: var(--sunnah); padding: 2px 6px; border-radius: 6px; border: 1px solid #e0eee0; margin-right: 5px; }
-        .link-btn { text-decoration: none; color: var(--deep-gold); font-size: 0.75rem; border-bottom: 1px dotted var(--deep-gold); font-weight: bold; }
+        .link-btn { text-decoration: none; color: var(--deep-gold); font-size: 0.75rem; border-bottom: 1px dotted var(--deep-gold); font-weight: bold; margin-right: 5px; }
     </style>
 </head>
 <body>
@@ -73,6 +72,8 @@
     <div id="podiums">
         <h4 class="rank-titles">🏆 سِجِلُّ الصدارة اليومي</h4>
         <div id="podium-daily" class="podium-container"></div>
+        <h4 class="rank-titles">🏅 الترتيب السنوي العام</h4>
+        <div id="podium-yearly" class="podium-container"></div>
     </div>
 
     <div id="user-grid" class="user-grid"></div>
@@ -89,7 +90,7 @@
         <div class="task-card" style="border-right-color: #f39c12">
             <h3 style="color:#f39c12">📑 الأذكار والأوراد</h3>
             <div class="row">
-                <span>📖 ورد القرآن (رقم الجزء) <span class="points-tag">100ن</span> <a href="https://quran.com" target="_blank" class="link-btn">🔗 المصحف</a></span>
+                <span>📖 ورد القرآن (جزء) <span class="points-tag">100ن</span> <a href="https://quran.com" target="_blank" class="link-btn">🔗 المصحف</a></span>
                 <input type="number" id="q-part" min="0" max="30" onchange="updateQ(this.value)" style="width:50px; padding:5px; border-radius:8px; border:1px solid #ddd;">
             </div>
             <div id="azkar-list"></div>
@@ -106,7 +107,7 @@
     const prayers = [{id:'fajr', n:'الفجر', icon:'🌅'},{id:'dhuhr', n:'الظهر', icon:'☀️'},{id:'asr', n:'العصر', icon:'🌤️'},{id:'maghrib', n:'المغرب', icon:'🌇'},{id:'isha', n:'العشاء', icon:'🌃'}];
     const sunan = [
         {id:'s_f_pre', n:'سنة الفجر', r:'2ر', p:15, icon:'🕯️'},
-        {id:'duha', n:'صلاة الضحى', r:'2ر+', p:15, icon:'🌦️'},
+        {id:'duha', n:'الضحى', r:'2ر+', p:15, icon:'🌦️'},
         {id:'s_d_pre', n:'سنة الظهر قبل', r:'4ر', p:20, icon:'🕒'},
         {id:'s_d_post', n:'سنة الظهر بعد', r:'2ر', p:10, icon:'🕕'},
         {id:'s_m_post', n:'سنة المغرب', r:'2ر', p:10, icon:'🌆'},
@@ -159,9 +160,7 @@
             return `
                 <div class="comp-card ${u===currentUser?'active':''}" onclick="setUser('${u}')">
                     <div style="display:flex; justify-content:space-between"><b>👤 ${u}</b> <span class="points-tag">${score}ن</span></div>
-                    <div class="remaining-box">
-                        ${missing.length > 0 ? missing.map(m => `<span class="rem-item">${m}</span>`).join('') : '✨ طاعاتك كاملة'}
-                    </div>
+                    <div class="remaining-box">${missing.length > 0 ? missing.map(m => `<span class="rem-item">${m}</span>`).join('') : '✨ طاعاتك كاملة'}</div>
                 </div>`;
         }).join('');
     }
@@ -202,13 +201,25 @@
             Object.values(d).forEach(v => s += (v.p || 0));
             s += (d.q_part * 100 || 0); return s;
         };
+        // ترتيب يومي
         let daily = users.map(u => ({ name: u, score: calc(day[u]) })).sort((a,b) => b.score - a.score);
-        const p = [daily[1], daily[0], daily[2], daily[3]];
-        document.getElementById('podium-daily').innerHTML = p.map((u, i) => u ? `
-            <div class="podium-item">
-                <div class="podium-rank rank-${i===0?2:i===1?1:i===2?3:4}">${u.score}</div>
-                <div style="font-size:0.8rem; font-weight:bold;">${u.name}</div>
-            </div>` : '').join('');
+        // ترتيب سنوي
+        let yearly = users.map(u => {
+            let total = 0;
+            Object.values(all).forEach(dayObj => total += calc(dayObj[u]));
+            return { name: u, score: total };
+        }).sort((a,b) => b.score - a.score);
+
+        const fillPodium = (data, elementId) => {
+            const p = [data[1], data[0], data[2], data[3]];
+            document.getElementById(elementId).innerHTML = p.map((u, i) => u ? `
+                <div class="podium-item">
+                    <div class="podium-rank rank-${i===0?2:i===1?1:i===2?3:4}">${u.score}</div>
+                    <div style="font-size:0.75rem; font-weight:bold;">${u.name}</div>
+                </div>` : '').join('');
+        };
+        fillPodium(daily, 'podium-daily');
+        fillPodium(yearly, 'podium-yearly');
     }
 
     function setUser(u) { currentUser = u; sync(); }
