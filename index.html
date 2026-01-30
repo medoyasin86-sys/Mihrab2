@@ -61,7 +61,7 @@
 
     <div id="app-body" style="display:none;">
         <div class="task-card">
-            <h3 style="color:var(--masjid)">🕋 الصلوات المفروضة</h3>
+            <h3 style="color:var(--masjid)">🕋 الصلوات المفروضة <span style="font-size:0.7rem; color:grey;">(100ن مسجد | 50ن جماعة | 25ن فردي | 10ن قضاء)</span></h3>
             <div id="fard-list"></div>
         </div>
 
@@ -73,15 +73,15 @@
         <div class="task-card azkar-card">
             <h3 style="color:#f39c12">📑 الأذكار والأوراد</h3>
             <div class="row">
-                <span>📖 ورد القرآن (رقم الجزء)</span>
+                <span>📖 ورد القرآن (رقم الجزء) <span class="points-tag">100ن لكل جزء</span></span>
                 <input type="number" id="q-part" min="0" max="30" onchange="updateQ(this.value)" style="width:50px;">
             </div>
-            <div class="row"><span>☀️ أذكار الصباح <a href="https://alazkar.today/" class="link-btn" target="_blank">📖 قراءة</a></span><input type="checkbox" id="c-morning" onchange="saveCheck('morning', 20, this.checked)"></div>
-            <div class="row"><span>🌙 أذكار المساء <a href="https://alazkar.today/" class="link-btn" target="_blank">📖 قراءة</a></span><input type="checkbox" id="c-evening" onchange="saveCheck('evening', 20, this.checked)"></div>
-            <div class="row"><span>😴 أذكار النوم <a href="https://alazkar.today/" class="link-btn" target="_blank">📖 قراءة</a></span><input type="checkbox" id="c-sleep" onchange="saveCheck('sleep', 10, this.checked)"></div>
-            <div class="row"><span>👑 سورة الملك <a href="https://quran.com/67" class="link-btn" target="_blank">📖 قراءة</a> <span class="points-tag">15ن</span></span><input type="checkbox" id="c-mulk" onchange="saveCheck('mulk', 15, this.checked)"></div>
-            <div class="row"><span>🕌 سورة الكهف <a href="https://quran.com/18" class="link-btn" target="_blank">📖 قراءة</a> <span class="points-tag">30ن</span></span><input type="checkbox" id="c-kahf" onchange="saveCheck('kahf', 30, this.checked)"></div>
-            <div class="row"><span>📜 خواتيم البقرة <a href="https://quran.com/2?startingVerse=285" class="link-btn" target="_blank">📖 قراءة</a> <span class="points-tag">10ن</span></span><input type="checkbox" id="c-baqara" onchange="saveCheck('baqara', 10, this.checked)"></div>
+            <div class="row"><span>☀️ أذكار الصباح <span class="points-tag">20ن</span> <a href="https://alazkar.today/" class="link-btn" target="_blank">📖 قراءة</a></span><input type="checkbox" id="c-morning" onchange="saveCheck('morning', 20, this.checked)"></div>
+            <div class="row"><span>🌙 أذكار المساء <span class="points-tag">20ن</span> <a href="https://alazkar.today/" class="link-btn" target="_blank">📖 قراءة</a></span><input type="checkbox" id="c-evening" onchange="saveCheck('evening', 20, this.checked)"></div>
+            <div class="row"><span>😴 أذكار النوم <span class="points-tag">10ن</span> <a href="https://alazkar.today/" class="link-btn" target="_blank">📖 قراءة</a></span><input type="checkbox" id="c-sleep" onchange="saveCheck('sleep', 10, this.checked)"></div>
+            <div class="row"><span>👑 سورة الملك <span class="points-tag">15ن</span> <a href="https://quran.com/67" class="link-btn" target="_blank">📖 قراءة</a></span><input type="checkbox" id="c-mulk" onchange="saveCheck('mulk', 15, this.checked)"></div>
+            <div class="row"><span>🕌 سورة الكهف <span class="points-tag">30ن</span> <a href="https://quran.com/18" class="link-btn" target="_blank">📖 قراءة</a></span><input type="checkbox" id="c-kahf" onchange="saveCheck('kahf', 30, this.checked)"></div>
+            <div class="row"><span>📜 خواتيم البقرة <span class="points-tag">10ن</span> <a href="https://quran.com/2?startingVerse=285" class="link-btn" target="_blank">📖 قراءة</a></span><input type="checkbox" id="c-baqara" onchange="saveCheck('baqara', 10, this.checked)"></div>
         </div>
     </div>
 </div>
@@ -92,9 +92,7 @@
     
     let currentUser = null;
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
-    
     const prayers = [{id:'fajr', n:'الفجر', icon:'🌅'},{id:'dhuhr', n:'الظهر', icon:'☀️'},{id:'asr', n:'العصر', icon:'🌤️'},{id:'maghrib', n:'المغرب', icon:'🌇'},{id:'isha', n:'العشاء', icon:'🌃'}];
-    
     const sunan = [
         {id:'s_f_pre', n:'سنة الفجر', r:'ركعتان', p:15, icon:'🌅'},
         {id:'duha', n:'صلاة الضحى', r:'ركعتان فأكثر', p:15, icon:'⛅'},
@@ -124,7 +122,6 @@
         const date = document.getElementById('main-date').value;
         const hijriFormat = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(new Date(date));
         document.getElementById('hijri-date').innerText = hijriFormat;
-        
         db.ref('osraty').on('value', snap => {
             const allDaysData = snap.val() || {};
             const currentDayData = allDaysData[date] || {};
@@ -136,6 +133,7 @@
     function updatePodiums(allData, currentDayData) {
         let daily = users.map(u => {
             let s = 0; Object.values(currentDayData[u] || {}).forEach(v => { if(v.p) s += v.p; });
+            if(currentDayData[u]?.q_part) s += (currentDayData[u].q_part * 100);
             return { name: u, score: s };
         }).sort((a,b) => b.score - a.score);
 
@@ -143,6 +141,7 @@
         Object.values(allData).forEach(day => {
             users.forEach(u => {
                 Object.values(day[u] || {}).forEach(v => { if(v.p) yearlyMap[u] += v.p; });
+                if(day[u]?.q_part) yearlyMap[u] += (day[u].q_part * 100);
             });
         });
         let yearly = users.map(u => ({ name: u, score: yearlyMap[u] })).sort((a,b) => b.score - a.score);
@@ -163,6 +162,7 @@
         const isRamadan = hijriText.includes('رمضان');
         document.getElementById('user-grid').innerHTML = users.map(u => {
             let s = 0; Object.values(udDay[u] || {}).forEach(v => { if(v.p) s += v.p; });
+            if(udDay[u]?.q_part) s += (udDay[u].q_part * 100);
             return `<div class="comp-card ${u===currentUser?'active':''}" onclick="setUser('${u}')">👤 <b>${u}</b><br>${s}ن</div>`;
         }).join('');
 
@@ -183,8 +183,7 @@
             }).join('');
 
             document.getElementById('sunnah-list').innerHTML = sunan.map(s => {
-                let displayName = s.n;
-                if(s.id === 'traweeh' && isRamadan) displayName = "صلاة التراويح";
+                let displayName = s.n; if(s.id === 'traweeh' && isRamadan) displayName = "صلاة التراويح";
                 return `<div class="row">
                     <span>${s.icon} ${displayName} <span class="rakat-tag">${s.r}</span> <span class="points-tag">${s.p}ن</span></span>
                     <input type="checkbox" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)">
@@ -205,7 +204,6 @@
     function saveFard(id, type, p) { db.ref(`osraty/${document.getElementById('main-date').value}/${currentUser}/${id}`).set({type, p}); }
     function saveCheck(id, p, done) { db.ref(`osraty/${document.getElementById('main-date').value}/${currentUser}/${id}`).set({done, p: done?p:0}); }
     function updateQ(v) { db.ref(`osraty/${document.getElementById('main-date').value}/${currentUser}/q_part`).set(Number(v)); }
-
     init();
 </script>
 </body>
