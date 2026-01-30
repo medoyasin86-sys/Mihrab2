@@ -42,18 +42,21 @@
         .rem-item { display: inline-block; background: #fff; padding: 2px 8px; border-radius: 6px; margin: 2px; border: 1px solid #eee; color: #555; }
         
         .task-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; border-right: 8px solid var(--masjid); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
+        .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; flex-wrap: wrap; gap: 10px; }
         
-        .btn-group button { border: 1px solid #ddd; padding: 8px 10px; border-radius: 12px; cursor: pointer; font-family: 'Amiri'; font-size: 0.9rem; background: white; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 55px; }
-        .btn-group button span { font-size: 0.65rem; font-weight: bold; }
+        /* جعل الأزرار على خط واحد */
+        .btn-group { display: flex; gap: 4px; flex-wrap: nowrap; }
+        .btn-group button { border: 1px solid #ddd; padding: 6px 4px; border-radius: 10px; cursor: pointer; font-family: 'Amiri'; font-size: 0.75rem; background: white; transition: 0.2s; display: flex; flex-direction: column; align-items: center; min-width: 48px; }
+        .btn-group button span { font-size: 0.6rem; font-weight: bold; }
         
         .active-m { background: var(--masjid) !important; color: white !important; }
         .active-h { background: #e65100 !important; color: white !important; }
         .active-s { background: #4a148c !important; color: white !important; }
         .active-q { background: #c62828 !important; color: white !important; }
         
-        .points-tag { font-size: 0.7rem; background: var(--gold-gradient); color: var(--royal-green); padding: 2px 8px; border-radius: 8px; font-weight: bold; }
-        .link-btn { text-decoration: none; color: var(--deep-gold); font-size: 0.75rem; margin-right: 8px; border-bottom: 1px dotted var(--deep-gold); font-weight: bold; }
+        .points-tag { font-size: 0.7rem; background: var(--gold-gradient); color: var(--royal-green); padding: 2px 8px; border-radius: 8px; font-weight: bold; margin-right: 5px; }
+        .rakat-tag { font-size: 0.7rem; background: #f0f4f0; color: var(--sunnah); padding: 2px 6px; border-radius: 6px; border: 1px solid #e0eee0; margin-right: 5px; }
+        .link-btn { text-decoration: none; color: var(--deep-gold); font-size: 0.75rem; border-bottom: 1px dotted var(--deep-gold); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -86,7 +89,7 @@
         <div class="task-card" style="border-right-color: #f39c12">
             <h3 style="color:#f39c12">📑 الأذكار والأوراد</h3>
             <div class="row">
-                <span>📖 ورد القرآن (رقم الجزء) <span class="points-tag">100ن</span></span>
+                <span>📖 ورد القرآن (رقم الجزء) <span class="points-tag">100ن</span> <a href="https://quran.com" target="_blank" class="link-btn">🔗 المصحف</a></span>
                 <input type="number" id="q-part" min="0" max="30" onchange="updateQ(this.value)" style="width:50px; padding:5px; border-radius:8px; border:1px solid #ddd;">
             </div>
             <div id="azkar-list"></div>
@@ -102,15 +105,15 @@
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
     const prayers = [{id:'fajr', n:'الفجر', icon:'🌅'},{id:'dhuhr', n:'الظهر', icon:'☀️'},{id:'asr', n:'العصر', icon:'🌤️'},{id:'maghrib', n:'المغرب', icon:'🌇'},{id:'isha', n:'العشاء', icon:'🌃'}];
     const sunan = [
-        {id:'s_f_pre', n:'سنة الفجر', p:15, icon:'🕯️'},
-        {id:'duha', n:'صلاة الضحى', p:15, icon:'🌦️'},
-        {id:'s_d_pre', n:'سنة الظهر قبل', p:20, icon:'🕒'},
-        {id:'s_d_post', n:'سنة الظهر بعد', p:10, icon:'🕕'},
-        {id:'s_m_post', n:'سنة المغرب', p:10, icon:'🌆'},
-        {id:'s_i_post', n:'سنة العشاء', p:10, icon:'🌘'},
-        {id:'traweeh', n:'صلاة القيام', p:60, icon:'🎋'},
-        {id:'shaf', n:'صلاة الشفع', p:20, icon:'♊'},
-        {id:'witr', n:'صلاة الوتر', p:15, icon:'☝️'}
+        {id:'s_f_pre', n:'سنة الفجر', r:'2ر', p:15, icon:'🕯️'},
+        {id:'duha', n:'صلاة الضحى', r:'2ر+', p:15, icon:'🌦️'},
+        {id:'s_d_pre', n:'سنة الظهر قبل', r:'4ر', p:20, icon:'🕒'},
+        {id:'s_d_post', n:'سنة الظهر بعد', r:'2ر', p:10, icon:'🕕'},
+        {id:'s_m_post', n:'سنة المغرب', r:'2ر', p:10, icon:'🌆'},
+        {id:'s_i_post', n:'سنة العشاء', r:'2ر', p:10, icon:'🌘'},
+        {id:'traweeh', n:'صلاة القيام', r:'', p:60, icon:'🎋'},
+        {id:'shaf', n:'صلاة الشفع', r:'2ر', p:20, icon:'♊'},
+        {id:'witr', n:'صلاة الوتر', r:'1ر', p:15, icon:'☝️'}
     ];
     const azkar = [
         {id:'morning', n:'أذكار الصباح', p:20, icon:'🌞', l:'https://alazkar.today/morning'},
@@ -180,7 +183,7 @@
         document.getElementById('sunnah-list').innerHTML = sunan.map(s => {
             let dName = (s.id==='traweeh' && isRamadan) ? "صلاة التراويح" : s.n;
             return `<div class="row">
-                <span>${s.icon} ${dName} <span class="points-tag">${s.p}ن</span></span>
+                <span>${s.icon} ${dName} ${s.r ? `<span class="rakat-tag">${s.r}</span>` : ''} <span class="points-tag">${s.p}ن</span></span>
                 <input type="checkbox" style="width:22px; height:22px;" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)">
             </div>`;
         }).join('');
