@@ -4,179 +4,304 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نلتقي على طاعة الله 2026</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
-        :root { 
-            --royal-green: #00332c; 
-            --masjid: #004d40; 
-            --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f1d37e 50%, #b8860b 100%);
-            --deep-gold: #b8860b;
-            --bg: #fcfaf5; 
-            --text: #1a252f; 
-            --sunnah: #1b5e20; 
-            --silver: #95a5a6; 
-            --bronze: #a67c52; 
-            --card-bg: #ffffff;
+        :root {
+            --primary-gold: #d4af37;
+            --deep-green: #00332c;
+            --accent-green: #004d40;
+            --text-light: #f4f4f4;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        /* تنسيقات عامة */
         body {
             font-family: 'Amiri', serif;
-            background-color: var(--bg);
-            color: var(--text);
+            background: #fdfbf7 url('https://www.transparenttextures.com/patterns/arabesque.png');
             margin: 0;
-            padding: 20px;
+            color: var(--deep-green);
         }
 
-        .header {
+        /* Header & Navigation */
+        header {
+            background: linear-gradient(135deg, var(--deep-green), var(--accent-green));
+            color: var(--primary-gold);
+            padding: 30px 20px;
             text-align: center;
-            background: var(--royal-green);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border-bottom: 4px solid var(--primary-gold);
+            box-shadow: var(--shadow);
         }
 
-        /* تنسيق الصناديق والمحتوى */
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
-        }
-
-        /* نظام الدردشة */
-        #chat-box {
-            height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: #f9f9f9;
-            border-radius: 8px;
-        }
-
-        .msg {
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            border-radius: 15px;
-            background: #e1f5fe;
-            max-width: 80%;
-        }
-
-        .msg-info {
-            font-size: 0.8em;
-            color: #666;
-            margin-bottom: 4px;
-        }
-
-        /* أدوات التحكم */
-        .controls {
+        .calendar-nav {
             display: flex;
-            gap: 10px;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        /* Prayer Times & Alert */
+        .prayer-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .city-card {
+            background: var(--card-bg);
+            border: 2px solid var(--primary-gold);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .alert-box {
+            background: #fff3cd;
+            border: 2px solid #ffeeba;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+            display: none; /* يظهر بالجافاسكريبت */
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+        }
+
+        /* Family Members Section */
+        .family-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .member-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border-top: 5px solid var(--primary-gold);
+        }
+
+        .points-badge {
+            background: var(--primary-gold);
+            color: var(--deep-green);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        /* Prayers & Sunnah Tables */
+        .worship-table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 10px;
         }
 
-        input[type="text"], input[type="date"] {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            flex-grow: 1;
+        .worship-table th, .worship-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            text-align: center;
         }
 
-        button {
-            padding: 10px 20px;
-            background: var(--masjid);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        /* Chat System */
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 15px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
         }
 
-        button:hover {
-            background: var(--royal-green);
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; background: #efe7dd; }
+        .chat-input-area { padding: 15px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
+
+        /* Marquee */
+        .hadith-marquee {
+            background: var(--deep-green);
+            color: var(--primary-gold);
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
         }
 
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>✨ نلتقي على طاعة الله 2026 ✨</h1>
-        <div id="ramadan-countdown">جاري حساب المتبقي على رمضان...</div>
+<header>
+    <h1>✨ نلتقي على طاعة الله 2026 ✨</h1>
+    <div class="calendar-nav">
+        <input type="date" id="datePicker">
+        <div id="hijriDate" style="font-weight: bold;">جاري تحميل التاريخ الهجري...</div>
     </div>
+</header>
 
-    <div class="card">
-        <h3>📅 التاريخ والوقت</h3>
-        <input type="date" id="main-date">
-        <div id="salalah-timer" style="margin-top: 10px; font-weight: bold;"></div>
+<div id="prayerAlert" class="alert-box">⚠️ استعد للصلاة! متبقي 10 دقائق على الأذان</div>
+
+<section class="prayer-section">
+    <div class="city-card">
+        <h3>🕌 صلالة (عمان)</h3>
+        <div id="salalah-times">الفجر: 05:10 | الظهر: 12:30 | العصر: 15:45 | المغرب: 18:20 | العشاء: 19:40</div>
     </div>
-
-    <div class="card">
-        <h3>📖 حديث اليوم</h3>
-        <p id="daily-hadith">"الدال على الخير كفاعله"</p>
+    <div class="city-card">
+        <h3>🕌 كفر الشيخ (مصر)</h3>
+        <div id="kafr-times">الفجر: 03:40 | الظهر: 12:05 | العصر: 15:40 | المغرب: 18:55 | العشاء: 20:25</div>
     </div>
+</section>
 
-    <div class="card">
-        <h3>💬 مجلس العائلة (الدردشة)</h3>
-        <div id="chat-box"></div>
-        <div class="controls">
-            <input type="text" id="chat-user" placeholder="الاسم" style="width: 30%;">
-            <input type="text" id="chat-input" placeholder="اكتب رسالتك هنا...">
-            <button onclick="sendMsg()">إرسال</button>
-        </div>
-        <div style="margin-top: 10px;">
-            <button onclick="addEmoji('😊')">😊</button>
-            <button onclick="addEmoji('❤️')">❤️</button>
-            <button onclick="addEmoji('🙌')">🙌</button>
-        </div>
+<section class="family-grid">
+    <div class="member-card">
+        <h2>👨‍💼 محمد <span class="points-badge" id="points-mohammed">0 نقطة</span></h2>
+        <div class="tasks-pending">📌 المتبقي: صلاة العصر 🕌 - صيام الخميس 🌙</div>
+        <p><i>"هيا يا أبا أحمد، الجنة تناديك!"</i></p>
     </div>
+    <div class="member-card">
+        <h2>👩‍🍳 شيماء <span class="points-badge" id="points-shaymaa">0 نقطة</span></h2>
+        <div class="tasks-pending">📌 المتبقي: ورد القرآن 📖</div>
+        <p><i>"بارك الله في همتكِ يا أم أحمد"</i></p>
+    </div>
+    <div class="member-card">
+        <h2>👦 أحمد <span class="points-badge" id="points-ahmed">0 نقطة</span></h2>
+        <div class="tasks-pending">📌 المتبقي: صلاة العشاء 🌙</div>
+    </div>
+    <div class="member-card">
+        <h2>👶 ياسين <span class="points-badge" id="points-yassin">0 نقطة</span></h2>
+        <div class="tasks-pending">📌 المتبقي: أذكار النوم 😴</div>
+    </div>
+</section>
 
-    <script>
-        // تهيئة Firebase (يجب وضع إعداداتك هنا لتعمل الدردشة)
-        const firebaseConfig = {
-            // apiKey: "YOUR_API_KEY",
-            // databaseURL: "YOUR_DATABASE_URL",
-        };
-        // firebase.initializeApp(firebaseConfig);
-        // const db = firebase.database();
+<section style="padding: 20px;">
+    <div class="city-card">
+        <h2 id="fridayTitle">🕋 الصلوات المفروضة والسنن</h2>
+        <table class="worship-table">
+            <thead>
+                <tr>
+                    <th>الصلاة</th>
+                    <th>الفريضة (نقاط)</th>
+                    <th>السنّة الراتبة</th>
+                </tr>
+            </thead>
+            <tbody id="worshipBody">
+                </tbody>
+        </table>
+    </div>
+</section>
 
-        function sendMsg() {
-            const name = document.getElementById('chat-user').value || 'زائر';
-            const txt = document.getElementById('chat-input').value;
-            if (!txt) return;
-            
-            // في حال وجود Firebase مفعل:
-            // db.ref('osraty_chat').push({ user: name, msg: txt, time: new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) });
-            
-            // عرض تجريبي في حال عدم ربط القاعدة:
-            const box = document.getElementById('chat-box');
-            const time = new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
-            box.innerHTML += `<div class="msg"><b>${name}</b> [${time}]: <br>${txt}</div>`;
-            document.getElementById('chat-input').value = '';
-            box.scrollTop = box.scrollHeight;
-        }
+<section id="fastingSection" class="city-card hidden" style="margin: 20px; background: #fffde7;">
+    <h3>🌙 صيام التطوع</h3>
+    <div id="fastingReminder"></div>
+</section>
 
-        function addEmoji(emoji) { 
-            document.getElementById('chat-input').value += emoji; 
-        }
+<section class="family-grid">
+    <div class="member-card">
+        <h3>📿 الأذكار اليومية</h3>
+        <ul>
+            <li><a href="#">☀️ أذكار الصباح</a></li>
+            <li><a href="#">🌙 أذكار المساء</a></li>
+            <li><a href="#">😴 أذكار النوم</a></li>
+            <li><a href="#">📖 سورة الملك</a></li>
+        </ul>
+    </div>
+    <div class="member-card">
+        <h3>📖 الورد القرآني</h3>
+        <input type="number" placeholder="رقم الجزء" style="width: 60px;">
+        <button>تحديث</button>
+        <br><br>
+        <a href="https://quran.com" target="_blank">🔗 فتح المصحف الإلكتروني</a>
+    </div>
+</section>
 
-        function init() {
-            // ضبط تاريخ اليوم
-            document.getElementById('main-date').value = new Date().toISOString().split('T')[0];
-            
-            // حساب العداد التنازلي لرمضان (18 فبراير 2026 تقريباً)
-            const diffR = new Date("2026-02-18") - new Date();
-            const days = Math.max(0, Math.floor(diffR/(1000*60*60*24)));
-            document.getElementById('ramadan-countdown').innerText = ` ⏳ متبقي على نفحات رمضان: ${days} يوم`;
-        }
+<section class="chat-container">
+    <div style="background: var(--deep-green); color: white; padding: 10px; border-radius: 15px 15px 0 0;">
+        💬 ملتقى الطاعات - الدردشة العائلية
+    </div>
+    <div class="chat-messages" id="chatBox"></div>
+    <div class="chat-input-area">
+        <select id="senderSelect">
+            <option>محمد</option>
+            <option>شيماء</option>
+            <option>أحمد</option>
+            <option>ياسين</option>
+        </select>
+        <button>📎</button>
+        <input type="text" id="chatMsg" placeholder="اكتب رسالتك..." style="flex:1;">
+        <button>😊</button>
+        <button onclick="sendMessage()" style="background: var(--accent-green); color: white;">إرسال</button>
+    </div>
+</section>
 
-        window.onload = init;
-    </script>
+<div class="hadith-marquee">
+    <marquee id="dailyHadith">قال رسول الله ﷺ: "من سلك طريقاً يلتمس فيه علماً سهل الله له به طريقاً إلى الجنة"</marquee>
+</div>
+
+<script>
+    // --- وظائف التوقيت والمدن ---
+    function updateClock() {
+        const now = new Date();
+        // منطق حساب فرق التوقيت وتنبيه الـ 10 دقائق يوضع هنا
+        // إذا كان الوقت الحالي قبل الأذان بـ 10 دقائق، أظهر prayerAlert
+    }
+
+    // --- وظيفة تبديل صلاة الجمعة ---
+    function checkFriday() {
+        const today = new Date().getDay();
+        const body = document.getElementById('worshipBody');
+        const isFriday = (today === 5);
+        
+        let rows = `
+            <tr>
+                <td>🌅 الفجر</td>
+                <td>(المسجد: 50ن | فردي: 10ن)</td>
+                <td>رغيبة الفجر (2 ركعة)</td>
+            </tr>
+            <tr>
+                <td>${isFriday ? '🕌 الجمعة' : '☀️ الظهر'}</td>
+                <td>${isFriday ? 'المسجد: 100ن' : '(مسجد: 30ن | جماعة: 20ن | فردي: 10ن)'}</td>
+                <td>${isFriday ? 'بعدية (4 ركعات)' : 'قبلية (4) - بعدية (2)'}</td>
+            </tr>
+            `;
+        body.innerHTML = rows;
+    }
+
+    // --- وظيفة صيام التطوع ---
+    function checkFastingDays() {
+        // حساب الأيام الهجرية (الاثنين والخميس والبيض)
+        // إذا تحقق الشرط، نزيل class 'hidden' من fastingSection
+    }
+
+    // --- نظام الدردشة المحاكي ---
+    function sendMessage() {
+        const sender = document.getElementById('senderSelect').value;
+        const msg = document.getElementById('chatMsg').value;
+        if(!msg) return;
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML += `<div style="margin-bottom:10px;"><b>${sender}:</b> ${msg}</div>`;
+        document.getElementById('chatMsg').value = '';
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // تشغيل الوظائف عند التحميل
+    window.onload = () => {
+        checkFriday();
+        checkFastingDays();
+        setInterval(updateClock, 1000);
+    };
+</script>
+
 </body>
 </html>
