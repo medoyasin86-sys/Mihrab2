@@ -15,6 +15,10 @@
         .header-bar { background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid var(--gold); }
         .prayer-times-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; }
         .prayer-times-table th, .prayer-times-table td { padding: 5px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
+
+        /* الشريط الجديد للتاريخ الهجري وعداد رمضان */
+        .hijri-ramadan-bar { background: var(--gold); color: #1a4d2e; margin-top: 10px; border-radius: 10px; padding: 8px; font-weight: bold; display: flex; justify-content: space-around; align-items: center; font-size: 0.9rem; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .ramadan-timer { color: #fff; background: var(--primary); padding: 2px 10px; border-radius: 20px; font-family: sans-serif; font-size: 0.85rem; }
         
         .podium-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 130px; gap: 5px; padding-bottom: 25px; }
@@ -26,8 +30,8 @@
         .p-name { position: absolute; bottom: -25px; color: var(--text); font-weight: bold; font-size: 0.8rem; }
 
         .user-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        .comp-card { padding: 10px; text-align: center; border: 2px solid var(--gold-light); border-radius: 15px; cursor: pointer; background: #fff; }
-        .comp-card.active { border-color: var(--primary); background: #f0f7f2; }
+        .comp-card { padding: 10px; text-align: center; border: 2px solid var(--gold-light); border-radius: 15px; cursor: pointer; background: #fff; transition: 0.3s; }
+        .comp-card.active { border-color: var(--primary); background: #f0f7f2; transform: scale(1.02); }
         .user-status { font-size: 0.7rem; color: #d35400; margin-top: 5px; border-top: 1px solid #eee; padding-top: 5px; min-height: 35px; }
 
         .section-card { background: white; border: 1px solid var(--gold); border-radius: 15px; margin-top: 15px; overflow: hidden; }
@@ -57,6 +61,11 @@
                 <tr id="row-kafr"><td>كفر الشيخ</td><td colspan="5">...</td></tr>
             </tbody>
         </table>
+
+        <div class="hijri-ramadan-bar">
+            <div id="hijri-date">التاريخ الهجري...</div>
+            <div id="ramadan-countdown">باقي على رمضان: <span class="ramadan-timer" id="timer-vals">...</span></div>
+        </div>
     </div>
 
     <div class="podium-section">
@@ -109,6 +118,32 @@
             {id:'azkar_n', n:'أذكار النوم', p:30}, {id:'mulk', n:'سورة الملك', p:30}, {id:'quran', n:'الورد القرآني', p:50}
         ]
     };
+
+    // وظيفة التاريخ الهجري
+    function updateHijriDate() {
+        const options = { calendar: 'islamic-uma', day: 'numeric', month: 'long', year: 'numeric' };
+        const formatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', options);
+        document.getElementById('hijri-date').innerText = "📅 " + formatter.format(new Date());
+    }
+
+    // وظيفة عداد رمضان
+    function updateRamadanCountdown() {
+        const ramadanDate = new Date('February 18, 2026 00:00:00').getTime();
+        const interval = setInterval(() => {
+            const now = new Date().getTime();
+            const diff = ramadanDate - now;
+            if (diff < 0) {
+                document.getElementById('ramadan-countdown').innerText = "🌙 رمضان كريم!";
+                clearInterval(interval);
+                return;
+            }
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            document.getElementById('timer-vals').innerText = `${d}ي ${h}س ${m}د ${s}ث`;
+        }, 1000);
+    }
 
     function getRemaining(userData, isFriday) {
         let rem = [];
@@ -214,6 +249,8 @@
         document.getElementById('date-picker').value = new Date().toISOString().split('T')[0];
         fetchCityPrayers('Salalah', 'Oman', 'row-salalah');
         fetchCityPrayers('Kafr El Sheikh', 'Egypt', 'row-kafr');
+        updateHijriDate();
+        updateRamadanCountdown();
         document.getElementById('date-picker').onchange = sync; sync();
     };
 </script>
