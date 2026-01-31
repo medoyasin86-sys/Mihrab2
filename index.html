@@ -101,26 +101,27 @@
     let currentUser = null;
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
 
+    // إضافة الأيقونات المميزة لكل عبادة هنا
     const model = {
         fard: [
-            {id:'fajr', n:'الفجر', pts: {m:100, g:30, f:15, q:5}, d: 'م:100|ج:30|ف:15'},
-            {id:'dhuhr', n:'الظهر', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
-            {id:'asr', n:'العصر', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
-            {id:'maghrib', n:'المغرب', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
-            {id:'isha', n:'العشاء', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'}
+            {id:'fajr', n:'🌄 الفجر', pts: {m:100, g:30, f:15, q:5}, d: 'م:100|ج:30|ف:15'},
+            {id:'dhuhr', n:'☀️ الظهر', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
+            {id:'asr', n:'🌤️ العصر', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
+            {id:'maghrib', n:'🌅 المغرب', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
+            {id:'isha', n:'🌃 العشاء', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'}
         ],
         sunan: [
-            {id:'s_fajr', n:'سنة الفجر', p:20}, {id:'s_dhuhr_b', n:'سنة الظهر قبل', p:20},
-            {id:'s_dhuhr_a', n:'سنة الظهر بعد', p:15}, {id:'s_maghrib', n:'سنة المغرب', p:15},
-            {id:'s_isha', n:'سنة العشاء', p:15}, {id:'s_shaf', n:'الشفع', p:15},
-            {id:'s_witr', n:'الوتر', p:20}, {id:'s_qyam', n:'قيام الليل', p:40}
+            {id:'s_fajr', n:'✨ سنة الفجر', p:20}, {id:'s_dhuhr_b', n:'✨ الظهر قبل', p:20},
+            {id:'s_dhuhr_a', n:'✨ الظهر بعد', p:15}, {id:'s_maghrib', n:'✨ سنة المغرب', p:15},
+            {id:'s_isha', n:'✨ سنة العشاء', p:15}, {id:'s_shaf', n:'🕯️ الشفع', p:15},
+            {id:'s_witr', n:'🌌 الوتر', p:20}, {id:'s_qyam', n:'🌙 قيام الليل', p:40}
         ],
         extra: [
-            {id:'azkar_s', n:'أذكار الصباح', p:30, l:'https://alazkar.today/'}, 
-            {id:'azkar_e', n:'أذكار المساء', p:30, l:'https://alazkar.today/'},
-            {id:'azkar_n', n:'أذكار النوم', p:30, l:'https://alazkar.today/'}, 
-            {id:'mulk', n:'سورة الملك', p:30, l:'https://quran.com/67'}, 
-            {id:'quran', n:'الورد القرآني', p:50, l:'https://quran.com'}
+            {id:'azkar_s', n:'☀️ أذكار الصباح', p:30, l:'https://alazkar.today/'}, 
+            {id:'azkar_e', n:'🌙 أذكار المساء', p:30, l:'https://alazkar.today/'},
+            {id:'azkar_n', n:'😴 أذكار النوم', p:30, l:'https://alazkar.today/'}, 
+            {id:'mulk', n:'📖 سورة الملك', p:30, l:'https://quran.com/67'}, 
+            {id:'quran', n:'📖 الورد القرآني', p:50, l:'https://quran.com'}
         ]
     };
 
@@ -156,7 +157,7 @@
         let rem = [];
         let curFard = [...model.fard];
         let curExtra = [...model.extra];
-        if(isFriday) curExtra.push({id:'kahf', n:'سورة الكهف', p:40});
+        if(isFriday) curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40});
 
         curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
         model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
@@ -187,8 +188,8 @@
         let curFard = [...model.fard];
         let curExtra = [...model.extra];
         if(isFriday) { 
-            curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'صلاة الجمعة'} : f);
-            curExtra.push({id:'kahf', n:'سورة الكهف', p:40, l:'https://quran.com/18'});
+            curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f);
+            curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'});
         }
 
         document.getElementById('fard-list').innerHTML = curFard.map(h => {
