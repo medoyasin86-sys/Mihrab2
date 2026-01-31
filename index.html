@@ -16,200 +16,167 @@
             --bg: #fcfaf5; 
             --text: #1a252f; 
             --sunnah: #1b5e20; 
+            --silver: #95a5a6; 
+            --bronze: #a67c52; 
             --card-bg: #ffffff;
-            --border: #eee;
         }
 
-        body.dark-mode {
-            --bg: #121212;
-            --text: #e0e0e0;
-            --card-bg: #1e1e1e;
-            --border: #333;
-            --masjid: #4db6ac;
-            --royal-green: #004d40;
+        /* تنسيقات عامة */
+        body {
+            font-family: 'Amiri', serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
         }
-        
-        body { font-family: 'Amiri', serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; line-height: 1.6; transition: 0.3s; }
-        .container { max-width: 900px; margin: auto; background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 30px; padding: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.08); }
-        
-        .ramadan-bar { background: var(--royal-green); color: #f1d37e; padding: 15px; text-align: center; border-radius: 20px; margin-bottom: 10px; font-weight: bold; border: 1px solid var(--deep-gold); font-size: 1.1rem; }
-        
-        .hadith-ticker { background: var(--card-bg); border: 1px solid #e0d5b0; color: var(--masjid); padding: 8px; border-radius: 12px; margin-bottom: 20px; overflow: hidden; white-space: nowrap; font-size: 0.9rem; font-weight: bold; }
-        
-        .fasting-alert { 
-            background: linear-gradient(90deg, #b8860b, #d4af37, #b8860b); 
-            background-size: 200% auto;
-            color: white; padding: 12px; border-radius: 12px; margin-bottom: 15px; 
-            text-align: center; font-weight: bold; 
-            box-shadow: 0 0 15px rgba(212,175,55,0.6); 
-            display: none; 
-            animation: shine 3s linear infinite;
+
+        .header {
+            text-align: center;
+            background: var(--royal-green);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        @keyframes shine { to { background-position: 200% center; } }
 
-        .prayer-times-box { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .city-card { background: var(--card-bg); border: 1px solid #e0d5b0; border-radius: 15px; padding: 10px; text-align: center; position: relative; }
-        
-        .city-name { font-family: 'Reem Kufi'; color: var(--masjid); font-size: 1rem; margin-bottom: 5px; border-bottom: 1px solid #e0d5b0; padding-bottom: 5px; }
-        .timer-val { font-size: 0.85rem; color: #e65100; font-weight: bold; display: block; margin: 5px 0; }
-        .mini-imsakiya { font-size: 0.65rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; color: var(--text); margin-top: 5px; }
-        .imsak-item { background: var(--card-bg); padding: 2px; border-radius: 4px; border: 1px solid var(--border); }
+        /* تنسيق الصناديق والمحتوى */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
 
-        .user-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        .comp-card { background: var(--card-bg); border: 1px solid var(--border); padding: 10px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
-        .comp-card.active { border: 2px solid var(--deep-gold); background: rgba(212, 175, 55, 0.1); }
+        /* نظام الدردشة */
+        #chat-box {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
 
-        .task-card { background: var(--card-bg); border-radius: 20px; padding: 15px; margin-bottom: 15px; border-right: 6px solid var(--masjid); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
-        
-        .points-tag { font-size: 0.7rem; background: var(--gold-gradient); color: var(--royal-green); padding: 2px 6px; border-radius: 6px; font-weight: bold; }
-        
-        .theme-toggle { position: fixed; top: 20px; left: 20px; width: 40px; height: 40px; background: var(--gold-gradient); border: none; border-radius: 50%; cursor: pointer; z-index: 1000; font-size: 1.2rem; }
+        .msg {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 15px;
+            background: #e1f5fe;
+            max-width: 80%;
+        }
+
+        .msg-info {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        /* أدوات التحكم */
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        input[type="text"], input[type="date"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            flex-grow: 1;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: var(--masjid);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: var(--royal-green);
+        }
+
     </style>
 </head>
 <body>
 
-<button class="theme-toggle" onclick="toggleTheme()">🌓</button>
-
-<div class="container">
-    <div id="ramadan-countdown" class="ramadan-bar">⏳ جاري حساب موعد رمضان...</div>
-    
-    <div id="fasting-ticker" class="fasting-alert">
-        <marquee>🌙 غداً صيام تطوع.. "من صام يوماً في سبيل الله باعد الله وجهه عن النار سبعين خريفاً"</marquee>
+    <div class="header">
+        <h1>✨ نلتقي على طاعة الله 2026 ✨</h1>
+        <div id="ramadan-countdown">جاري حساب المتبقي على رمضان...</div>
     </div>
 
-    <div class="hadith-ticker">
-        <marquee>📖 حديث اليوم: "تَسَحَّرُوا فَإِنَّ فِي السُّحُورِ بَرَكَةً" - متفق عليه</marquee>
+    <div class="card">
+        <h3>📅 التاريخ والوقت</h3>
+        <input type="date" id="main-date">
+        <div id="salalah-timer" style="margin-top: 10px; font-weight: bold;"></div>
     </div>
 
-    <div class="prayer-times-box">
-        <div class="city-card">
-            <div class="city-name">📍 صلالة</div>
-            <span id="salalah-timer" class="timer-val">00:00:00</span>
-            <div id="salalah-imsak" class="mini-imsakiya"></div>
+    <div class="card">
+        <h3>📖 حديث اليوم</h3>
+        <p id="daily-hadith">"الدال على الخير كفاعله"</p>
+    </div>
+
+    <div class="card">
+        <h3>💬 مجلس العائلة (الدردشة)</h3>
+        <div id="chat-box"></div>
+        <div class="controls">
+            <input type="text" id="chat-user" placeholder="الاسم" style="width: 30%;">
+            <input type="text" id="chat-input" placeholder="اكتب رسالتك هنا...">
+            <button onclick="sendMsg()">إرسال</button>
         </div>
-        <div class="city-card">
-            <div class="city-name">📍 كفر الشيخ</div>
-            <span id="kafr-timer" class="timer-val">00:00:00</span>
-            <div id="kafr-imsak" class="mini-imsakiya"></div>
-        </div>
-    </div>
-
-    <div style="text-align:center; margin-bottom:20px;">
-        <div style="background: var(--gold-gradient); padding: 10px; border-radius: 15px; color: var(--royal-green); font-weight: bold; display: inline-block;">
-            📅 <span id="hijri-date">12 شعبان 1447هـ</span>
-        </div>
-        <br>
-        <input type="date" id="main-date" onchange="sync()" style="margin-top:10px; padding:5px; border-radius:10px; border:1px solid var(--deep-gold);">
-    </div>
-
-    <div id="user-grid" class="user-grid">
-        <div class="comp-card" onclick="selectUser('محمد')">محمد</div>
-        <div class="comp-card" onclick="selectUser('شيماء')">شيماء</div>
-        <div class="comp-card" onclick="selectUser('أحمد')">أحمد</div>
-        <div class="comp-card" onclick="selectUser('ياسين')">ياسين</div>
-    </div>
-
-    <div id="app-body">
-        <div id="fasting-section" class="task-card" style="border-right-color: #d4af37;">
-            <h3 style="color:#b8860b; margin:0 0 10px 0;">🌙 صيام التطوع</h3>
-            <div class="row">
-                <span>صيام اليوم <span class="points-tag">150ن</span></span>
-                <input type="checkbox" id="fast-check" onchange="saveTask('fasting', 150, this.checked)">
-            </div>
-        </div>
-
-        <div class="task-card">
-            <h3 style="color:var(--masjid); margin:0 0 10px 0;">🕋 الفروض والسنن</h3>
-            <div id="task-list">
-                </div>
+        <div style="margin-top: 10px;">
+            <button onclick="addEmoji('😊')">😊</button>
+            <button onclick="addEmoji('❤️')">❤️</button>
+            <button onclick="addEmoji('🙌')">🙌</button>
         </div>
     </div>
-</div>
 
-<script>
-    // تهيئة البيانات
-    const timetable = {
-        salalah: { fajr: "05:12", dhuhr: "12:35", asr: "15:52", maghrib: "18:18", isha: "19:30", offset: 4 },
-        kafr: { fajr: "05:18", dhuhr: "12:08", asr: "15:12", maghrib: "17:42", isha: "19:08", offset: 2 }
-    };
+    <script>
+        // تهيئة Firebase (يجب وضع إعداداتك هنا لتعمل الدردشة)
+        const firebaseConfig = {
+            // apiKey: "YOUR_API_KEY",
+            // databaseURL: "YOUR_DATABASE_URL",
+        };
+        // firebase.initializeApp(firebaseConfig);
+        // const db = firebase.database();
 
-    const tasks = [
-        {id: 'fajr', n: 'صلاة الفجر', p: 50},
-        {id: 'duha', n: 'صلاة الضحى', p: 30},
-        {id: 'quran', n: 'ورد القرآن', p: 100},
-        {id: 'azkar', n: 'الأذكار', p: 40}
-    ];
-
-    function init() {
-        const today = new Date();
-        document.getElementById('main-date').valueAsDate = today;
-        updateTimers();
-        setInterval(updateTimers, 1000);
-        renderTasks();
-        sync();
-    }
-
-    function sync() {
-        const d = new Date(document.getElementById('main-date').value);
-        // حساب رمضان 2026 (تقريباً 18 فبراير)
-        const ramadan = new Date('2026-02-18');
-        const diff = Math.ceil((ramadan - d) / (1000 * 60 * 60 * 24));
-        
-        let msg = diff > 0 ? `⏳ متبقي على رمضان ${diff} يوم` : "🌙 مبارك عليكم الشهر";
-        document.getElementById('ramadan-countdown').innerText = msg;
-
-        // إظهار قسم الصيام إذا كان (اثنين، خميس، أو أيام بيض 13,14,15)
-        // اليوم 12 شعبان، غداً تبدأ الأيام البيض
-        const day = d.getDate();
-        const isWhiteDays = (day >= 31 || day <= 2); // تكييف حسب التقويم الميلادي ليناير/فبراير 2026
-        document.getElementById('fasting-section').style.display = "block"; 
-    }
-
-    function updateTimers() {
-        ['salalah', 'kafr'].forEach(city => {
-            const data = timetable[city];
-            const now = new Date();
-            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const cityTime = new Date(utc + (3600000 * data.offset));
+        function sendMsg() {
+            const name = document.getElementById('chat-user').value || 'زائر';
+            const txt = document.getElementById('chat-input').value;
+            if (!txt) return;
             
-            document.getElementById(`${city}-timer`).innerText = cityTime.toLocaleTimeString('ar-EG');
+            // في حال وجود Firebase مفعل:
+            // db.ref('osraty_chat').push({ user: name, msg: txt, time: new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) });
             
-            let html = '';
-            for(let p in data) {
-                if(p !== 'offset') html += `<div class="imsak-item"><b>${p}</b><br>${data[p]}</div>`;
-            }
-            document.getElementById(`${city}-imsak`).innerHTML = html;
-        });
-    }
+            // عرض تجريبي في حال عدم ربط القاعدة:
+            const box = document.getElementById('chat-box');
+            const time = new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+            box.innerHTML += `<div class="msg"><b>${name}</b> [${time}]: <br>${txt}</div>`;
+            document.getElementById('chat-input').value = '';
+            box.scrollTop = box.scrollHeight;
+        }
 
-    function renderTasks() {
-        const container = document.getElementById('task-list');
-        container.innerHTML = tasks.map(t => `
-            <div class="row">
-                <span>${t.n} <span class="points-tag">${t.p}ن</span></span>
-                <input type="checkbox" onchange="saveTask('${t.id}', ${t.p}, this.checked)">
-            </div>
-        `).join('');
-    }
+        function addEmoji(emoji) { 
+            document.getElementById('chat-input').value += emoji; 
+        }
 
-    function selectUser(name) {
-        document.querySelectorAll('.comp-card').forEach(c => c.classList.remove('active'));
-        event.target.classList.add('active');
-        alert("أهلاً يا " + name + ".. تقبل الله طاعتك");
-    }
+        function init() {
+            // ضبط تاريخ اليوم
+            document.getElementById('main-date').value = new Date().toISOString().split('T')[0];
+            
+            // حساب العداد التنازلي لرمضان (18 فبراير 2026 تقريباً)
+            const diffR = new Date("2026-02-18") - new Date();
+            const days = Math.max(0, Math.floor(diffR/(1000*60*60*24)));
+            document.getElementById('ramadan-countdown').innerText = ` ⏳ متبقي على نفحات رمضان: ${days} يوم`;
+        }
 
-    function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-    }
-
-    function saveTask(id, points, isDone) {
-        console.log(`Saved: ${id} - ${points} - ${isDone}`);
-        // هنا يتم الربط مع Firebase مستقبلاً
-    }
-
-    window.onload = init;
-</script>
-
+        window.onload = init;
+    </script>
 </body>
 </html>
