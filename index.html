@@ -19,6 +19,26 @@
         .next-prayer-banner { background: rgba(255, 255, 255, 0.1); margin-top: 10px; padding: 10px; border-radius: 10px; font-size: 0.9rem; border: 1px solid var(--gold-light); line-height: 1.6; }
         .timer-span { color: var(--gold-light); font-family: sans-serif; font-weight: bold; }
 
+        /* تنبيه الاستعداد للصلاة المضيء */
+        #prayer-wudu-alert {
+            display: none;
+            background: linear-gradient(135deg, #fff9e6, #fffde7);
+            border: 2px solid var(--gold);
+            color: #856404;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(197, 160, 89, 0.4);
+            animation: lightPulse 2s infinite;
+        }
+        @keyframes lightPulse {
+            0% { box-shadow: 0 0 5px rgba(197, 160, 89, 0.4); transform: scale(1); }
+            50% { box-shadow: 0 0 20px rgba(197, 160, 89, 0.8); transform: scale(1.01); }
+            100% { box-shadow: 0 0 5px rgba(197, 160, 89, 0.4); transform: scale(1); }
+        }
+
         .hijri-ramadan-bar { background: var(--gold); color: #1a4d2e; margin-top: 10px; border-radius: 10px; padding: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; font-size: 1rem; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .ramadan-timer { color: #fff; background: var(--primary); padding: 4px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.9rem; margin-top: 5px; direction: ltr; }
         
@@ -47,7 +67,6 @@
         .opt-btn { font-size: 0.7rem; padding: 6px 2px; border-radius: 6px; border: 1px solid var(--gold); cursor: pointer; flex: 1; margin: 0 1px; }
         .opt-btn.selected { background: var(--gold); color: white; }
         
-        /* تحديثات الدردشة الجديدة */
         .chat-section { background: white; border: 2px solid var(--primary); border-radius: 15px; margin-top: 20px; height: 350px; display: flex; flex-direction: column; position: relative; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
         .chat-msg { padding: 8px; border-radius: 10px; max-width: 80%; font-size: 0.85rem; position: relative; }
@@ -57,7 +76,6 @@
         .chat-tools { display: flex; gap: 8px; align-items: center; }
         .tool-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--primary); padding: 0; display: flex; align-items: center; }
         
-        /* نافذة الإيموجي */
         #emoji-picker { position: absolute; bottom: 65px; left: 10px; background: white; border: 2px solid var(--gold); border-radius: 10px; width: 250px; height: 200px; display: none; flex-direction: column; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .emoji-tabs { display: flex; background: #f0f0f0; padding: 5px; gap: 5px; border-bottom: 1px solid #ddd; }
         .emoji-tab { cursor: pointer; padding: 2px 5px; }
@@ -82,6 +100,11 @@
         </table>
 
         <div id="next-prayer-info" class="next-prayer-banner">حساب المواعيد...</div>
+
+        <div id="prayer-wudu-alert">
+            🌊 حان وقت الاستعداد! <br> 
+            <span id="alert-msg"></span>، هيا للوضوء لتدرك الصف الأول.
+        </div>
 
         <div class="hijri-ramadan-bar">
             <div id="ramadan-countdown">🌙 متبقي على رمضان: <span class="ramadan-timer" id="timer-vals">...</span></div>
@@ -161,7 +184,6 @@
         ]
     };
 
-    // --- وظائف الإيموجي والمرفقات ---
     const emojiData = {
         "وجوه": ["😊", "😂", "😇", "😍", "🤩", "😎", "🤔", "😴", "🤲", "🙌", "👏", "👍"],
         "قلوب": ["❤️", "🧡", "💛", "💚", "💙", "💜", "🤎", "🖤", "🤍", "✨", "🌟", "🔥"],
@@ -170,7 +192,6 @@
 
     function initEmojis() {
         const tabs = document.getElementById('emoji-tabs');
-        const list = document.getElementById('emoji-list');
         Object.keys(emojiData).forEach((category, index) => {
             const span = document.createElement('span');
             span.className = 'emoji-tab';
@@ -199,12 +220,10 @@
 
     function handleFile(input) {
         if(input.files && input.files[0]) {
-            alert("تم اختيار ملف: " + input.files[0].name + "\n(سيتم إرساله كاسم في الرسالة حالياً لعدم وجود Storage)");
+            alert("تم اختيار ملف: " + input.files[0].name);
             document.getElementById('chat-input').value += ` [ملف: ${input.files[0].name}] `;
         }
     }
-
-    // --- بقية وظائف النظام الأصلية ---
 
     function format12h(timeStr) {
         if(!timeStr) return "";
@@ -238,11 +257,7 @@
         if (hijriTomorrow) {
             const isTomorrowFasting = isFastingDay(tomorrow.getDay(), hijriTomorrow.day);
             const isNiyaTime = now.getHours() >= 20 || (now.getHours() < 4);
-            if (isTomorrowFasting && isNiyaTime) {
-                document.getElementById('niya-reminder').style.display = 'block';
-            } else {
-                document.getElementById('niya-reminder').style.display = 'none';
-            }
+            document.getElementById('niya-reminder').style.display = (isTomorrowFasting && isNiyaTime) ? 'block' : 'none';
         }
 
         setInterval(() => {
@@ -274,6 +289,9 @@
 
     function updateNextPrayerCountdown(now) {
         let info = "";
+        let showAlert = false;
+        let alertPrayerName = "";
+
         for (let city in prayersCache) {
             const timings = prayersCache[city];
             const prayerNames = {Fajr:"الفجر", Dhuhr:"الظهر", Asr:"العصر", Maghrib:"المغرب", Isha:"العشاء"};
@@ -296,11 +314,26 @@
                 const m = Math.floor((nextP.time % 3600000) / 60000);
                 const s = Math.floor((nextP.time % 60000) / 1000);
                 info += `<div>${cityName}: صلاة <b style="color:var(--gold-light)">${nextP.name}</b> خلال <span class="timer-span">${h}س ${m}د ${s}ث</span></div>`;
+                
+                // تفعيل التنبيه إذا كان الوقت المتبقي أقل من أو يساوي 10 دقائق
+                if (h === 0 && m < 10) {
+                    showAlert = true;
+                    alertPrayerName = nextP.name;
+                }
             } else {
                 info += `<div>${cityName}: بانتظار فجر الغد 🌅</div>`;
             }
         }
         document.getElementById('next-prayer-info').innerHTML = info;
+        
+        // إظهار أو إخفاء مربع التنبيه المضيء
+        const alertBox = document.getElementById('prayer-wudu-alert');
+        if(showAlert) {
+            alertBox.style.display = 'block';
+            document.getElementById('alert-msg').innerText = `اقترب موعد أذان ${alertPrayerName}`;
+        } else {
+            alertBox.style.display = 'none';
+        }
     }
 
     async function getRemaining(userData, isFriday, selectedDate) {
@@ -313,7 +346,6 @@
         if(hijri && isFastingDay(new Date(selectedDate).getDay(), hijri.day)) {
             if(!userData['fasting']) rem.push("الصيام 🌙");
         }
-
         curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
         model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
         curExtra.forEach(e => { if(!userData[e.id]?.done) rem.push(e.n); });
