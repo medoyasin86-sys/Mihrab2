@@ -16,9 +16,8 @@
         .prayer-times-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; }
         .prayer-times-table th, .prayer-times-table td { padding: 5px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
 
-        /* شريط التاريخ الهجري وعداد رمضان */
-        .hijri-ramadan-bar { background: var(--gold); color: #1a4d2e; margin-top: 10px; border-radius: 10px; padding: 10px; font-weight: bold; display: flex; justify-content: space-around; align-items: center; font-size: 0.95rem; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-wrap: wrap; gap: 10px; }
-        .ramadan-timer { color: #fff; background: var(--primary); padding: 3px 12px; border-radius: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 0.85rem; direction: ltr; display: inline-block; }
+        .hijri-ramadan-bar { background: var(--gold); color: #1a4d2e; margin-top: 10px; border-radius: 10px; padding: 10px; font-weight: bold; display: flex; justify-content: center; align-items: center; font-size: 1rem; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .ramadan-timer { color: #fff; background: var(--primary); padding: 4px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.9rem; margin-right: 10px; direction: ltr; }
         
         .podium-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 130px; gap: 5px; padding-bottom: 25px; }
@@ -37,6 +36,7 @@
         .section-card { background: white; border: 1px solid var(--gold); border-radius: 15px; margin-top: 15px; overflow: hidden; }
         .section-title { background: var(--primary); color: white; padding: 10px; margin: 0; font-size: 1rem; }
         .habit-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px dashed var(--gold-light); }
+        .habit-link { color: var(--primary); text-decoration: none; border-bottom: 1px solid var(--gold); }
         .pts-info { font-size: 0.65rem; color: #666; display: block; }
         .opt-btn { font-size: 0.7rem; padding: 6px 2px; border-radius: 6px; border: 1px solid var(--gold); cursor: pointer; flex: 1; margin: 0 1px; }
         .opt-btn.selected { background: var(--gold); color: white; }
@@ -64,7 +64,6 @@
         </table>
 
         <div class="hijri-ramadan-bar">
-            <div id="hijri-date">📅 جاري حساب التاريخ...</div>
             <div id="ramadan-countdown">🌙 متبقي على رمضان: <span class="ramadan-timer" id="timer-vals">...</span></div>
         </div>
     </div>
@@ -117,39 +116,27 @@
             {id:'s_witr', n:'الوتر', p:20}, {id:'s_qyam', n:'قيام الليل', p:40}
         ],
         extra: [
-            {id:'azkar_s', n:'أذكار الصباح', p:30}, {id:'azkar_e', n:'أذكار المساء', p:30},
-            {id:'azkar_n', n:'أذكار النوم', p:30}, {id:'mulk', n:'سورة الملك', p:30}, {id:'quran', n:'الورد القرآني', p:50}
+            {id:'azkar_s', n:'أذكار الصباح', p:30, l:'https://www.islamcloud.com/azkar/1'}, 
+            {id:'azkar_e', n:'أذكار المساء', p:30, l:'https://www.islamcloud.com/azkar/2'},
+            {id:'azkar_n', n:'أذكار النوم', p:30, l:'https://www.islamcloud.com/azkar/3'}, 
+            {id:'mulk', n:'سورة الملك', p:30, l:'https://quran.com/67'}, 
+            {id:'quran', n:'الورد القرآني', p:50, l:'https://quran.com'}
         ]
     };
 
-    // وظيفة التاريخ الهجري
-    function updateHijriDate() {
-        try {
-            const options = { calendar: 'islamic-uma', day: 'numeric', month: 'long', year: 'numeric' };
-            const formatter = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', options);
-            document.getElementById('hijri-date').innerText = "📅 " + formatter.format(new Date());
-        } catch (e) {
-            document.getElementById('hijri-date').innerText = "📅 " + new Date().toLocaleDateString('ar-SA');
-        }
-    }
-
-    // عداد رمضان التنازلي (رمضان 2026 يبدأ تقريباً 18 فبراير)
     function updateRamadanCountdown() {
         const ramadanDate = new Date('February 18, 2026 00:00:00').getTime();
         const countdownFunc = () => {
             const now = new Date().getTime();
             const diff = ramadanDate - now;
-            
             if (diff < 0) {
                 document.getElementById('ramadan-countdown').innerHTML = "🌙 <b>رمضان كريم!</b>";
                 return;
             }
-            
             const d = Math.floor(diff / (1000 * 60 * 60 * 24));
             const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const s = Math.floor((diff % (1000 * 60)) / 1000);
-            
             document.getElementById('timer-vals').innerText = `${d}ي ${h}س ${m}د ${s}ث`;
         };
         countdownFunc();
@@ -201,7 +188,7 @@
         let curExtra = [...model.extra];
         if(isFriday) { 
             curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'صلاة الجمعة'} : f);
-            curExtra.push({id:'kahf', n:'سورة الكهف', p:40});
+            curExtra.push({id:'kahf', n:'سورة الكهف', p:40, l:'https://quran.com/18'});
         }
 
         document.getElementById('fard-list').innerHTML = curFard.map(h => {
@@ -213,7 +200,8 @@
         const drawCheck = (list, tid) => {
             document.getElementById(tid).innerHTML = list.map(h => {
                 const done = userData[h.id]?.done;
-                return `<div class="habit-row"><span>${h.n} <small>(+${h.p}ن)</small></span>
+                const label = h.l ? `<a href="${h.l}" target="_blank" class="habit-link">${h.n}</a>` : h.n;
+                return `<div class="habit-row"><span>${label} <small>(+${h.p}ن)</small></span>
                 <input type="checkbox" ${done?'checked':''} onchange="save('${h.id}',{done:this.checked, p:this.checked?${h.p}:0})" style="transform:scale(1.5); cursor:pointer;"></div>`;
             }).join('');
         };
@@ -285,7 +273,6 @@
         document.getElementById('date-picker').value = new Date().toISOString().split('T')[0];
         fetchCityPrayers('Salalah', 'Oman', 'row-salalah');
         fetchCityPrayers('Kafr El Sheikh', 'Egypt', 'row-kafr');
-        updateHijriDate();
         updateRamadanCountdown();
         document.getElementById('date-picker').onchange = sync; 
         sync();
