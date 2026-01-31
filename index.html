@@ -17,11 +17,12 @@
         .prayer-times-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 10px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 10px; }
         
         .podium-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-        .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 100px; gap: 5px; border-bottom: 2px solid var(--gold); padding-bottom: 5px; }
-        .podium-step { width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: white; border-radius: 5px 5px 0 0; position: relative; font-size: 0.8rem; }
-        .p-1 { height: 80px; background: linear-gradient(to top, #b8860b, #f1c40f); }
-        .p-2 { height: 60px; background: #95a5a6; }
-        .p-3 { height: 40px; background: #cd7f32; }
+        .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 120px; gap: 5px; border-bottom: 2px solid var(--gold); padding-bottom: 5px; }
+        .podium-step { width: 45px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: white; border-radius: 5px 5px 0 0; position: relative; font-size: 0.7rem; transition: 0.5s; }
+        .p-1 { height: 90px; background: linear-gradient(to top, #b8860b, #f1c40f); z-index: 3; }
+        .p-2 { height: 70px; background: #95a5a6; z-index: 2; }
+        .p-3 { height: 50px; background: #cd7f32; z-index: 1; }
+        .p-4 { height: 35px; background: #7f8c8d; z-index: 0; }
         .p-name { position: absolute; bottom: -22px; color: var(--text); font-weight: bold; font-size: 0.75rem; white-space: nowrap; }
 
         .user-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
@@ -64,12 +65,12 @@
     <div id="cards-ui" class="user-cards"></div>
 
     <div id="user-ui" style="display:none;">
+        <h2 id="current-user-title" style="text-align:center; color:var(--primary);"></h2>
+
         <div class="remaining-box">
             <h3 class="remaining-title">📝 العبادات المتبقية لك اليوم:</h3>
-            <ul id="remaining-list" style="margin:0; padding-right:20px; color: #d35400; font-weight: bold;"></ul>
+            <ul id="remaining-list" style="margin:0; padding-right:20px; color: #d35400; font-weight: bold; list-style-type: '⏳ ';"></ul>
         </div>
-
-        <h2 id="current-user-title" style="text-align:center; color:var(--primary);"></h2>
         
         <div class="section-card">
             <h3 class="section-title">🕋 الصلوات الخمس</h3>
@@ -116,11 +117,11 @@
 
     const model = {
         fard: [
-            {id:'fajr', n:'☀️ الفجر', pts: {m:100, g:30, f:15, q:5}},
-            {id:'dhuhr', n:'☀️ الظهر', pts: {m:50, g:30, f:15, q:5}},
-            {id:'asr', n:'⛅ العصر', pts: {m:50, g:30, f:15, q:5}},
-            {id:'maghrib', n:'🌙 المغرب', pts: {m:50, g:30, f:15, q:5}},
-            {id:'isha', n:'🌑 العشاء', pts: {m:50, g:30, f:15, q:5}}
+            {id:'fajr', n:'☀️ صلاة الفجر', pts: {m:100, g:30, f:15, q:5}},
+            {id:'dhuhr', n:'☀️ صلاة الظهر', pts: {m:50, g:30, f:15, q:5}},
+            {id:'asr', n:'⛅ صلاة العصر', pts: {m:50, g:30, f:15, q:5}},
+            {id:'maghrib', n:'🌙 صلاة المغرب', pts: {m:50, g:30, f:15, q:5}},
+            {id:'isha', n:'🌑 صلاة العشاء', pts: {m:50, g:30, f:15, q:5}}
         ],
         sunan: [
             {id:'s_fajr', n:'🌅 سنة الفجر', p:20},
@@ -135,6 +136,7 @@
         extra: [
             {id:'azkar_s', n:'📖 أذكار الصباح', p:30, link:'https://alazkar.today/'},
             {id:'azkar_e', n:'📖 أذكار المساء', p:30, link:'https://alazkar.today/'},
+            {id:'azkar_n', n:'🛌 أذكار النوم', p:30, link:'https://www.islamweb.net/ar/fatwa/4544/'},
             {id:'mulk', n:'👑 سورة الملك', p:30, link:'https://quran.com/67'},
             {id:'quran', n:'📜 الورد القرآني', p:50}
         ]
@@ -181,13 +183,11 @@
     }
 
     function render(allData) {
-        // التحقق من يوم الجمعة
         const selectedDate = new Date(document.getElementById('date-picker').value);
         const isFriday = selectedDate.getDay() === 5;
 
         let stats = users.map(u => {
             let score = 0; let uData = allData[u] || {};
-            
             let currentFard = [...model.fard];
             let currentExtra = [...model.extra];
 
@@ -236,8 +236,9 @@
 
     function drawPodium(el, data) {
         const sorted = [...data].sort((a,b) => b.s - a.s);
-        const order = [1, 0, 2]; 
-        const steps = ['p-2', 'p-1', 'p-3'];
+        const order = [1, 0, 2, 3]; // ترتيب الأماكن: الثاني، الأول، الثالث، الرابع
+        const steps = ['p-2', 'p-1', 'p-3', 'p-4'];
+        
         document.getElementById(el).innerHTML = order.map((idx, i) => {
             const u = sorted[idx] || {n: '-', s: 0};
             return `<div class="podium-step ${steps[i]}"><small>${u.s}</small><div class="p-name">${u.n}</div></div>`;
