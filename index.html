@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1a4d2e; --gold: #c5a059; --gold-light: #e6cc92; --bg: #f9f6f0; --card-bg: #ffffff; --text: #1a4d2e; }
+        :root { --primary: #1a4d2e; --gold: #c5a059; --gold-light: #e6cc92; --bg: #f9f6f0; --card-bg: #ffffff; --text: #1a4d2e; --accent: #d35400; }
         body { font-family: 'Amiri', serif; background-color: var(--bg); margin: 0; padding: 10px; color: var(--text); }
         .main-container { max-width: 900px; margin: auto; background: var(--card-bg); border: 3px double var(--gold); border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         
@@ -19,9 +19,13 @@
         .next-prayer-banner { background: rgba(255, 255, 255, 0.1); margin-top: 10px; padding: 10px; border-radius: 10px; font-size: 0.9rem; border: 1px solid var(--gold-light); line-height: 1.6; }
         .timer-span { color: var(--gold-light); font-family: sans-serif; font-weight: bold; }
 
-        .hijri-ramadan-bar { background: var(--gold); color: #1a4d2e; margin-top: 10px; border-radius: 10px; padding: 10px; font-weight: bold; display: flex; justify-content: center; align-items: center; font-size: 1rem; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .ramadan-timer { color: #fff; background: var(--primary); padding: 4px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.9rem; margin-right: 10px; direction: ltr; }
+        .hijri-ramadan-bar { background: var(--gold); color: #1a4d2e; margin-top: 10px; border-radius: 10px; padding: 10px; font-weight: bold; display: flex; flex-direction: column; align-items: center; font-size: 1rem; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .ramadan-timer { color: #fff; background: var(--primary); padding: 4px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.9rem; margin-top: 5px; direction: ltr; }
         
+        /* تنبيه النية */
+        .niya-alert { background: #fff3cd; color: #856404; padding: 10px; border-radius: 10px; margin-top: 10px; border: 1px solid #ffeeba; font-weight: bold; animation: pulse 2s infinite; display: none; text-align: center; width: 100%; box-sizing: border-box; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
         .podium-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 130px; gap: 5px; padding-bottom: 25px; }
         .podium-step { width: 45px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: white; border-radius: 8px; position: relative; font-size: 0.75rem; transition: 0.5s; }
@@ -70,6 +74,7 @@
 
         <div class="hijri-ramadan-bar">
             <div id="ramadan-countdown">🌙 متبقي على رمضان: <span class="ramadan-timer" id="timer-vals">...</span></div>
+            <div id="niya-reminder" class="niya-alert">💡 تنبيه: غداً صيام تطوع، لا تنسَ عقد النية وسحوراً هنيئاً!</div>
         </div>
     </div>
 
@@ -82,6 +87,11 @@
 
     <div id="user-ui" style="display:none;">
         <h3 id="current-user-title" style="text-align:center; color:var(--primary); background: var(--gold-light); padding: 5px; border-radius: 10px;"></h3>
+        <div id="fasting-section" class="section-card" style="display:none; border: 2px solid var(--accent);">
+            <h3 class="section-title" style="background: var(--accent);">🌟 قسم الاجتهاد (صيام التطوع)</h3>
+            <div id="fasting-list"></div>
+        </div>
+        
         <div class="section-card"><h3 class="section-title">🕋 الفرائض (المسجد | جماعة | فردي)</h3><div id="fard-list"></div></div>
         <div class="section-card"><h3 class="section-title">🌱 السنن والرواتب</h3><div id="sunan-list"></div></div>
         <div class="section-card"><h3 class="section-title">📿 الأذكار والورد</h3><div id="extra-list"></div></div>
@@ -138,13 +148,42 @@
         return `${h}:${m} ${suffix}`;
     }
 
-    function updateCountdowns() {
+    async function getHijriData(date) {
+        try {
+            const res = await fetch(`https://api.aladhan.com/v1/gToH/${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`);
+            const data = await res.json();
+            return data.data.hijri;
+        } catch(e) { return null; }
+    }
+
+    function isFastingDay(dayOfWeek, hijriDay) {
+        const whiteDays = [13, 14, 15];
+        return (dayOfWeek === 1 || dayOfWeek === 4 || whiteDays.includes(parseInt(hijriDay)));
+    }
+
+    async function updateCountdowns() {
         const ramadanDate = new Date('February 18, 2026 00:00:00').getTime();
-        setInterval(() => {
-            const now = new Date();
+        
+        // التحديث الذكي لتنبيه النية والاجتهاد
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(now.getDate() + 1);
+        
+        const hijriTomorrow = await getHijriData(tomorrow);
+        if (hijriTomorrow) {
+            const isTomorrowFasting = isFastingDay(tomorrow.getDay(), hijriTomorrow.day);
+            const isNiyaTime = now.getHours() >= 20 || (now.getHours() < 4); // من 8 مساءً حتى الفجر تقريباً
             
-            // Ramadan Countdown
-            const diffRamadan = ramadanDate - now.getTime();
+            if (isTomorrowFasting && isNiyaTime) {
+                document.getElementById('niya-reminder').style.display = 'block';
+            } else {
+                document.getElementById('niya-reminder').style.display = 'none';
+            }
+        }
+
+        setInterval(() => {
+            const currentTime = new Date();
+            const diffRamadan = ramadanDate - currentTime.getTime();
             if (diffRamadan < 0) {
                 document.getElementById('ramadan-countdown').innerHTML = "🌙 <b>رمضان كريم!</b>";
             } else {
@@ -154,9 +193,7 @@
                 const s = Math.floor((diffRamadan % (1000 * 60)) / 1000);
                 document.getElementById('timer-vals').innerText = `${d}ي ${h}س ${m}د ${s}ث`;
             }
-
-            // Next Prayer Countdown
-            updateNextPrayerCountdown(now);
+            updateNextPrayerCountdown(currentTime);
         }, 1000);
     }
 
@@ -183,14 +220,12 @@
                 let [h, m] = timings[p].split(':');
                 let pDate = new Date(now);
                 pDate.setHours(parseInt(h), parseInt(m), 0, 0);
-                
                 let diff = pDate - now;
                 if (diff > 0 && diff < minDiff) {
                     minDiff = diff;
                     nextP = { name: prayerNames[p], time: minDiff };
                 }
             }
-
             const cityName = city === 'Salalah' ? 'صلالة' : 'كفر الشيخ';
             if (nextP) {
                 const h = Math.floor(nextP.time / 3600000);
@@ -204,35 +239,59 @@
         document.getElementById('next-prayer-info').innerHTML = info;
     }
 
-    function getRemaining(userData, isFriday) {
+    async function getRemaining(userData, isFriday, selectedDate) {
         let rem = [];
         let curFard = [...model.fard];
         let curExtra = [...model.extra];
         if(isFriday) curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40});
+        
+        const hijri = await getHijriData(new Date(selectedDate));
+        if(hijri && isFastingDay(new Date(selectedDate).getDay(), hijri.day)) {
+            if(!userData['fasting']) rem.push("الصيام 🌙");
+        }
+
         curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
         model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
         curExtra.forEach(e => { if(!userData[e.id]?.done) rem.push(e.n); });
-        return rem.length ? rem.join('، ') : "✅ اكتملت الطاعات";
+        return rem.length ? rem.join('، ') : "✅ اكتملت الطاعة";
     }
 
-    function render(allData) {
-        const isFriday = new Date(document.getElementById('date-picker').value).getDay() === 5;
-        let stats = users.map(u => {
+    async function render(allData) {
+        const selectedDateStr = document.getElementById('date-picker').value;
+        const selectedDate = new Date(selectedDateStr);
+        const isFriday = selectedDate.getDay() === 5;
+        const hijri = await getHijriData(selectedDate);
+        const fastingDay = hijri ? isFastingDay(selectedDate.getDay(), hijri.day) : false;
+
+        let stats = await Promise.all(users.map(async u => {
             let s = 0; let uData = allData[u] || {};
             [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
             if(isFriday && uData['kahf']) s += 40;
-            return { n: u, s: s, rem: getRemaining(uData, isFriday) };
-        });
+            if(uData['fasting']) s += 100;
+            return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
+        }));
+
         drawPodium('daily-podium', stats);
         document.getElementById('cards-ui').innerHTML = stats.map(st => `
             <div class="comp-card ${st.n === currentUser ? 'active' : ''}" onclick="selectUser('${st.n}')">
                 <b style="font-size:1.1rem">${st.n}</b> <br> <span style="color:var(--gold)">${st.s} نقطة</span>
                 <div class="user-status">⏳ المتبقي: ${st.rem}</div>
             </div>`).join('');
-        if(currentUser) renderForms(allData[currentUser] || {}, isFriday);
+        
+        if(currentUser) renderForms(allData[currentUser] || {}, isFriday, fastingDay);
     }
 
-    function renderForms(userData, isFriday) {
+    function renderForms(userData, isFriday, fastingDay) {
+        // قسم الصيام
+        const fastSection = document.getElementById('fasting-section');
+        if(fastingDay) {
+            fastSection.style.display = 'block';
+            document.getElementById('fasting-list').innerHTML = `<div class="habit-row">
+                <span>🌙 صيام التطوع (الاثنين/الخميس/البيض) <small>(+100ن)</small></span>
+                <input type="checkbox" ${userData['fasting']?.done?'checked':''} onchange="save('fasting',{done:this.checked, p:this.checked?100:0})" style="transform:scale(1.5);">
+            </div>`;
+        } else { fastSection.style.display = 'none'; }
+
         let curFard = [...model.fard];
         let curExtra = [...model.extra];
         if(isFriday) { 
@@ -244,6 +303,7 @@
             return `<div class="habit-row"><div><b>${h.n}</b><span class="pts-info">${h.d}</span></div>
             <div style="display:flex; gap:2px;">${Object.entries(h.pts).map(([k,v]) => `<button class="opt-btn ${cur===k?'selected':''}" onclick="save('${h.id}',{type:'${k}', p:${v}})">${k=='m'?'مسجد':k=='g'?'جماعة':k=='f'?'فرد':'قضاء'}</button>`).join('')}</div></div>`;
         }).join('');
+        
         const drawCheck = (list, tid) => {
             document.getElementById(tid).innerHTML = list.map(h => {
                 const done = userData[h.id]?.done;
