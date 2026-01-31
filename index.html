@@ -6,7 +6,6 @@
     <title>نلتقي على طاعة الله 2026</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.4/dist/index.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -16,200 +15,351 @@
             --deep-gold: #b8860b;
             --bg: #fcfaf5; 
             --text: #1a252f; 
+            --sunnah: #1b5e20; 
+            --silver: #95a5a6; 
+            --bronze: #a67c52; 
             --card-bg: #ffffff;
             --border: #eee;
         }
 
         body.dark-mode {
-            --bg: #121212; --text: #e0e0e0; --card-bg: #1e1e1e; --border: #333; --masjid: #4db6ac; --royal-green: #004d40;
+            --bg: #121212;
+            --text: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --border: #333;
+            --masjid: #4db6ac;
+            --royal-green: #004d40;
         }
         
-        body { font-family: 'Amiri', serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; transition: 0.3s; }
-        .container { max-width: 900px; margin: auto; background: var(--card-bg); border-radius: 30px; padding: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.08); }
+        body { font-family: 'Amiri', serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; line-height: 1.6; transition: 0.3s; }
+        .container { max-width: 900px; margin: auto; background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 30px; padding: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.08); }
         
-        /* شريط تنبيه الصيام */
-        .fasting-alert-bar { 
-            background: var(--gold-gradient); color: var(--royal-green); padding: 12px; text-align: center; 
-            border-radius: 15px; margin-bottom: 15px; font-weight: bold; animation: pulse-gold 2s infinite; display: none;
-        }
-        @keyframes pulse-gold { 0% {transform: scale(1);} 50% {transform: scale(1.02);} 100% {transform: scale(1);} }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .theme-toggle { cursor: pointer; font-size: 1.5rem; }
 
-        /* الشات المطور */
+        .ramadan-bar { background: var(--royal-green); color: #f1d37e; padding: 15px; text-align: center; border-radius: 20px; margin-bottom: 10px; font-weight: bold; border: 1px solid var(--deep-gold); position: relative; }
+        .date-picker { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: transparent; border: 1px solid #f1d37e; color: #f1d37e; border-radius: 8px; font-size: 0.8rem; padding: 2px; cursor: pointer; }
+
+        .hadith-ticker { background: var(--card-bg); border: 1px solid #e0d5b0; color: var(--masjid); padding: 8px; border-radius: 12px; margin-bottom: 20px; overflow: hidden; white-space: nowrap; font-size: 0.9rem; font-weight: bold; }
+
+        .prayer-times-box { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .city-card { background: var(--card-bg); border: 1px solid #e0d5b0; border-radius: 15px; padding: 10px; text-align: center; }
+        .city-name { font-family: 'Reem Kufi'; color: var(--masjid); font-size: 1rem; margin-bottom: 5px; border-bottom: 1px solid #e0d5b0; padding-bottom: 5px; }
+        .timer-val { font-size: 0.9rem; color: #e65100; font-weight: bold; display: block; margin: 5px 0; }
+
+        .rank-titles { text-align: center; margin: 15px 0 5px; font-family: 'Reem Kufi'; color: var(--masjid); font-size: 1.1rem; }
+        .podium-container { display: flex; justify-content: space-around; align-items: flex-end; margin: 10px 0 20px; background: var(--card-bg); padding: 15px; border-radius: 25px; border: 1px solid var(--border); }
+        .podium-item { display: flex; flex-direction: column; align-items: center; width: 22%; }
+        .podium-rank { width: 100%; text-align: center; color: white; border-radius: 12px 12px 0 0; padding: 8px 0; font-weight: bold; font-size: 0.85rem; }
+        .rank-1 { height: 90px; background: var(--gold-gradient); color: var(--royal-green); }
+        .rank-2 { height: 70px; background: var(--silver); }
+        .rank-3 { height: 55px; background: var(--bronze); }
+        .rank-4 { height: 40px; background: #ecf0f1; color: #7f8c8d; }
+
+        .user-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 25px; }
+        .comp-card { background: var(--card-bg); border: 1px solid var(--border); padding: 15px; border-radius: 20px; text-align: right; cursor: pointer; transition: 0.3s; color: var(--text); }
+        .comp-card.active { border: 2px solid var(--deep-gold); background: rgba(212, 175, 55, 0.1); }
+        
+        .task-card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px; border-right: 8px solid var(--masjid); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
+        
+        .btn-group { display: flex; gap: 4px; }
+        .btn-group button { border: 1px solid var(--border); padding: 6px 4px; border-radius: 10px; cursor: pointer; font-family: 'Amiri'; font-size: 0.75rem; background: var(--card-bg); color: var(--text); min-width: 48px; }
+        .active-m { background: var(--masjid) !important; color: white !important; }
+        .active-h { background: #e65100 !important; color: white !important; }
+
+        /* Chat System */
         .chat-section { background: var(--card-bg); border: 2px solid var(--masjid); border-radius: 25px; padding: 15px; margin-top: 30px; }
-        .chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border); padding: 10px; margin-bottom: 10px; border-radius: 15px; background: rgba(0,0,0,0.02); }
-        .chat-controls { display: flex; gap: 8px; align-items: center; background: var(--border); padding: 8px; border-radius: 15px; }
-        .chat-btn-icon { background: none; border: none; font-size: 1.4rem; cursor: pointer; padding: 5px; }
-        #chat-input { flex: 1; border: none; padding: 8px; border-radius: 10px; outline: none; background: var(--card-bg); color: var(--text); }
-        
-        /* تنبيه الفجر الذهبي */
-        .fajr-crown { color: #d4af37; font-size: 1.2rem; margin-left: 4px; filter: drop-shadow(0 0 2px gold); }
-        .active-fajr-m { 
-            background: #d32f2f !important; color: white !important; 
-            border: 2px solid gold !important; position: relative; box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-        }
+        .chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border); padding: 10px; margin-bottom: 10px; border-radius: 15px; background: rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 14px; border-radius: 18px; max-width: 80%; font-size: 0.88rem; position: relative; }
+        .msg.received { background: #fff; align-self: flex-start; border: 1px solid var(--border); }
+        .msg.sent { background: #dcf8c6; align-self: flex-end; color: #1a252f; }
+        .chat-input-area { display: flex; gap: 8px; }
+        .chat-input-area input { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid var(--border); }
+        .send-btn { background: var(--masjid); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
 
-        /* تنسيقات إضافية */
-        .msg-img { max-width: 150px; border-radius: 10px; margin-top: 5px; display: block; }
-        .btn-group button { min-width: 55px; height: 45px; cursor: pointer; border-radius: 10px; border: 1px solid var(--border); font-family: 'Amiri'; }
-        .active-m { background: var(--masjid); color: white; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="ramadan-countdown" class="fasting-alert-bar" style="display:block; margin-bottom:10px;">⏳ متبقي على رمضان...</div>
-    <div id="fasting-tomorrow-alert" class="fasting-alert-bar">✨ غداً يوم صيام مبارك.. نلتقي على السحور والنية الخالصة!</div>
+    <header>
+        <div class="theme-toggle" onclick="toggleTheme()">🌙</div>
+        <h2 style="font-family: 'Reem Kufi'; margin:0; color:var(--masjid);">عائلة أشرقت</h2>
+        <div style="width:24px;"></div>
+    </header>
 
-    <div style="text-align:center;">
-        <h1 style="font-family:'Reem Kufi'; color: var(--royal-green);">⚜️ نلتقي على طاعة الله 2026</h1>
-        <div id="hijri-date" style="color:var(--deep-gold); font-weight:bold; font-size: 1.2rem;"></div>
-        <input type="date" id="main-date" style="padding:8px; border-radius:12px; margin:10px;">
+    <div class="ramadan-bar">
+        <input type="date" id="main-date" class="date-picker" onchange="sync()">
+        <span>رمضان 1447هـ - نلتقي في الجنة</span>
     </div>
 
-    <div id="app-body">
-        <div class="task-card" style="padding:15px; border-right: 8px solid var(--masjid); background:#f9f9f9; border-radius:15px; margin-bottom:15px;">
-            <h3 style="color:var(--masjid)">🕋 الصلوات المفروضة</h3>
+    <div class="hadith-ticker">
+        <marquee>قال رسول الله ﷺ: "مَنْ صَامَ رَمَضَانَ إِيمَانًا وَاحْتِسَابًا غُفِرَ لَهُ مَا تَقَدَّمَ مِنْ ذَنْبِهِ" | لا تنسوا ورد القرآن اليومي | صلاة الضحى غنيمة</marquee>
+    </div>
+
+    <div class="prayer-times-box">
+        <div class="city-card">
+            <div class="city-name">القاهرة</div>
+            <span class="timer-val" id="timer-cairo">--:--</span>
+            <div style="font-size:0.7rem;">الفجر: 04:30 | المغرب: 18:05</div>
+        </div>
+        <div class="city-card">
+            <div class="city-name">برلين</div>
+            <span class="timer-val" id="timer-berlin">--:--</span>
+            <div style="font-size:0.7rem;">الفجر: 03:50 | المغرب: 18:45</div>
+        </div>
+    </div>
+
+    <div class="rank-titles">🏆 متصدر اليوم / المتصدر السنوي</div>
+    <div class="podium-container" id="podium-daily"></div>
+    <div class="podium-container" id="podium-yearly"></div>
+
+    <div class="user-grid" id="user-selector">
+        <div class="comp-card" onclick="setUser('أحمد')">أحمد 👨‍💼</div>
+        <div class="comp-card" onclick="setUser('إيمان')">إيمان 👩‍🏫</div>
+        <div class="comp-card" onclick="setUser('أبنائي')">أبنائي 🧒</div>
+    </div>
+
+    <div id="tasks-area" class="hidden">
+        <h3 id="current-user-title" style="text-align:center; color:var(--masjid);"></h3>
+        
+        <div class="task-card">
+            <div style="font-weight:bold; color:var(--masjid); margin-bottom:10px;">🕋 الصلوات المفروضة (5 نقاط للفجر، 2 للبقية)</div>
             <div id="fard-list"></div>
         </div>
+
+        <div class="task-card">
+            <div style="font-weight:bold; color:var(--sunnah); margin-bottom:10px;">✨ السنن والنوافل (نقطة لكل ركعة)</div>
+            <div id="sunnah-list"></div>
         </div>
 
+        <div class="task-card">
+            <div style="font-weight:bold; color:#e65100; margin-bottom:10px;">📖 الأذكار والورد (نقاط متغيرة)</div>
+            <div id="adhkar-list"></div>
+        </div>
+    </div>
+
     <div class="chat-section">
-        <h3 style="text-align:center; font-family:'Reem Kufi'; color:var(--masjid);">💬 ملتقى العائلة المطور</h3>
-        <div id="chat-box" class="chat-box"></div>
-        
-        <div class="chat-controls">
-            <select id="chat-user-select" style="padding:5px; border-radius:8px;">
-                <option value="">👤</option>
-                <option value="محمد">محمد</option><option value="شيماء">شيماء</option>
-                <option value="أحمد">أحمد</option><option value="ياسين">ياسين</option>
+        <h4 style="margin:0 0 10px 0; color:var(--masjid);">💬 مجلس العائلة</h4>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="chat-input-area">
+            <select id="chat-user-select" style="padding:5px; border-radius:10px;">
+                <option value="أحمد">أحمد</option>
+                <option value="إيمان">إيمان</option>
+                <option value="أبنائي">أبنائي</option>
             </select>
-            
-            <button class="chat-btn-icon" id="emoji-btn" title="إيموجي">😊</button>
-            <button class="chat-btn-icon" onclick="document.getElementById('file-input').click()" title="إرفاق صورة">📎</button>
-            <input type="file" id="file-input" style="display:none" accept="image/*" onchange="uploadImage(this)">
-            
-            <input type="text" id="chat-input" placeholder="اكتب رسالتك هنا...">
-            <button onclick="sendMsg()" style="background:var(--masjid); color:white; border:none; padding:8px 15px; border-radius:10px; cursor:pointer;">إرسال</button>
+            <input type="text" id="chat-msg" placeholder="اكتب رسالة...">
+            <button class="send-btn" onclick="sendMsg()">إرسال</button>
         </div>
     </div>
 </div>
 
 <script>
-    // تهيئة Firebase (استخدم بياناتك السابقة)
-    const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1", storageBucket: "ebada-656e1.firebasestorage.app", messagingSenderId: "705608653939", appId: "1:705608653939:web:5ab3609a6f7ccc8675de06" };
+    // Firebase Configuration (ضع بياناتك هنا)
+    const firebaseConfig = {
+        databaseURL: "https://osraty-2026-default-rtdb.firebaseio.com"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let currentUser = null;
-    const prayers = [{id:'fajr', n:'الفجر', icon:'🌅'},{id:'dhuhr', n:'الظهر', icon:'☀️'},{id:'asr', n:'العصر', icon:'🌤️'},{id:'maghrib', n:'المغرب', icon:'🌇'},{id:'isha', n:'العشاء', icon:'🌃'}];
+    let currentUser = '';
+    const users = ['أحمد', 'إيمان', 'أبنائي'];
+    const tasks = {
+        fard: [
+            { id: 'fajr', n: 'الفجر', p: 5 },
+            { id: 'dhuhr', n: 'الظهر', p: 2 },
+            { id: 'asr', n: 'العصر', p: 2 },
+            { id: 'maghrib', n: 'المغرب', p: 2 },
+            { id: 'isha', n: 'العشاء', p: 2 }
+        ],
+        sunnah: [
+            { id: 'rawatib', n: 'السنن الرواتب', p: 1, max: 12 },
+            { id: 'duha', n: 'صلاة الضحى', p: 1, max: 8 },
+            { id: 'tahajjud', n: 'التهجد / التراويح', p: 1, max: 11 },
+            { id: 'witr', n: 'صلاة الوتر', p: 1, max: 3 }
+        ],
+        adhkar: [
+            { id: 'morning', n: 'أذكار الصباح', p: 5 },
+            { id: 'evening', n: 'أذكار المساء', p: 5 },
+            { id: 'quran', n: 'ورد القرآن (صفحة)', p: 1, type: 'count' },
+            { id: 'istighfar', n: 'الاستغفار (100 مرة)', p: 2, type: 'count' }
+        ]
+    };
 
-    // تفعيل اختيار الإيموجي
-    const picker = new EmojiButton({ position: 'top-start' });
-    const emojiBtn = document.querySelector('#emoji-btn');
-    picker.on('emoji', selection => { document.querySelector('#chat-input').value += selection; });
-    emojiBtn.addEventListener('click', () => picker.togglePicker(emojiBtn));
+    // إعداد التاريخ الافتراضي (اليوم)
+    document.getElementById('main-date').valueAsDate = new Date();
 
-    // وظيفة إرسال الرسالة
-    function sendMsg() {
-        const user = document.getElementById('chat-user-select').value;
-        const txt = document.getElementById('chat-input').value;
-        if(!user) return alert("اختر اسمك أولاً!");
-        if(!txt) return;
-
-        db.ref('osraty_chat').push({
-            user: user,
-            msg: txt,
-            type: 'text',
-            time: new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})
-        });
-        document.getElementById('chat-input').value = '';
+    function setUser(u) {
+        currentUser = u;
+        document.getElementById('tasks-area').classList.remove('hidden');
+        document.getElementById('current-user-title').innerText = `مهام ${u}`;
+        document.getElementById('chat-user-select').value = u;
+        renderTasks();
+        sync();
     }
 
-    // وظيفة رفع الصور (محاكاة أو عبر Firebase Storage إذا فعلته)
-    function uploadImage(input) {
-        const user = document.getElementById('chat-user-select').value;
-        if(!user) return alert("اختر اسمك أولاً!");
+    function renderTasks() {
+        // فروع المهام
+        let fHTML = '', sHTML = '', aHTML = '';
         
-        const file = input.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                db.ref('osraty_chat').push({
-                    user: user,
-                    img: e.target.result,
-                    type: 'image',
-                    time: new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})
-                });
-            };
-            reader.readAsDataURL(file);
-        }
+        tasks.fard.forEach(t => {
+            fHTML += `<div class="row"><span>${t.n}</span>
+                <div class="btn-group">
+                    <button id="${t.id}-m" onclick="saveTask('${t.id}', 'مسجد')">🕌<span>مسجد</span></button>
+                    <button id="${t.id}-h" onclick="saveTask('${t.id}', 'منزل')">🏠<span>منزل</span></button>
+                </div></div>`;
+        });
+
+        tasks.sunnah.forEach(t => {
+            sHTML += `<div class="row"><span>${t.n}</span>
+                <input type="number" id="${t.id}-val" placeholder="0" style="width:50px;" onchange="saveCount('${t.id}', this.value)">
+                </div>`;
+        });
+
+        tasks.adhkar.forEach(t => {
+            if(t.type === 'count') {
+                aHTML += `<div class="row"><span>${t.n}</span>
+                    <input type="number" id="${t.id}-val" style="width:50px;" onchange="saveCount('${t.id}', this.value)">
+                    </div>`;
+            } else {
+                aHTML += `<div class="row"><span>${t.n}</span>
+                    <button id="${t.id}-check" onclick="toggleCheck('${t.id}')">✔️ تم</button>
+                    </div>`;
+            }
+        });
+
+        document.getElementById('fard-list').innerHTML = fHTML;
+        document.getElementById('sunnah-list').innerHTML = sHTML;
+        document.getElementById('adhkar-list').innerHTML = aHTML;
     }
 
-    // عرض الرسائل
-    db.ref('osraty_chat').limitToLast(20).on('value', snap => {
+    function saveTask(id, val) {
+        const date = document.getElementById('main-date').value;
+        db.ref(`osraty/${date}/${currentUser}/${id}`).set(val);
+    }
+
+    function saveCount(id, val) {
+        const date = document.getElementById('main-date').value;
+        db.ref(`osraty/${date}/${currentUser}/${id}`).set(parseInt(val) || 0);
+    }
+
+    function toggleCheck(id) {
+        const date = document.getElementById('main-date').value;
+        const ref = db.ref(`osraty/${date}/${currentUser}/${id}`);
+        ref.once('value', s => ref.set(!s.val()));
+    }
+
+    function sync() {
+        const date = document.getElementById('main-date').value;
+        db.ref(`osraty`).on('value', snapshot => {
+            const allData = snapshot.val() || {};
+            const dayData = allData[date] || {};
+            
+            // تحديث واجهة المستخدم الحالي
+            if(currentUser && dayData[currentUser]) {
+                const uData = dayData[currentUser];
+                // تحديث أزرار الصلاة والمدخلات (منطقيات التلوين)
+                Object.keys(uData).forEach(key => {
+                    const val = uData[key];
+                    const btnM = document.getElementById(`${key}-m`);
+                    const btnH = document.getElementById(`${key}-h`);
+                    if(btnM) btnM.className = (val === 'مسجد') ? 'active-m' : '';
+                    if(btnH) btnH.className = (val === 'منزل') ? 'active-h' : '';
+                    
+                    const input = document.getElementById(`${key}-val`);
+                    if(input) input.value = val;
+
+                    const check = document.getElementById(`${key}-check`);
+                    if(check) check.className = val ? 'active-m' : '';
+                });
+            }
+            updateLeaderboard(allData);
+        });
+    }
+
+    function calculateScore(userData) {
+        let score = 0;
+        if(!userData) return 0;
+        // صلوات
+        tasks.fard.forEach(t => {
+            const v = userData[t.id];
+            if(v === 'مسجد') score += (t.id === 'fajr' ? 10 : 5); // تمييز المسجد
+            else if(v === 'منزل') score += (t.id === 'fajr' ? 5 : 2);
+        });
+        // سنن
+        tasks.sunnah.forEach(t => {
+            score += (userData[t.id] || 0) * t.p;
+        });
+        // أذكار
+        tasks.adhkar.forEach(t => {
+            if(t.type === 'count') score += (userData[t.id] || 0) * t.p;
+            else if(userData[t.id]) score += t.p;
+        });
+        return score;
+    }
+
+    function updateLeaderboard(allData) {
+        const date = document.getElementById('main-date').value;
+        const dayData = allData[date] || {};
+        
+        let daily = users.map(u => ({ name: u, score: calculateScore(dayData[u]) }))
+                          .sort((a,b) => b.score - a.score);
+        
+        let yearly = users.map(u => {
+            let total = 0;
+            Object.values(allData).forEach(day => total += calculateScore(day[u]));
+            return { name: u, score: total };
+        }).sort((a,b) => b.score - a.score);
+
+        const fill = (data, el) => {
+            const p = [data[1], data[0], data[2]];
+            document.getElementById(el).innerHTML = p.map((u, i) => u ? `
+                <div class="podium-item">
+                    <div class="podium-rank rank-${i===0?2:i===1?1:3}">${u.score}</div>
+                    <div style="font-size:0.7rem;">${u.name}</div>
+                </div>` : '').join('');
+        };
+        fill(daily, 'podium-daily');
+        fill(yearly, 'podium-yearly');
+    }
+
+    // Chat Functions
+    function sendMsg() {
+        const text = document.getElementById('chat-msg').value;
+        const user = document.getElementById('chat-user-select').value;
+        if(!text) return;
+        db.ref('chat').push({ user, text, time: Date.now() });
+        document.getElementById('chat-msg').value = '';
+    }
+
+    db.ref('chat').limitToLast(20).on('value', s => {
         const box = document.getElementById('chat-box');
         box.innerHTML = '';
-        snap.forEach(child => {
-            const d = child.val();
-            let content = d.type === 'image' ? `<img src="${d.img}" class="msg-img">` : `<div>${d.msg}</div>`;
-            box.innerHTML += `<div style="margin-bottom:10px; padding:8px; border-right:3px solid var(--masjid); background:white; border-radius:10px;">
-                <small style="color:gray;">${d.user} • ${d.time}</small>${content}
-            </div>`;
+        s.forEach(m => {
+            const msg = m.val();
+            const div = document.createElement('div');
+            div.className = `msg ${msg.user === currentUser ? 'sent' : 'received'}`;
+            div.innerHTML = `<div style="font-size:0.6rem; font-weight:bold;">${msg.user}</div>${msg.text}`;
+            box.appendChild(div);
         });
         box.scrollTop = box.scrollHeight;
     });
 
-    // عرض الصلوات مع ميزة الفجر المميزة
-    function renderPrayers(ud) {
-        document.getElementById('fard-list').innerHTML = prayers.map(p => {
-            const v = ud[p.id]?.type || '';
-            const isFajr = p.id === 'fajr';
-            // إضافة التاج للفجر
-            const fajrBadge = (isFajr && v === 'm') ? '<span class="fajr-crown">👑</span>' : '';
-            
-            return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee;">
-                <span>${p.icon} ${p.n} ${fajrBadge}</span>
-                <div class="btn-group">
-                    <button class="${v==='m' ? (isFajr ? 'active-fajr-m' : 'active-m') : ''}" onclick="saveTask('${p.id}','m',100)">
-                        ${isFajr ? '⭐ ' : ''}مسجد
-                    </button>
-                    <button class="${v==='h'?'active-m':''}" onclick="saveTask('${p.id}','h',50)">جماعة</button>
-                    <button class="${v==='s'?'active-m':''}" onclick="saveTask('${p.id}','s',25)">فردي</button>
-                </div>
-            </div>`;
-        }).join('');
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        document.querySelector('.theme-toggle').innerText = isDark ? '☀️' : '🌙';
     }
 
-    function saveTask(id, type, p) {
-        const date = document.getElementById('main-date').value;
-        const user = document.getElementById('chat-user-select').value;
-        if(!user) return alert("اختر اسمك!");
-        db.ref(`osraty/${date}/${user}/${id}`).set({type, p});
-    }
+    // Timer (Simulated for Demo)
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById('timer-cairo').innerText = now.toLocaleTimeString('ar-EG', {hour12:false});
+        document.getElementById('timer-berlin').innerText = now.toLocaleTimeString('de-DE', {hour12:false});
+    }, 1000);
 
-    // تهيئة الصفحة
-    function init() {
-        document.getElementById('main-date').value = new Date().toISOString().split('T')[0];
-        // مراقبة البيانات
-        db.ref('osraty').on('value', snap => {
-            const date = document.getElementById('main-date').value;
-            const user = document.getElementById('chat-user-select').value;
-            if(user) renderPrayers(snap.val()?.[date]?.[user] || {});
-        });
-        
-        // عداد رمضان
-        const diff = new Date("2026-02-18") - new Date();
-        document.getElementById('ramadan-countdown').innerText = `⏳ متبقي على نفحات رمضان: ${Math.floor(diff/(1000*60*60*24))} يوم`;
-    }
-
-    init();
-    document.getElementById('chat-user-select').onchange = () => {
-        const user = document.getElementById('chat-user-select').value;
-        if(user) db.ref('osraty').once('value', snap => {
-             const date = document.getElementById('main-date').value;
-             renderPrayers(snap.val()?.[date]?.[user] || {});
-        });
-    };
 </script>
 
 </body>
