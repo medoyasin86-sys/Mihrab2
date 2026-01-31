@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ملتقى طاعاتنا 2026 | النسخة الشاملة والمستقرة</title>
+    <title>ملتقى طاعاتنا 2026 | النسخة الشاملة</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
@@ -11,10 +11,13 @@
         :root { --primary: #1a4d2e; --gold: #c5a059; --gold-light: #e6cc92; --bg: #f9f6f0; --card-bg: #ffffff; --text: #1a4d2e; }
         body { font-family: 'Amiri', serif; background-color: var(--bg); margin: 0; padding: 10px; color: var(--text); }
         .main-container { max-width: 900px; margin: auto; background: var(--card-bg); border: 3px double var(--gold); border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        
+        /* Header & Prayer Times */
         .header-bar { background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: white; padding: 20px; border-radius: 15px; text-align: center; border: 2px solid var(--gold); }
         .prayer-timer { background: rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; margin: 10px 0; font-weight: bold; font-size: 1.1rem; border: 1px solid var(--gold-light); }
         .prayer-times-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 10px; font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 10px; }
         
+        /* Podium */
         .podium-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 100px; gap: 5px; border-bottom: 2px solid var(--gold); padding-bottom: 5px; }
         .podium-step { width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: white; border-radius: 5px 5px 0 0; position: relative; font-size: 0.8rem; }
@@ -23,16 +26,30 @@
         .p-3 { height: 40px; background: #cd7f32; }
         .p-name { position: absolute; bottom: -22px; color: var(--text); font-weight: bold; font-size: 0.75rem; white-space: nowrap; }
 
+        /* User Cards */
         .user-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
         .comp-card { padding: 10px; text-align: center; border: 1px solid var(--gold); border-radius: 12px; cursor: pointer; transition: 0.3s; background: white; }
         .comp-card.active { background: var(--gold-light); border: 2.5px solid var(--primary); transform: scale(1.05); }
 
+        /* Remaining Tasks Box */
+        .remaining-box { background: #fff5e6; border: 2px solid #e67e22; border-radius: 15px; padding: 15px; margin: 15px 0; }
+        .remaining-title { color: #e67e22; margin-top: 0; font-size: 1.2rem; border-bottom: 1px solid #e67e22; }
+
+        /* Sections */
         .section-card { background: white; border: 1px solid var(--gold); border-radius: 15px; margin-top: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .section-title { background: var(--primary); color: white; padding: 12px; margin: 0; font-size: 1.1rem; }
         .habit-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px dashed var(--gold-light); }
         .opt-btn { font-size: 0.75rem; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--gold); cursor: pointer; background: transparent; flex: 1; margin: 0 2px; }
         .opt-btn.selected { background: var(--gold); color: white; font-weight: bold; }
-        .link-icon { text-decoration: none; font-size: 1.3rem; margin-left: 8px; }
+        
+        /* Chat Box */
+        .chat-section { background: white; border: 2px solid var(--primary); border-radius: 15px; margin-top: 20px; height: 400px; display: flex; flex-direction: column; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .chat-msg { padding: 8px 12px; border-radius: 10px; max-width: 80%; font-size: 0.9rem; }
+        .chat-input-area { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; align-items: center; }
+        .chat-input { flex: 1; padding: 10px; border: 1px solid var(--gold); border-radius: 20px; outline: none; }
+        .chat-btn { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 50%; cursor: pointer; }
+        .tool-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -41,7 +58,7 @@
     <div class="header-bar">
         <h1 style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h1>
         <div id="countdown-box" class="prayer-timer">جاري تحميل المواقيت...</div>
-        <input type="date" id="date-picker" style="padding: 8px; border-radius: 8px;">
+        <input type="date" id="date-picker" style="padding: 8px; border-radius: 8px; border:none;">
         <div id="prayer-times" class="prayer-times-grid"></div>
     </div>
 
@@ -53,21 +70,38 @@
     <div id="cards-ui" class="user-cards"></div>
 
     <div id="user-ui" style="display:none;">
-        <h2 id="current-user-title" style="text-align:center; color:var(--primary); margin-top:20px;"></h2>
+        <div class="remaining-box">
+            <h3 class="remaining-title">📝 العبادات المتبقية لك اليوم:</h3>
+            <ul id="remaining-list" style="margin:0; padding-right:20px; color: #d35400; font-weight: bold;"></ul>
+        </div>
+
+        <h2 id="current-user-title" style="text-align:center; color:var(--primary);"></h2>
         
         <div class="section-card">
-            <h3 class="section-title">🕋 الصلوات الخمس (النقاط حسب النوع)</h3>
+            <h3 class="section-title">🕋 الصلوات الخمس</h3>
             <div id="fard-list"></div>
         </div>
 
         <div class="section-card">
-            <h3 class="section-title">🌱 السنن الرواتب (12 ركعة)</h3>
+            <h3 class="section-title">🌱 السنن الرواتب</h3>
             <div id="sunan-list"></div>
         </div>
 
         <div class="section-card">
-            <h3 class="section-title">📿 الأذكار والورد (روابط مباشرة)</h3>
+            <h3 class="section-title">📿 الأذكار والورد</h3>
             <div id="extra-list"></div>
+        </div>
+    </div>
+
+    <div class="chat-section">
+        <h3 class="section-title" style="background: var(--primary); text-align: center;">💬 ملتقى الطاقة (دردشة العائلة)</h3>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="chat-input-area">
+            <button class="tool-btn" onclick="toggleEmoji()">😊</button>
+            <button class="tool-btn" onclick="document.getElementById('file-input').click()">📎</button>
+            <input type="file" id="file-input" style="display:none">
+            <input type="text" id="chat-input" class="chat-input" placeholder="اكتب رسالتك هنا...">
+            <button class="chat-btn" onclick="sendMessage()">➤</button>
         </div>
     </div>
 </div>
@@ -90,18 +124,18 @@
             {id:'isha', n:'العشاء', pts: {m:50, g:30, f:15, q:5}}
         ],
         sunan: [
-            {id:'s_fajr', n:'سنة الفجر (ركعتان قبل)', p:20},
-            {id:'s_dhuhr_b', n:'سنة الظهر (4 ركعات قبل)', p:20},
-            {id:'s_dhuhr_a', n:'سنة الظهر (ركعتان بعد)', p:15},
-            {id:'s_maghrib', n:'سنة المغرب (ركعتان بعد)', p:15},
-            {id:'s_isha', n:'سنة العشاء (ركعتان بعد)', p:15},
-            {id:'s_witr', n:'الوتر وصلاة القيام', p:40}
+            {id:'s_fajr', n:'سنة الفجر', p:20},
+            {id:'s_dhuhr_b', n:'سنة الظهر قبل', p:20},
+            {id:'s_dhuhr_a', n:'سنة الظهر بعد', p:15},
+            {id:'s_maghrib', n:'سنة المغرب', p:15},
+            {id:'s_isha', n:'سنة العشاء', p:15},
+            {id:'s_witr', n:'الوتر والقيام', p:40}
         ],
         extra: [
             {id:'azkar_s', n:'أذكار الصباح', p:30, link:'https://www.hisnmuslim.com/i/ar/27'},
             {id:'azkar_e', n:'أذكار المساء', p:30, link:'https://www.hisnmuslim.com/i/ar/28'},
             {id:'mulk', n:'سورة الملك', p:30, link:'https://quran.com/67'},
-            {id:'quran', n:'الورد القرآني اليومي', p:50, link:''}
+            {id:'quran', n:'الورد القرآني', p:50}
         ]
     };
 
@@ -117,7 +151,7 @@
             document.getElementById('prayer-times').innerHTML = html;
             updateCountdown();
             setInterval(updateCountdown, 60000);
-        } catch(e) { console.error("API Error"); }
+        } catch(e) { console.error("Prayer API Error"); }
     }
 
     function updateCountdown() {
@@ -141,6 +175,7 @@
     function sync() {
         const d = document.getElementById('date-picker').value;
         db.ref('osraty/' + d).on('value', snap => render(snap.val() || {}));
+        db.ref('osraty_chat').limitToLast(20).on('value', snap => renderChat(snap.val() || {}));
         updateAnnual();
     }
 
@@ -150,8 +185,7 @@
             [...model.fard, ...model.sunan, ...model.extra].forEach(h => {
                 if(uData[h.id]) score += Number(uData[h.id].p || 0);
             });
-            let badge = score > 150 ? '🔥' : (score > 50 ? '⭐' : '');
-            return { n: u, s: score, b: badge };
+            return { n: u, s: score, b: score > 150 ? '🔥' : (score > 50 ? '⭐' : '') };
         });
 
         drawPodium('daily-podium', stats);
@@ -160,7 +194,20 @@
                 <b>${st.b}${st.n}</b><br><small>${st.s}ن</small>
             </div>`).join('');
         
-        if(currentUser) renderForms(allData[currentUser] || {});
+        if(currentUser) {
+            renderForms(allData[currentUser] || {});
+            updateRemaining(allData[currentUser] || {});
+        }
+    }
+
+    function updateRemaining(userData) {
+        let rem = [];
+        model.fard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
+        model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
+        model.extra.forEach(e => { if(!userData[e.id]?.done) rem.push(e.n); });
+        
+        document.getElementById('remaining-list').innerHTML = rem.length ? 
+            rem.map(r => `<li>${r}</li>`).join('') : "🎉 أحسنت! أتممت جميع طاعات اليوم";
     }
 
     function drawPodium(el, data) {
@@ -187,16 +234,30 @@
             document.getElementById(tid).innerHTML = list.map(h => {
                 const done = userData[h.id]?.done;
                 return `<div class="habit-row">
-                    <span>${h.link?`<a href="${h.link}" target="_blank" class="link-icon">🔗</a>`:''} ${h.n}</span>
-                    <div style="display:flex; align-items:center;">
-                        <span style="color:var(--gold); margin-left:10px; font-weight:bold;">+${h.p}</span>
-                        <input type="checkbox" ${done?'checked':''} onchange="save('${h.id}',{done:this.checked, p:this.checked?${h.p}:0})" style="transform:scale(1.5)">
-                    </div>
+                    <span>${h.link?`<a href="${h.link}" target="_blank">🔗</a>`:''} ${h.n}</span>
+                    <input type="checkbox" ${done?'checked':''} onchange="save('${h.id}',{done:this.checked, p:this.checked?${h.p}:0})" style="transform:scale(1.5)">
                 </div>`;
             }).join('');
         };
         drawChecklist(model.sunan, 'sunan-list');
         drawChecklist(model.extra, 'extra-list');
+    }
+
+    function sendMessage() {
+        const inp = document.getElementById('chat-input');
+        if(!inp.value || !currentUser) return;
+        db.ref('osraty_chat').push({ u: currentUser, m: inp.value, t: Date.now() });
+        inp.value = '';
+    }
+
+    function renderChat(msgs) {
+        const div = document.getElementById('chat-messages');
+        div.innerHTML = Object.values(msgs).map(m => `
+            <div class="chat-msg" style="align-self: ${m.u === currentUser ? 'flex-end' : 'flex-start'}; background: ${m.u === currentUser ? '#dcf8c6' : '#eee'};">
+                <small style="display:block; font-weight:bold; color:var(--primary)">${m.u}</small>
+                ${m.m}
+            </div>`).join('');
+        div.scrollTop = div.scrollHeight;
     }
 
     function updateAnnual() {
@@ -210,7 +271,8 @@
     }
 
     function save(id, val) { db.ref(`osraty/${document.getElementById('date-picker').value}/${currentUser}/${id}`).set(val); }
-    function selectUser(u) { currentUser = u; document.getElementById('user-ui').style.display='block'; document.getElementById('current-user-title').innerText="سجل الطاعات لـ " + u; sync(); }
+    function selectUser(u) { currentUser = u; document.getElementById('user-ui').style.display='block'; document.getElementById('current-user-title').innerText="سجل " + u; sync(); }
+    function toggleEmoji() { document.getElementById('chat-input').value += '😊'; }
 
     window.onload = () => {
         document.getElementById('date-picker').value = new Date().toISOString().split('T')[0];
