@@ -13,13 +13,17 @@
         .main-container { max-width: 900px; margin: auto; background: var(--card-bg); border: 3px double var(--gold); border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         
         .header-bar { background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid var(--gold); }
+        
+        /* حاوية التاريخ */
+        .date-container { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; margin: 10px 0; border: 1px solid rgba(197, 160, 89, 0.3); }
+        #hijri-display { display: block; color: var(--gold-light); font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+
         .prayer-times-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; }
         .prayer-times-table th, .prayer-times-table td { padding: 5px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
         
         .next-prayer-banner { background: rgba(255, 255, 255, 0.1); margin-top: 10px; padding: 10px; border-radius: 10px; font-size: 0.9rem; border: 1px solid var(--gold-light); line-height: 1.6; }
         .timer-span { color: var(--gold-light); font-family: sans-serif; font-weight: bold; }
 
-        /* تنبيه الاستعداد للصلاة المضيء */
         #prayer-wudu-alert {
             display: none;
             background: linear-gradient(135deg, #fff9e6, #fffde7);
@@ -89,7 +93,11 @@
 <div class="main-container">
     <div class="header-bar">
         <h2 style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h2>
-        <input type="date" id="date-picker" style="margin: 10px 0; border-radius: 5px; border: none; padding: 5px; text-align: center;">
+        
+        <div class="date-container">
+            <span id="hijri-display">جاري تحديد التاريخ الهجري...</span>
+            <input type="date" id="date-picker" style="border-radius: 5px; border: none; padding: 5px; text-align: center; font-weight: bold;">
+        </div>
         
         <table class="prayer-times-table">
             <thead><tr><th>المدينة</th><th>الفجر</th><th>الظهر</th><th>العصر</th><th>المغرب</th><th>العشاء</th></tr></thead>
@@ -253,6 +261,12 @@
         const tomorrow = new Date(now);
         tomorrow.setDate(now.getDate() + 1);
         
+        // تحديث التاريخ الهجري الحالي في الواجهة
+        const hijriNow = await getHijriData(now);
+        if(hijriNow) {
+            document.getElementById('hijri-display').innerText = `${hijriNow.day} ${hijriNow.month.ar} ${hijriNow.year}هـ`;
+        }
+
         const hijriTomorrow = await getHijriData(tomorrow);
         if (hijriTomorrow) {
             const isTomorrowFasting = isFastingDay(tomorrow.getDay(), hijriTomorrow.day);
@@ -315,7 +329,6 @@
                 const s = Math.floor((nextP.time % 60000) / 1000);
                 info += `<div>${cityName}: صلاة <b style="color:var(--gold-light)">${nextP.name}</b> خلال <span class="timer-span">${h}س ${m}د ${s}ث</span></div>`;
                 
-                // تفعيل التنبيه إذا كان الوقت المتبقي أقل من أو يساوي 10 دقائق
                 if (h === 0 && m < 10) {
                     showAlert = true;
                     alertPrayerName = nextP.name;
@@ -326,7 +339,6 @@
         }
         document.getElementById('next-prayer-info').innerHTML = info;
         
-        // إظهار أو إخفاء مربع التنبيه المضيء
         const alertBox = document.getElementById('prayer-wudu-alert');
         if(showAlert) {
             alertBox.style.display = 'block';
@@ -344,7 +356,7 @@
         
         const hijri = await getHijriData(new Date(selectedDate));
         if(hijri && isFastingDay(new Date(selectedDate).getDay(), hijri.day)) {
-            if(!userData['fasting']) rem.push("الصيام 🌙");
+            if(!userData['fasting']?.done) rem.push("الصيام 🌙");
         }
         curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
         model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
@@ -355,8 +367,12 @@
     async function render(allData) {
         const selectedDateStr = document.getElementById('date-picker').value;
         const selectedDate = new Date(selectedDateStr);
-        const isFriday = selectedDate.getDay() === 5;
+        
+        // تحديث الهجري عند تغيير التاريخ الميلادي
         const hijri = await getHijriData(selectedDate);
+        if(hijri) document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
+
+        const isFriday = selectedDate.getDay() === 5;
         const fastingDay = hijri ? isFastingDay(selectedDate.getDay(), hijri.day) : false;
 
         let stats = await Promise.all(users.map(async u => {
