@@ -133,8 +133,8 @@
             {id:'s_qyam', n:'🌌 قيام الليل', p:40}
         ],
         extra: [
-            {id:'azkar_s', n:'📖 أذكار الصباح', p:30, link:'https://www.hisnmuslim.com/i/ar/27'},
-            {id:'azkar_e', n:'📖 أذكار المساء', p:30, link:'https://www.hisnmuslim.com/i/ar/28'},
+            {id:'azkar_s', n:'📖 أذكار الصباح', p:30, link:'https://alazkar.today/'},
+            {id:'azkar_e', n:'📖 أذكار المساء', p:30, link:'https://alazkar.today/'},
             {id:'mulk', n:'👑 سورة الملك', p:30, link:'https://quran.com/67'},
             {id:'quran', n:'📜 الورد القرآني', p:50}
         ]
@@ -181,9 +181,24 @@
     }
 
     function render(allData) {
+        // التحقق من يوم الجمعة
+        const selectedDate = new Date(document.getElementById('date-picker').value);
+        const isFriday = selectedDate.getDay() === 5;
+
         let stats = users.map(u => {
             let score = 0; let uData = allData[u] || {};
-            [...model.fard, ...model.sunan, ...model.extra].forEach(h => {
+            
+            let currentFard = [...model.fard];
+            let currentExtra = [...model.extra];
+
+            if(isFriday) {
+                currentFard = currentFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f);
+                if(!currentExtra.find(e => e.id === 'kahf')) {
+                    currentExtra.push({id:'kahf', n:'📖 سورة الكهف', p:40, link:'https://quran.com/18'});
+                }
+            }
+
+            [...currentFard, ...model.sunan, ...currentExtra].forEach(h => {
                 if(uData[h.id]) score += Number(uData[h.id].p || 0);
             });
             return { n: u, s: score, b: score > 200 ? '🔥' : (score > 100 ? '⭐' : '') };
@@ -196,16 +211,24 @@
             </div>`).join('');
         
         if(currentUser) {
-            renderForms(allData[currentUser] || {});
-            updateRemaining(allData[currentUser] || {});
+            renderForms(allData[currentUser] || {}, isFriday);
+            updateRemaining(allData[currentUser] || {}, isFriday);
         }
     }
 
-    function updateRemaining(userData) {
+    function updateRemaining(userData, isFriday) {
         let rem = [];
-        model.fard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
+        let currentFard = [...model.fard];
+        let currentExtra = [...model.extra];
+
+        if(isFriday) {
+            currentFard = currentFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f);
+            currentExtra.push({id:'kahf', n:'📖 سورة الكهف', p:40});
+        }
+
+        currentFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
         model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
-        model.extra.forEach(e => { if(!userData[e.id]?.done) rem.push(e.n); });
+        currentExtra.forEach(e => { if(!userData[e.id]?.done) rem.push(e.n); });
         
         document.getElementById('remaining-list').innerHTML = rem.length ? 
             rem.map(r => `<li>${r}</li>`).join('') : "🎉 أحسنت! أتممت جميع طاعات اليوم";
@@ -221,8 +244,16 @@
         }).join('');
     }
 
-    function renderForms(userData) {
-        document.getElementById('fard-list').innerHTML = model.fard.map(h => {
+    function renderForms(userData, isFriday) {
+        let currentFard = [...model.fard];
+        let currentExtra = [...model.extra];
+
+        if(isFriday) {
+            currentFard = currentFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f);
+            currentExtra.push({id:'kahf', n:'📖 سورة الكهف', p:40, link:'https://quran.com/18'});
+        }
+
+        document.getElementById('fard-list').innerHTML = currentFard.map(h => {
             const cur = userData[h.id]?.type;
             return `<div class="habit-row"><b>${h.n}</b><div style="display:flex; flex:1; max-width:260px;">
                 ${Object.entries(h.pts).map(([k,v]) => `
@@ -242,7 +273,7 @@
             }).join('');
         };
         drawChecklist(model.sunan, 'sunan-list');
-        drawChecklist(model.extra, 'extra-list');
+        drawChecklist(currentExtra, 'extra-list');
     }
 
     function sendMessage() {
@@ -281,7 +312,7 @@
         currentUser = u; 
         document.getElementById('user-ui').style.display='block'; 
         document.getElementById('current-user-title').innerText="سجل " + u; 
-        document.getElementById('chat-user-selector').value = u; // تحديث اختيار الشات تلقائياً
+        document.getElementById('chat-user-selector').value = u; 
         sync(); 
     }
     
