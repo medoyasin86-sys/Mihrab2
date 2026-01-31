@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ملتقى طاعاتنا 2026 | الإصدار الفاخر</title>
+    <title>ملتقى طاعاتنا 2026 | الإصدار المطور</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
@@ -15,282 +15,178 @@
             --bg: #f9f6f0; 
             --card-bg: rgba(255,255,255,0.98);
             --text: #1a4d2e;
-            --accent: #e67e22; 
         }
 
-        /* الوضع الليلي */
         body.dark-mode {
-            --primary: #c5a059;
-            --gold: #e6cc92;
-            --bg: #121212;
-            --card-bg: #1e1e1e;
-            --text: #e0e0e0;
-            background-image: url('https://www.transparenttextures.com/patterns/dark-matter.png');
+            --primary: #c5a059; --gold: #e6cc92; --bg: #121212;
+            --card-bg: #1e1e1e; --text: #e0e0e0;
         }
 
         body { 
-            font-family: 'Amiri', serif; 
-            background-color: var(--bg); 
+            font-family: 'Amiri', serif; background-color: var(--bg); 
             background-image: url('https://www.transparenttextures.com/patterns/islamic-art.png'); 
-            margin: 0; padding: 10px; 
-            color: var(--text);
-            transition: all 0.3s ease;
+            margin: 0; padding: 10px; color: var(--text); transition: 0.3s;
         }
 
-        .main-container { 
-            max-width: 850px; margin: auto; 
-            background: var(--card-bg); 
-            border: 3px double var(--gold); 
-            border-radius: 20px; padding: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
-        }
+        .main-container { max-width: 850px; margin: auto; background: var(--card-bg); border: 3px double var(--gold); border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 
-        .header-bar { 
-            background: linear-gradient(135deg, #1a4d2e, #0a2b1a); 
-            color: white; padding: 20px; 
-            border-radius: 15px; border: 2px solid var(--gold); 
-            text-align: center; margin-bottom: 20px; 
-            position: relative;
-        }
+        .header-bar { background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: white; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); text-align: center; position: relative; }
 
-        .theme-toggle {
-            position: absolute; top: 10px; left: 10px;
-            background: var(--gold); border: none; padding: 5px 10px;
-            border-radius: 20px; cursor: pointer; font-size: 1.2rem;
-        }
+        .theme-toggle { position: absolute; top: 10px; left: 10px; background: var(--gold); border: none; padding: 5px 10px; border-radius: 20px; cursor: pointer; }
 
-        /* تنسيق البطاقات والجداول */
-        .prayer-times-card, .section-card, .comp-card, .daily-wisdom {
-            background: var(--card-bg);
-            border: 1px solid var(--gold);
-            border-radius: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
+        .section-card { background: var(--card-bg); border: 1px solid var(--gold); border-radius: 15px; margin-top: 15px; overflow: hidden; }
 
-        .habit-row { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px; border-bottom: 1px dashed var(--gold-light); 
-        }
-
-        .habit-row:last-child { border-bottom: none; }
-
-        .habit-icon { margin-left: 8px; font-size: 1.2rem; }
+        .habit-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px dashed var(--gold-light); flex-wrap: wrap; gap: 10px; }
 
         .opt-btn { 
-            font-size: 0.7rem; padding: 6px 4px; border-radius: 8px; 
+            font-size: 0.75rem; padding: 8px 5px; border-radius: 8px; 
             border: 1px solid var(--gold); cursor: pointer; 
-            background: transparent; color: var(--text); min-width: 45px; 
+            background: transparent; color: var(--text); flex: 1; min-width: 60px;
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
         }
 
-        .opt-btn.selected { background: var(--gold); color: white; }
+        .opt-btn small { font-size: 0.6rem; opacity: 0.8; }
+        .opt-btn.selected { background: var(--gold); color: white; box-shadow: inset 0 0 5px rgba(0,0,0,0.2); }
+        .opt-btn.fajr-special { border: 2px solid #e67e22; }
 
-        /* منصة التتويج */
-        .podium-step { background: var(--primary); border: 1.5px solid var(--gold); }
+        .crown { color: #f1c40f; font-size: 1.2rem; margin-right: 5px; }
+        
+        .comp-card { padding:10px; text-align:center; cursor:pointer; border-radius: 12px; transition: 0.2s; }
+        .comp-card.active { background: rgba(197, 160, 89, 0.1); border: 2px solid var(--primary) !important; }
+
+        .podium-step { background: var(--primary); border: 1.5px solid var(--gold); display: flex; flex-direction: column; justify-content: flex-end; align-items: center; color: white; border-radius: 5px 5px 0 0; }
         .p1 { background: linear-gradient(to top, #b8860b, #f1c40f); }
-
-        /* التحدي الأسبوعي */
-        .weekly-challenge { 
-            background: linear-gradient(45deg, #8b6b23, #c5a059); 
-            color: white; padding: 15px; border-radius: 12px; 
-            text-align: center; font-weight: bold; margin-bottom: 15px;
-        }
-
-        .chat-area { 
-            height: 120px; overflow-y: auto; background: rgba(0,0,0,0.03); 
-            padding: 10px; border-radius: 10px; border-right: 4px solid var(--gold); 
-        }
-
-        input[type="date"], select {
-            background: var(--card-bg); color: var(--text);
-            border: 1px solid var(--gold); padding: 5px; border-radius: 5px;
-        }
     </style>
 </head>
-<body id="body">
+<body>
 
 <div class="main-container">
     <div class="header-bar">
         <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
         <h1 style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h1>
-        <input type="date" id="date-picker" style="margin-top:10px;">
+        <input type="date" id="date-picker" style="margin-top:10px; padding: 5px; border-radius: 5px;">
         <div id="hijri-display" style="margin-top: 8px; font-weight: bold; color: var(--gold);"></div>
     </div>
 
-    <div class="prayer-times-card" style="padding: 15px;">
-        <div style="margin-bottom: 10px; font-weight: bold;">⌛ مواقيت الصلاة</div>
-        <select id="city-selector" class="city-select" onchange="fetchPrayerTimes()">
-            <option value="Salalah,OM">صلالة، عمان</option>
-            <option value="Kafr el-Sheikh,EG">كفر الشيخ، مصر</option>
-        </select>
-        <div class="prayer-grid" id="prayer-times-ui" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top:10px;">
-            <div class="prayer-item"><span>الفجر</span><br><b id="time-Fajr">--:--</b></div>
-            <div class="prayer-item"><span>الظهر</span><br><b id="time-Dhuhr">--:--</b></div>
-            <div class="prayer-item"><span>العصر</span><br><b id="time-Asr">--:--</b></div>
-            <div class="prayer-item"><span>المغرب</span><br><b id="time-Maghrib">--:--</b></div>
-            <div class="prayer-item"><span>العشاء</span><br><b id="time-Isha">--:--</b></div>
-            <div class="prayer-item"><span>الضحى</span><br><b id="time-Sunrise">--:--</b></div>
-        </div>
+    <div class="podiums-wrapper" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+        <div><div style="text-align:center; font-size:0.8rem;">🏆 اليوم</div><div id="daily-podium" style="display: flex; align-items: flex-end; justify-content: center; height: 80px; border-bottom: 2px solid var(--gold);"></div></div>
+        <div><div style="text-align:center; font-size:0.8rem;">✨ العام</div><div id="annual-podium" style="display: flex; align-items: flex-end; justify-content: center; height: 80px; border-bottom: 2px solid var(--gold);"></div></div>
     </div>
 
-    <div class="weekly-challenge" id="weekly-box">
-        <span style="font-size: 0.9rem;">🌟 تحدي الأسبوع (نقاط مضاعفة)</span><br>
-        <span id="challenge-text" style="font-size: 1.2rem;">...</span>
-    </div>
-
-    <div class="daily-wisdom" style="padding: 15px;">
-        <div><b>📖 حديث اليوم:</b> <span id="hadith-text">...</span></div>
-        <div style="margin-top:10px; border-top:1px solid var(--gold); padding-top:10px;"><b>💡 ومضة:</b> <span id="flash-text">...</span></div>
-    </div>
-
-    <div class="podiums-wrapper" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
-        <div><div style="text-align:center; font-size:0.9rem;">🏆 ترتيب اليوم</div><div class="podium-container" id="daily-podium" style="display: flex; align-items: flex-end; justify-content: center; height: 100px; border-bottom: 2px solid var(--gold);"></div></div>
-        <div><div style="text-align:center; font-size:0.9rem;">✨ صدارة العام</div><div class="podium-container" id="annual-podium" style="display: flex; align-items: flex-end; justify-content: center; height: 100px; border-bottom: 2px solid var(--gold);"></div></div>
-    </div>
-
-    <div class="competitors-grid" id="cards-ui" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;"></div>
+    <div id="cards-ui" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;"></div>
 
     <div id="user-ui" style="display:none; margin-top:20px;">
-        <hr style="border-color: var(--gold);">
-        <h2 id="current-user-title" style="text-align:center; color:var(--gold);"></h2>
+        <h2 id="current-user-title" style="text-align:center; color:var(--gold); border-bottom: 2px solid var(--gold); padding-bottom: 10px;"></h2>
         
         <div class="section-card">
-            <h3 style="padding: 10px; margin: 0; background: var(--primary); color: white; border-radius: 12px 12px 0 0;">🕋 الفروض الخمسة</h3>
+            <h3 style="padding: 10px; margin: 0; background: var(--primary); color: white;">🕋 الفروض الخمسة (نقاط التميز)</h3>
             <div id="fard-list"></div>
         </div>
 
         <div class="section-card">
-            <h3 style="padding: 10px; margin: 0; background: var(--primary); color: white; border-radius: 12px 12px 0 0;">✨ السنن والأوراد</h3>
+            <h3 style="padding: 10px; margin: 0; background: var(--primary); color: white;">✨ السنن والأوراد</h3>
             <div id="extra-list"></div>
-        </div>
-        
-        <div class="section-card" style="padding: 15px;">
-            <h3>💬 مجلس العائلة</h3>
-            <div id="chat-box" class="chat-area"></div>
-            <div style="display:flex; gap:5px; margin-top:10px;">
-                <input type="text" id="chat-in" placeholder="اكتب رسالة تذكير..." style="flex:1;">
-                <button onclick="sendMsg()" style="background:var(--primary); color:white; border:none; padding:10px 20px; border-radius:5px;">ارسل</button>
-            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // الإبقاء على نفس إعدادات Firebase الخاصة بك
-    const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1", storageBucket: "ebada-656e1.firebasestorage.app", messagingSenderId: "705608653939", appId: "1:705608653939:web:5ab3609a6f7ccc8675de06" };
+    const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
     let currentUser = null;
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
 
-    // النماذج مع الأيقونات
     const model = {
         fard: [
-            {id:'fajr', n:'الفجر', icon:'🌅'}, 
-            {id:'dhuhr', n:'الظهر', icon:'☀️'}, 
-            {id:'asr', n:'العصر', icon:'🌤️'}, 
-            {id:'maghrib', n:'المغرب', icon:'🌇'}, 
-            {id:'isha', n:'العشاء', icon:'🌙'}
+            {id:'fajr', n:'الفجر', icon:'🌅', points: {m:100, g:30, f:15, q:5}}, 
+            {id:'dhuhr', n:'الظهر', icon:'☀️', points: {m:50, g:30, f:15, q:5}}, 
+            {id:'asr', n:'العصر', icon:'🌤️', points: {m:50, g:30, f:15, q:5}}, 
+            {id:'maghrib', n:'المغرب', icon:'🌇', points: {m:50, g:30, f:15, q:5}}, 
+            {id:'isha', n:'العشاء', icon:'🌙', points: {m:50, g:30, f:15, q:5}}
         ],
         extra: [
-            {id:'qiyam', n:'صلاة القيام', p:30, icon:'🌃'},
-            {id:'duha', n:'صلاة الضحى', p:15, icon:'🔆'},
-            {id:'s_f', n:'سنة الفجر', p:10, icon:'🌱'},
-            {id:'quran', n:'الورد القرآني', p:40, icon:'📖', l:'https://quran.com'},
-            {id:'azkar_m', n:'أذكار الصباح', p:20, icon:'📿'},
-            {id:'azkar_e', n:'أذكار المساء', p:20, icon:'🌌'},
-            {id:'mulk', n:'سورة الملك', p:30, icon:'👑'},
-            {id:'kahf', n:'سورة الكهف', p:50, icon:'💎', friday: true}
+            {id:'qiyam', n:'صلاة القيام', p:40, icon:'🌃'},
+            {id:'duha', n:'صلاة الضحى', p:20, icon:'🔆'},
+            {id:'quran', n:'الورد القرآني', p:50, icon:'📖'},
+            {id:'azkar', n:'الأذكار (ص/م)', p:30, icon:'📿'}
         ]
     };
 
     function toggleTheme() {
         document.body.classList.toggle('dark-mode');
-        const btn = document.querySelector('.theme-toggle');
-        btn.innerText = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
     }
 
-    async function fetchPrayerTimes() {
-        const cityVal = document.getElementById('city-selector').value.split(',');
-        const date = document.getElementById('date-picker').value;
-        const [year, month, day] = date.split('-');
-        try {
-            const response = await fetch(`https://api.aladhan.com/v1/timingsByCity/${day}-${month}-${year}?city=${cityVal[0]}&country=${cityVal[1]}&method=4`);
-            const data = await response.json();
-            const t = data.data.timings;
-            ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha', 'Sunrise'].forEach(p => {
-                document.getElementById('time-' + p).innerText = t[p];
-            });
-        } catch (e) { console.error("Prayer times error"); }
+    function sync() {
+        const d = document.getElementById('date-picker').value;
+        const dateObj = new Date(d);
+        document.getElementById('hijri-display').innerText = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(dateObj);
+        
+        db.ref('osraty/' + d).on('value', snap => render(snap.val() || {}));
+        updateAnnualPodium();
     }
 
-    function renderUserForms(userData, isFri) {
+    function render(allData) {
+        let stats = users.map(u => {
+            let score = 0; let uData = allData[u] || {};
+            let hasFajrCrown = uData['fajr'] && uData['fajr'].type === 'm';
+            
+            model.fard.forEach(h => { if(uData[h.id]) score += Number(uData[h.id].p || 0); });
+            model.extra.forEach(h => { if(uData[h.id] && uData[h.id].done) score += h.p; });
+            return { n: u, s: score, crown: hasFajrCrown };
+        });
+
+        drawPodium('daily-podium', [...stats]);
+        
+        document.getElementById('cards-ui').innerHTML = stats.map(st => `
+            <div class="comp-card ${st.n === currentUser ? 'active' : ''}" onclick="selectUser('${st.n}')" style="border:1px solid var(--gold)">
+                <b>${st.crown ? '<span class="crown">👑</span>' : ''}${st.n}</b><br>
+                <span style="color:var(--gold); font-weight:bold;">${st.s} نقطة</span>
+            </div>`).join('');
+        
+        if(currentUser) renderUserForms(allData[currentUser] || {});
+    }
+
+    function renderUserForms(userData) {
         document.getElementById('fard-list').innerHTML = model.fard.map(h => {
-            const v = userData[h.id] ? userData[h.id].type : 'none';
-            const label = (h.id === 'dhuhr' && isFri) ? 'صلاة الجمعة' : h.n;
+            const currentType = userData[h.id] ? userData[h.id].type : 'none';
             return `<div class="habit-row">
-                <span><span class="habit-icon">${h.icon}</span><b>${label}</b></span>
-                <div style="display:flex; gap:3px;">
-                    <button class="opt-btn ${v==='m'?'selected':''}" onclick="saveFard('${h.id}','m',50)">مسجد</button>
-                    <button class="opt-btn ${v==='f'?'selected':''}" onclick="saveFard('${h.id}','f',25)">بيت</button>
-                    <button class="opt-btn ${v==='q'?'selected':''}" onclick="saveFard('${h.id}','q',10)">قضاء</button>
+                <div style="min-width:100px;"><span>${h.icon}</span> <b>${h.n}</b></div>
+                <div style="display:flex; gap:4px; flex:1;">
+                    <button class="opt-btn ${h.id==='fajr'?'fajr-special':''} ${currentType==='m'?'selected':''}" onclick="saveFard('${h.id}','m',${h.points.m})">
+                        <span>مسجد</span><small>+${h.points.m}</small>
+                    </button>
+                    <button class="opt-btn ${currentType==='g'?'selected':''}" onclick="saveFard('${h.id}','g',${h.points.g})">
+                        <span>جماعة</span><small>+${h.points.g}</small>
+                    </button>
+                    <button class="opt-btn ${currentType==='f'?'selected':''}" onclick="saveFard('${h.id}','f',${h.points.f})">
+                        <span>فردي</span><small>+${h.points.f}</small>
+                    </button>
+                    <button class="opt-btn ${currentType==='q'?'selected':''}" onclick="saveFard('${h.id}','q',${h.points.q})">
+                        <span>قضاء</span><small>+${h.points.q}</small>
+                    </button>
                 </div>
             </div>`;
         }).join('');
 
         document.getElementById('extra-list').innerHTML = model.extra.map(h => {
-            if(h.friday && !isFri) return '';
             const done = userData[h.id] ? userData[h.id].done : false;
             return `<div class="habit-row">
-                <span><span class="habit-icon">${h.icon}</span>${h.n}</span>
-                <div><span style="font-size:0.8rem; color:var(--gold); margin-left:10px;">+${h.p}ن</span>
-                <input type="checkbox" ${done?'checked':''} onchange="saveExtra('${h.id}', ${h.p}, this.checked)" style="transform:scale(1.4);"></div>
+                <span>${h.icon} ${h.n}</span>
+                <div><span style="color:var(--gold); margin-left:10px;">+${h.p}ن</span>
+                <input type="checkbox" ${done?'checked':''} onchange="saveExtra('${h.id}', ${h.p}, this.checked)" style="transform:scale(1.5);"></div>
             </div>`;
         }).join('');
     }
 
-    // (بقية دوال السنك والرندر كما هي في الكود الأصلي لضمان عمل قاعدة البيانات)
-    function sync() {
-        const d = document.getElementById('date-picker').value;
-        const dateObj = new Date(d);
-        const dayOfYear = Math.floor((dateObj - new Date(dateObj.getFullYear(), 0, 0)) / 86400000);
-        const hijriDate = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(dateObj);
-        document.getElementById('hijri-display').innerText = hijriDate;
-        fetchPrayerTimes(); 
-        db.ref('osraty/' + d).on('value', snap => render(snap.val() || {}, dateObj.getDay() === 5));
-        db.ref('chat/' + d).on('value', snap => {
-            const m = snap.val() || [];
-            document.getElementById('chat-box').innerHTML = m.map(x => `<div><b>${x.u}:</b> ${x.t}</div>`).join('');
-            document.getElementById('chat-box').scrollTop = 999;
-        });
-        updateAnnualPodium();
-    }
-
-    function render(allData, isFri) {
-        let stats = users.map(u => {
-            let score = 0; let uData = allData[u] || {};
-            model.fard.forEach(h => { if(uData[h.id]) score += Number(uData[h.id].p || 0); });
-            model.extra.forEach(h => { if(uData[h.id] && uData[h.id].done) score += h.p; });
-            return { n: u, s: score };
-        });
-
-        drawPodium('daily-podium', [...stats]);
-        document.getElementById('cards-ui').innerHTML = stats.map(st => `
-            <div class="comp-card ${st.n === currentUser ? 'active' : ''}" onclick="selectUser('${st.n}')" style="padding:10px; text-align:center; cursor:pointer; border:${st.n === currentUser?'2px solid var(--primary)':'1px solid var(--gold)'}">
-                <b>${st.n}</b><br><span style="color:var(--gold); font-weight:bold;">${st.s} نقطة</span>
-            </div>`).join('');
-        
-        if(currentUser) renderUserForms(allData[currentUser] || {}, isFri);
-    }
-
-    function drawPodium(elementId, data) {
+    function drawPodium(el, data) {
         const sorted = data.sort((a,b) => b.s - a.s);
-        const order = [1, 0, 2, 3];
-        const heights = ['50px', '80px', '40px', '30px'];
-        document.getElementById(elementId).innerHTML = order.map((idx, i) => `
-            <div class="podium-step ${idx===0?'p1':''}" style="height:${heights[i]}; width:40px; margin:0 5px; position:relative;">
-                <div style="position:absolute; top:-20px; width:100%; font-size:0.7rem; text-align:center;">${sorted[idx].n}</div>
+        const order = [1, 0, 2, 3]; // ترتيب المراكز عرضياً
+        const heights = ['40px', '60px', '30px', '20px'];
+        document.getElementById(el).innerHTML = order.map((idx, i) => `
+            <div class="podium-step ${idx===0?'p1':''}" style="height:${heights[i]}; width:45px; margin:0 2px;">
+                <span style="font-size:0.6rem; color:white; margin-bottom:2px;">${sorted[idx].n}</span>
             </div>`).join('');
     }
 
@@ -307,13 +203,6 @@
     function saveFard(id, type, p) { db.ref(`osraty/${document.getElementById('date-picker').value}/${currentUser}/${id}`).set({type, p: Number(p)}); }
     function saveExtra(id, p, done) { db.ref(`osraty/${document.getElementById('date-picker').value}/${currentUser}/${id}`).set({done, p: Number(p)}); }
     function selectUser(u) { currentUser = u; document.getElementById('user-ui').style.display='block'; document.getElementById('current-user-title').innerText="تسجيل: " + u; sync(); }
-    function sendMsg() {
-        const i = document.getElementById('chat-in'); if(!i.value) return;
-        db.ref('chat/' + document.getElementById('date-picker').value).once('value', s => { 
-            let m = s.val() || []; m.push({u: currentUser, t: i.value}); 
-            db.ref('chat/' + document.getElementById('date-picker').value).set(m); i.value = ""; 
-        });
-    }
 
     window.onload = () => { 
         document.getElementById('date-picker').value = new Date().toISOString().split('T')[0];
