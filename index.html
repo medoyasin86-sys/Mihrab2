@@ -35,24 +35,85 @@
         .container { max-width: 900px; margin: auto; background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 30px; padding: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.08); }
         
         .ramadan-bar { background: var(--royal-green); color: #f1d37e; padding: 15px; text-align: center; border-radius: 20px; margin-bottom: 10px; font-weight: bold; border: 1px solid var(--deep-gold); }
-        
-        /* ... باقي كود التنسيق CSS ... */
+
+        /* إضافة تنسيق أزرار الشات الجديدة */
+        .chat-input-container { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+        .chat-btn { background: var(--masjid); color: white; border: none; padding: 8px 12px; border-radius: 12px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .chat-btn:hover { background: var(--royal-green); opacity: 0.9; }
+        #chat-input { flex-grow: 1; padding: 10px; border-radius: 15px; border: 1px solid var(--border); }
+
+        .extra-ibadah { margin-top: 15px; padding: 10px; border-top: 1px solid var(--border); }
+        .bonus-tag { font-size: 0.8rem; color: var(--deep-gold); font-weight: bold; }
 
         .chat-section { background: var(--card-bg); border: 2px solid var(--masjid); border-radius: 25px; padding: 15px; margin-top: 30px; }
         .chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border); padding: 10px; margin-bottom: 5px; border-radius: 15px; background: rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 10px; }
         .msg { padding: 10px 14px; border-radius: 18px; max-width: 80%; font-size: 0.88rem; position: relative; color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .msg.sent { background: #dcf8c6; align-self: flex-end; border-bottom-left-radius: 4px; color: #1a252f; }
-        
-        /* ... كود JavaScript والتعامل مع Firebase ... */
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="ramadan-bar">نلتقي على طاعة الله 2026</div>
+        
+        <div id="ibadah-list">
+            <h3>الصلوات المفروضة</h3>
+            <div class="fajr-section" style="border: 1px solid var(--deep-gold); padding: 10px; border-radius: 15px; margin-bottom: 10px;">
+                <strong>صلاة الفجر (نقاط مضاعفة للمسجد)</strong>
+                <select onchange="saveFard('fajr', this.value)">
+                    <option value="0">لم أصلِ</option>
+                    <option value="10">في البيت</option>
+                    <option value="30">في المسجد جماعة ⭐</option>
+                </select>
+            </div>
+            
+            <div class="extra-ibadah">
+                <h3>عبادات التميز والاجتهاد</h3>
+                <label>
+                    <input type="checkbox" onchange="saveExtra('fast_mon_thu', this.checked)"> 
+                    صيام الاثنين والخميس <span class="bonus-tag">(+20 نقطة)</span>
+                </label><br>
+                <label>
+                    <input type="checkbox" onchange="saveExtra('fast_white_days', this.checked)"> 
+                    صيام الأيام البيض (13، 14، 15) <span class="bonus-tag">(+50 نقطة مميزة)</span>
+                </label>
+            </div>
         </div>
 
+        <div class="chat-section">
+            <div class="chat-box" id="chat-box"></div>
+            <div class="chat-input-container">
+                <button class="chat-btn" title="إرفاق" onclick="document.getElementById('file-input').click()">📎</button>
+                <input type="file" id="file-input" style="display:none">
+                <button class="chat-btn" title="إيموجي">😊</button>
+                <input type="text" id="chat-input" placeholder="اكتب رسالتك هنا...">
+                <button class="chat-btn" id="send-btn" style="background: var(--deep-gold)">🚀</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // كود Firebase لإدارة قاعدة البيانات والدردشة الحية
-        // وظائف حساب النتائج وترتيب المتسابقين (Podium)
+        // دالة مخصصة لحساب النقاط مع مراعاة تمييز الفجر والصيام الجديد
+        function calculatePoints(data) {
+            let total = 0;
+            if(data.fajr === "30") total += 30; // صلاة الفجر في المسجد
+            else if(data.fajr === "10") total += 10;
+            
+            if(data.fast_mon_thu) total += 20;
+            if(data.fast_white_days) total += 50;
+            
+            // باقي الحسابات...
+            return total;
+        }
+
+        // إعدادات Firebase والدردشة (يتم ربطها ببياناتك الأصلية)
+        const sendBtn = document.getElementById('send-btn');
+        sendBtn.addEventListener('click', () => {
+            const msg = document.getElementById('chat-input').value;
+            if(msg.trim() !== "") {
+                // منطق الإرسال لـ Firebase
+                document.getElementById('chat-input').value = "";
+            }
+        });
     </script>
 </body>
 </html>
