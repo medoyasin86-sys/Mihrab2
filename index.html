@@ -16,7 +16,8 @@
         .prayer-times-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; }
         .prayer-times-table th, .prayer-times-table td { padding: 5px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
         
-        .next-prayer-banner { background: rgba(255, 255, 255, 0.1); margin-top: 10px; padding: 5px; border-radius: 10px; font-size: 0.85rem; border: 1px solid var(--gold-light); }
+        .next-prayer-banner { background: rgba(255, 255, 255, 0.1); margin-top: 10px; padding: 10px; border-radius: 10px; font-size: 0.9rem; border: 1px solid var(--gold-light); line-height: 1.6; }
+        .timer-span { color: var(--gold-light); font-family: sans-serif; font-weight: bold; }
 
         .hijri-ramadan-bar { background: var(--gold); color: #1a4d2e; margin-top: 10px; border-radius: 10px; padding: 10px; font-weight: bold; display: flex; justify-content: center; align-items: center; font-size: 1rem; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .ramadan-timer { color: #fff; background: var(--primary); padding: 4px 15px; border-radius: 20px; font-family: sans-serif; font-size: 0.9rem; margin-right: 10px; direction: ltr; }
@@ -65,7 +66,7 @@
             </tbody>
         </table>
 
-        <div id="next-prayer-info" class="next-prayer-banner">جاري حساب موعد الصلاة القادمة...</div>
+        <div id="next-prayer-info" class="next-prayer-banner">حساب المواعيد...</div>
 
         <div class="hijri-ramadan-bar">
             <div id="ramadan-countdown">🌙 متبقي على رمضان: <span class="ramadan-timer" id="timer-vals">...</span></div>
@@ -137,21 +138,25 @@
         return `${h}:${m} ${suffix}`;
     }
 
-    function updateRamadanCountdown() {
+    function updateCountdowns() {
         const ramadanDate = new Date('February 18, 2026 00:00:00').getTime();
         setInterval(() => {
-            const now = new Date().getTime();
-            const diff = ramadanDate - now;
-            if (diff < 0) {
+            const now = new Date();
+            
+            // Ramadan Countdown
+            const diffRamadan = ramadanDate - now.getTime();
+            if (diffRamadan < 0) {
                 document.getElementById('ramadan-countdown').innerHTML = "🌙 <b>رمضان كريم!</b>";
-                return;
+            } else {
+                const d = Math.floor(diffRamadan / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diffRamadan % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diffRamadan % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diffRamadan % (1000 * 60)) / 1000);
+                document.getElementById('timer-vals').innerText = `${d}ي ${h}س ${m}د ${s}ث`;
             }
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-            document.getElementById('timer-vals').innerText = `${d}ي ${h}س ${m}د ${s}ث`;
-            updateNextPrayerCountdown();
+
+            // Next Prayer Countdown
+            updateNextPrayerCountdown(now);
         }, 1000);
     }
 
@@ -166,19 +171,19 @@
         } catch(e) { console.error("Error fetching prayers"); }
     }
 
-    function updateNextPrayerCountdown() {
+    function updateNextPrayerCountdown(now) {
         let info = "";
         for (let city in prayersCache) {
             const timings = prayersCache[city];
-            const now = new Date();
             const prayerNames = {Fajr:"الفجر", Dhuhr:"الظهر", Asr:"العصر", Maghrib:"المغرب", Isha:"العشاء"};
             let nextP = null;
             let minDiff = Infinity;
 
             for (let p in prayerNames) {
                 let [h, m] = timings[p].split(':');
-                let pDate = new Date();
-                pDate.setHours(h, m, 0);
+                let pDate = new Date(now);
+                pDate.setHours(parseInt(h), parseInt(m), 0, 0);
+                
                 let diff = pDate - now;
                 if (diff > 0 && diff < minDiff) {
                     minDiff = diff;
@@ -190,12 +195,13 @@
             if (nextP) {
                 const h = Math.floor(nextP.time / 3600000);
                 const m = Math.floor((nextP.time % 3600000) / 60000);
-                info += `${cityName}: ${nextP.name} خلال ${h}س و ${m}د | `;
+                const s = Math.floor((nextP.time % 60000) / 1000);
+                info += `<div>${cityName}: صلاة <b style="color:var(--gold-light)">${nextP.name}</b> خلال <span class="timer-span">${h}س ${m}د ${s}ث</span></div>`;
             } else {
-                info += `${cityName}: بانتظار فجر الغد | `;
+                info += `<div>${cityName}: بانتظار فجر الغد 🌅</div>`;
             }
         }
-        document.getElementById('next-prayer-info').innerText = info.slice(0, -3);
+        document.getElementById('next-prayer-info').innerHTML = info;
     }
 
     function getRemaining(userData, isFriday) {
@@ -314,7 +320,7 @@
         document.getElementById('date-picker').value = new Date().toISOString().split('T')[0];
         fetchCityPrayers('Salalah', 'Oman', 'row-salalah');
         fetchCityPrayers('Kafr El Sheikh', 'Egypt', 'row-kafr');
-        updateRamadanCountdown();
+        updateCountdowns();
         document.getElementById('date-picker').onchange = sync; 
         sync();
     };
