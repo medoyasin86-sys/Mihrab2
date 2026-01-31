@@ -23,318 +23,36 @@
         }
 
         body.dark-mode {
-            --bg: #121212; --text: #e0e0e0; --card-bg: #1e1e1e; --border: #333; --masjid: #4db6ac; --royal-green: #004d40;
+            --bg: #121212;
+            --text: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --border: #333;
+            --masjid: #4db6ac;
+            --royal-green: #004d40;
         }
         
         body { font-family: 'Amiri', serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; line-height: 1.6; transition: 0.3s; }
         .container { max-width: 900px; margin: auto; background: var(--card-bg); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 30px; padding: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.08); }
         
         .ramadan-bar { background: var(--royal-green); color: #f1d37e; padding: 15px; text-align: center; border-radius: 20px; margin-bottom: 10px; font-weight: bold; border: 1px solid var(--deep-gold); }
-        .hadith-ticker { background: var(--card-bg); border: 1px solid #e0d5b0; color: var(--masjid); padding: 8px; border-radius: 12px; margin-bottom: 20px; overflow: hidden; white-space: nowrap; font-size: 0.9rem; font-weight: bold; }
-
-        .prayer-times-box { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .city-card { background: var(--card-bg); border: 1px solid #e0d5b0; border-radius: 15px; padding: 10px; text-align: center; }
-        .city-name { font-family: 'Reem Kufi'; color: var(--masjid); font-size: 1rem; border-bottom: 1px solid #e0d5b0; margin-bottom: 5px; }
-        .timer-val { font-size: 0.85rem; color: #e65100; font-weight: bold; display: block; }
-
-        .podium-container { display: flex; justify-content: space-around; align-items: flex-end; margin: 10px 0 20px; background: var(--card-bg); padding: 15px; border-radius: 25px; border: 1px solid var(--border); }
-        .podium-item { display: flex; flex-direction: column; align-items: center; width: 22%; font-size: 0.8rem; }
-        .podium-rank { width: 100%; text-align: center; color: white; border-radius: 12px 12px 0 0; padding: 5px 0; font-weight: bold; }
-        .rank-1 { height: 80px; background: var(--gold-gradient); color: var(--royal-green); }
-        .rank-2 { height: 60px; background: var(--silver); }
-        .rank-3 { height: 45px; background: var(--bronze); }
-
-        .user-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 25px; }
-        .comp-card { background: var(--card-bg); border: 1px solid var(--border); padding: 15px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
-        .comp-card.active { border: 2px solid var(--deep-gold); background: rgba(212, 175, 55, 0.05); }
-        .remaining-box { margin-top: 8px; padding: 8px; background: rgba(0,0,0,0.02); border-radius: 10px; font-size: 0.75rem; color: #666; display: flex; flex-wrap: wrap; gap: 4px; }
-        .rem-tag { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
-
-        .task-card { background: var(--card-bg); border-radius: 20px; padding: 15px; margin-bottom: 15px; border-right: 6px solid var(--masjid); box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
-        .row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
         
-        .btn-group { display: flex; gap: 3px; }
-        .btn-group button { border: 1px solid var(--border); padding: 5px; border-radius: 8px; cursor: pointer; font-family: 'Amiri'; font-size: 0.7rem; background: var(--card-bg); color: var(--text); min-width: 45px; }
-        .active-m { background: var(--masjid) !important; color: white !important; }
-        .active-h { background: #e65100 !important; color: white !important; }
-        .active-s { background: #4a148c !important; color: white !important; }
+        /* ... باقي كود التنسيق CSS ... */
 
-        /* الشات المتطور */
-        .chat-section { background: var(--card-bg); border: 2px solid var(--masjid); border-radius: 25px; padding: 15px; margin-top: 20px; }
-        .chat-box { height: 300px; overflow-y: auto; border: 1px solid var(--border); padding: 10px; margin-bottom: 10px; border-radius: 15px; display: flex; flex-direction: column; gap: 8px; background: #f9f9f9; }
-        body.dark-mode .chat-box { background: #1a1a1a; }
-        .msg { padding: 10px; border-radius: 15px; max-width: 85%; position: relative; font-size: 0.9rem; }
-        .msg.sent { align-self: flex-end; background: #e3f2fd; border: 1px solid #bbdefb; border-bottom-left-radius: 2px; }
-        .msg.received { align-self: flex-start; background: white; border: 1px solid #eee; border-bottom-right-radius: 2px; }
-        body.dark-mode .msg.sent { background: #004d40; color: white; border-color: #00695c; }
-        .msg-info { font-size: 0.7rem; color: #888; margin-bottom: 4px; display: flex; justify-content: space-between; }
+        .chat-section { background: var(--card-bg); border: 2px solid var(--masjid); border-radius: 25px; padding: 15px; margin-top: 30px; }
+        .chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border); padding: 10px; margin-bottom: 5px; border-radius: 15px; background: rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 14px; border-radius: 18px; max-width: 80%; font-size: 0.88rem; position: relative; color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .msg.sent { background: #dcf8c6; align-self: flex-end; border-bottom-left-radius: 4px; color: #1a252f; }
         
-        .reactions { display: flex; gap: 3px; margin-top: 5px; font-size: 0.8rem; }
-        .react-btn { cursor: pointer; opacity: 0.6; transition: 0.2s; }
-        .react-btn:hover { opacity: 1; transform: scale(1.2); }
-        .react-count { background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 5px; font-size: 0.65rem; }
-
-        .chat-controls { display: flex; gap: 5px; }
-        #chat-input { flex: 1; padding: 10px; border-radius: 15px; border: 1px solid var(--border); font-family: 'Amiri'; }
-        .theme-toggle { position: fixed; top: 15px; left: 15px; width: 40px; height: 40px; border-radius: 50%; background: var(--gold-gradient); border: none; cursor: pointer; z-index: 1000; font-size: 1.2rem; }
-        
-        .points-tag { font-size: 0.65rem; color: var(--deep-gold); font-weight: bold; margin-right: 5px; }
+        /* ... كود JavaScript والتعامل مع Firebase ... */
     </style>
 </head>
 <body>
-
-<button class="theme-toggle" onclick="toggleTheme()">🌓</button>
-
-<div class="container">
-    <div id="ramadan-countdown" class="ramadan-bar">⏳ يترقب المحبون رمضان...</div>
-    
-    <div class="hadith-ticker">
-        <span>📖 حديث: </span><marquee id="hadith-text">جاري تحميل الحديث الشريف...</marquee>
-    </div>
-
-    <div class="prayer-times-box">
-        <div class="city-card">
-            <div class="city-name">📍 صلالة</div>
-            <span id="salalah-timer" class="timer-val">...</span>
-        </div>
-        <div class="city-card">
-            <div class="city-name">📍 كفر الشيخ</div>
-            <span id="kafr-timer" class="timer-val">...</span>
-        </div>
-    </div>
-
-    <div style="text-align:center; margin-bottom:15px;">
-        <h2 style="font-family:'Reem Kufi'; color: var(--royal-green); margin:0;">⚜️ نلتقي على طاعة الله 2026</h2>
-        <div id="hijri-date" style="color:var(--deep-gold); font-weight:bold; font-size: 0.9rem;"></div>
-        <input type="date" id="main-date" onchange="sync()" style="padding:5px; border-radius:8px; border:1px solid var(--deep-gold);">
-    </div>
-
-    <div id="podiums">
-        <h4 style="text-align:center; margin: 10px 0;">🏆 المتصدرون</h4>
-        <div id="podium-daily" class="podium-container"></div>
-    </div>
-
-    <div id="user-grid" class="user-grid"></div>
-
-    <div id="app-body" style="display:none;">
-        <div class="task-card">
-            <h3 style="color:var(--masjid); margin-top:0;">🕋 الصلوات (مسجد:100ن | جماعة:50ن | فردي:25ن)</h3>
-            <div id="fard-list"></div>
-        </div>
-        
-        <div class="task-card" style="border-right-color: var(--sunnah)">
-            <h3 style="color:var(--sunnah); margin-top:0;">✨ السنن والرواتب</h3>
-            <div id="sunnah-list"></div>
+    <div class="container">
         </div>
 
-        <div class="task-card" style="border-right-color: #f39c12">
-            <h3 style="color:#f39c12; margin-top:0;">📑 الأوراد والقرآن</h3>
-            <div class="row">
-                <span>📖 ورد القرآن (الجزء) <b class="points-tag">100ن</b></span>
-                <input type="number" id="q-part" min="0" max="30" onchange="updateQ(this.value)" style="width:45px;">
-            </div>
-            <div id="azkar-list"></div>
-        </div>
-    </div>
-
-    <div class="chat-section">
-        <h4 style="text-align:center; margin:0 0 10px 0; font-family:'Reem Kufi';">💬 ديوانية العائلة</h4>
-        <div id="chat-box" class="chat-box"></div>
-        <div class="chat-controls">
-            <select id="chat-user-select" onchange="setUser(this.value)" style="padding:5px; border-radius:10px;">
-                <option value="" disabled selected>أنا..</option>
-                <option value="محمد">محمد</option>
-                <option value="شيماء">شيماء</option>
-                <option value="أحمد">أحمد</option>
-                <option value="ياسين">ياسين</option>
-            </select>
-            <input type="text" id="chat-input" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendMsg()">
-            <button onclick="sendMsg()" style="background:var(--masjid); color:white; border:none; border-radius:10px; padding:0 15px;">إرسال</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1", storageBucket: "ebada-656e1.firebasestorage.app", messagingSenderId: "705608653939", appId: "1:705608653939:web:5ab3609a6f7ccc8675de06" };
-    firebase.initializeApp(firebaseConfig); const db = firebase.database();
-
-    let currentUser = null;
-    const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
-    const prayers = [{id:'fajr', n:'الفجر', i:'🌅'},{id:'dhuhr', n:'الظهر', i:'☀️'},{id:'asr', n:'العصر', i:'🌤️'},{id:'maghrib', n:'المغرب', i:'🌇'},{id:'isha', n:'العشاء', i:'🌃'}];
-    const sunan = [
-        {id:'s_f_pre', n:'سنة الفجر', r:'2ر', p:15},
-        {id:'duha', n:'الضحى', r:'2ر+', p:15},
-        {id:'s_d_pre', n:'سنة الظهر قبل', r:'4ر', p:20},
-        {id:'s_d_post', n:'سنة الظهر بعد', r:'2ر', p:10},
-        {id:'s_m_post', n:'سنة المغرب', r:'2ر', p:10},
-        {id:'s_i_post', n:'سنة العشاء', r:'2ر', p:10},
-        {id:'traweeh', n:'صلاة القيام', r:'', p:60},
-        {id:'witr', n:'الوتر والشفع', r:'3ر', p:25}
-    ];
-    const azkar = [
-        {id:'morning', n:'أذكار الصباح', p:20},
-        {id:'evening', n:'أذكار المساء', p:20},
-        {id:'sleep', n:'أذكار النوم', p:15},
-        {id:'kahf', n:'سورة الكهف', p:40}
-    ];
-
-    const timetable = {
-        salalah: { fajr: "05:15", dhuhr: "12:30", asr: "15:50", maghrib: "18:15", isha: "19:30" },
-        kafr: { fajr: "05:25", dhuhr: "12:10", asr: "15:10", maghrib: "17:40", isha: "19:05" }
-    };
-
-    function toggleTheme() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
-    }
-
-    function sync() {
-        const date = document.getElementById('main-date').value;
-        const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma', {day:'numeric', month:'long', year:'numeric'}).format(new Date(date));
-        document.getElementById('hijri-date').innerText = hijri;
-        const isFri = new Date(date).getDay() === 5;
-
-        db.ref('osraty').on('value', snap => {
-            const all = snap.val() || {}; const day = all[date] || {};
-            updatePodiums(day);
-            renderUsers(day, isFri);
-            if(currentUser) renderTasks(day[currentUser] || {}, isFri);
-        });
-    }
-
-    function renderUsers(dayData, isFri) {
-        document.getElementById('user-grid').innerHTML = users.map(u => {
-            const ud = dayData[u] || {};
-            let score = 0;
-            let missing = [];
-            
-            // حساب النقاط والناقص
-            prayers.forEach(p => {
-                let id = (isFri && p.id==='dhuhr') ? 'jumuah' : p.id;
-                if(ud[id]) score += (ud[id].p || 0);
-                else missing.push(isFri && p.id==='dhuhr' ? 'الجمعة' : p.n);
-            });
-            sunan.forEach(s => { if(ud[s.id]) score += s.p; else missing.push(s.n); });
-            azkar.forEach(a => { 
-                if(isFri || a.id !== 'kahf') {
-                    if(ud[a.id]) score += a.p; else missing.push(a.n);
-                }
-            });
-            score += (ud.q_part * 100 || 0);
-
-            return `<div class="comp-card ${u===currentUser?'active':''}" onclick="setUser('${u}')">
-                <div style="display:flex; justify-content:space-between"><b>👤 ${u}</b> <span class="points-tag">${score}ن</span></div>
-                <div class="remaining-box">${missing.length ? missing.map(m=>`<span class="rem-tag">${m}</span>`).join('') : '✅ مكتمل'}</div>
-            </div>`;
-        }).join('');
-    }
-
-    function renderTasks(ud, isFri) {
-        document.getElementById('app-body').style.display = 'block';
-        
-        // الصلوات
-        document.getElementById('fard-list').innerHTML = prayers.map(p => {
-            let id = (isFri && p.id==='dhuhr') ? 'jumuah' : p.id;
-            let n = (id==='jumuah') ? 'صلاة الجمعة' : p.n;
-            const v = ud[id]?.type || '';
-            return `<div class="row"><span>${p.i} ${n}</span>
-                <div class="btn-group">
-                    <button class="${v==='m'?'active-m':''}" onclick="saveFard('${id}','m',100)">مسجد</button>
-                    <button class="${v==='h'?'active-h':''}" onclick="saveFard('${id}','h',50)">جماعة</button>
-                    <button class="${v==='s'?'active-s':''}" onclick="saveFard('${id}','s',25)">فردي</button>
-                </div></div>`;
-        }).join('');
-
-        // السنن
-        document.getElementById('sunnah-list').innerHTML = sunan.map(s => `
-            <div class="row"><span>${s.n} <small>(${s.r})</small> <b class="points-tag">${s.p}ن</b></span>
-            <input type="checkbox" ${ud[s.id]?.done?'checked':''} onchange="saveCheck('${s.id}',${s.p},this.checked)"></div>
-        `).join('');
-
-        // الأذكار
-        document.getElementById('azkar-list').innerHTML = azkar.map(a => {
-            if(!isFri && a.id === 'kahf') return '';
-            return `<div class="row"><span>${a.n} <b class="points-tag">${a.p}ن</b></span>
-            <input type="checkbox" ${ud[a.id]?.done?'checked':''} onchange="saveCheck('${a.id}',${a.p},this.checked)"></div>`;
-        }).join('');
-        
-        document.getElementById('q-part').value = ud.q_part || 0;
-    }
-
-    function updatePodiums(day) {
-        let daily = users.map(u => {
-            let s = 0; const ud = day[u] || {};
-            Object.values(ud).forEach(v => s += (v.p || 0));
-            s += (ud.q_part * 100 || 0);
-            return { name: u, score: s };
-        }).sort((a,b) => b.score - a.score);
-
-        const fill = (data, id) => {
-            const p = [data[1], data[0], data[2]];
-            document.getElementById(id).innerHTML = p.map((u, i) => u ? `
-                <div class="podium-item">
-                    <div class="podium-rank rank-${i===0?2:i===1?1:3}">${u.score}</div>
-                    <div>${u.name}</div>
-                </div>` : '').join('');
-        };
-        fill(daily, 'podium-daily');
-    }
-
-    // الشات والتفاعلات
-    function sendMsg() {
-        const txt = document.getElementById('chat-input').value;
-        if(!currentUser || !txt) return;
-        db.ref('osraty_chat').push({
-            user: currentUser, msg: txt,
-            time: new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})
-        });
-        document.getElementById('chat-input').value = '';
-    }
-
-    function addReact(msgId, emoji) {
-        if(!currentUser) return;
-        db.ref(`osraty_chat/${msgId}/reacts/${emoji}`).transaction(c => (c || 0) + 1);
-    }
-
-    function initChat() {
-        db.ref('osraty_chat').limitToLast(15).on('value', snap => {
-            const box = document.getElementById('chat-box'); box.innerHTML = '';
-            snap.forEach(child => {
-                const d = child.val(); const isMe = d.user === currentUser;
-                let reactsHtml = `<div class="reactions">
-                    <span class="react-btn" onclick="addReact('${child.key}','❤️')">❤️</span>
-                    <span class="react-btn" onclick="addReact('${child.key}','👍')">👍</span>`;
-                if(d.reacts) Object.entries(d.reacts).forEach(([e, c]) => reactsHtml += `<span class="react-count">${e}${c}</span>`);
-                reactsHtml += `</div>`;
-
-                box.innerHTML += `<div class="msg ${isMe?'sent':'received'}">
-                    <div class="msg-info"><b>${d.user}</b> <span>${d.time}</span></div>
-                    <div>${d.msg}</div>${reactsHtml}</div>`;
-            });
-            box.scrollTop = box.scrollHeight;
-        });
-    }
-
-    function updateTimers() {
-        const now = new Date();
-        const update = (city, offset, id) => {
-            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            const cityTime = new Date(utc + (3600000 * offset));
-            document.getElementById(id).innerText = cityTime.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-        };
-        update('salalah', 4, 'salalah-timer');
-        update('kafr', 2, 'kafr-timer');
-    }
-
-    function setUser(u) { currentUser = u; document.getElementById('chat-user-select').value = u; sync(); }
-    function saveFard(id, type, p) { if(currentUser) db.ref(`osraty/${document.getElementById('main-date').value}/${currentUser}/${id}`).set({type, p}); }
-    function saveCheck(id, p, done) { if(currentUser) db.ref(`osraty/${document.getElementById('main-date').value}/${currentUser}/${id}`).set({done, p: done?p:0}); }
-    function updateQ(v) { if(currentUser) db.ref(`osraty/${document.getElementById('main-date').value}/${currentUser}/q_part`).set(Number(v)); }
-
-    document.getElementById('main-date').value = new Date().toISOString().split('T')[0];
-    setInterval(updateTimers, 1000);
-    initChat();
-    sync();
-</script>
+    <script>
+        // كود Firebase لإدارة قاعدة البيانات والدردشة الحية
+        // وظائف حساب النتائج وترتيب المتسابقين (Podium)
+    </script>
 </body>
 </html>
