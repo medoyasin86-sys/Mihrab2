@@ -31,7 +31,6 @@
         .niya-alert { background: #fff3cd; color: #856404; padding: 10px; border-radius: 10px; margin-top: 10px; border: 1px solid #ffeeba; font-weight: bold; animation: pulse 2s infinite; display: none; text-align: center; width: 100%; box-sizing: border-box; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
-        /* تعديل الشريط ليصبح ثابتاً تماماً */
         .hadith-marquee { background: var(--accent); color: white; padding: 12px 15px; border-radius: 15px; font-size: 1.1rem; border: 2px solid var(--gold); margin: 15px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; display: flex; justify-content: center; align-items: center; min-height: 40px; overflow: hidden; }
         .hadith-text { display: block; white-space: normal; animation: none; font-weight: bold; line-height: 1.4; }
 
@@ -43,6 +42,25 @@
         .p-3 { height: 55px; background: linear-gradient(135deg, #cd7f32, #8b4513); }
         .p-4 { height: 40px; background: linear-gradient(135deg, #95a5a6, #2c3e50); }
         .p-name { position: absolute; bottom: -25px; color: var(--text); font-weight: bold; font-size: 0.8rem; white-space: nowrap; }
+
+        /* قسم فرسان الأسبوع المطور */
+        .weekly-knights-section { 
+            margin: 20px 0; padding: 15px; border-radius: 20px; 
+            background: linear-gradient(135deg, #1a4d2e, #2c3e50); 
+            border: 2px solid var(--gold); 
+            box-shadow: 0 0 20px rgba(197, 160, 89, 0.5);
+            text-align: center; color: white;
+        }
+        .knights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
+        .knight-card { 
+            background: rgba(255,255,255,0.1); border: 1px solid var(--gold); 
+            padding: 10px; border-radius: 15px; position: relative; overflow: hidden;
+            transition: 0.3s;
+        }
+        .knight-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.2); }
+        .knight-icon { font-size: 1.8rem; display: block; margin-bottom: 5px; }
+        .knight-title { font-size: 0.8rem; color: var(--gold-light); font-weight: bold; display: block; }
+        .knight-name { font-size: 1.1rem; font-weight: bold; color: #fff; text-shadow: 0 0 5px var(--gold); }
 
         .user-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
         .comp-card { padding: 10px; text-align: center; border: 2px solid var(--gold-light); border-radius: 15px; cursor: pointer; background: #fff; transition: 0.3s; }
@@ -104,6 +122,17 @@
     <div class="podium-section">
         <div><h4 style="text-align:center; margin:2px;">🏆 توب اليوم</h4><div id="daily-podium" class="podium-container"></div></div>
         <div><h4 style="text-align:center; margin:2px;">✨ الترتيب السنوي</h4><div id="annual-podium" class="podium-container"></div></div>
+    </div>
+
+    <div class="weekly-knights-section">
+        <h3 style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light); text-shadow: 0 0 10px rgba(197, 160, 89, 0.8);">⚔️ فرسان الأسبوع (أكثر المنجزين)</h3>
+        <div class="knights-grid" id="knights-container">
+            <div class="knight-card"><span class="knight-icon">🕌</span><span class="knight-title">فارس الفجر</span><span class="knight-name" id="k-fajr">-</span></div>
+            <div class="knight-card"><span class="knight-icon">🌙</span><span class="knight-title">فارس الصيام</span><span class="knight-name" id="k-fast">-</span></div>
+            <div class="knight-card"><span class="knight-icon">✨</span><span class="knight-title">فارس السنن</span><span class="knight-name" id="k-sunan">-</span></div>
+            <div class="knight-card"><span class="knight-icon">📖</span><span class="knight-title">فارس القرآن</span><span class="knight-name" id="k-quran">-</span></div>
+            <div class="knight-card"><span class="knight-icon">📿</span><span class="knight-title">فارس الأذكار</span><span class="knight-name" id="k-azkar">-</span></div>
+        </div>
     </div>
 
     <div class="hadith-marquee">
@@ -419,6 +448,48 @@
         }).join('');
     }
 
+    // وظيفة احتساب فرسان الأسبوع
+    function updateWeeklyKnights() {
+        const today = new Date();
+        const last7Days = [];
+        for(let i=0; i<7; i++) {
+            let d = new Date();
+            d.setDate(today.getDate() - i);
+            last7Days.push(d.toISOString().split('T')[0]);
+        }
+
+        db.ref('osraty').once('value', snap => {
+            const data = snap.val() || {};
+            let kScores = users.reduce((acc, u) => ({...acc, [u]: {fajr:0, fast:0, sunan:0, quran:0, azkar:0}}), {});
+
+            last7Days.forEach(dateStr => {
+                if(data[dateStr]) {
+                    users.forEach(u => {
+                        const ud = data[dateStr][u] || {};
+                        if(ud.fajr?.type === 'm') kScores[u].fajr++;
+                        if(ud.fasting?.done) kScores[u].fast++;
+                        model.sunan.forEach(s => { if(ud[s.id]?.done) kScores[u].sunan++; });
+                        if(ud.quran?.done) kScores[u].quran++;
+                        if(ud.azkar_s?.done) kScores[u].azkar++;
+                        if(ud.azkar_e?.done) kScores[u].azkar++;
+                    });
+                }
+            });
+
+            const getWinner = (type) => {
+                let win = {n: '-', val: 0};
+                users.forEach(u => { if(kScores[u][type] > win.val) win = {n: u, val: kScores[u][type]}; });
+                return win.n;
+            };
+
+            document.getElementById('k-fajr').innerText = getWinner('fajr');
+            document.getElementById('k-fast').innerText = getWinner('fast');
+            document.getElementById('k-sunan').innerText = getWinner('sunan');
+            document.getElementById('k-quran').innerText = getWinner('quran');
+            document.getElementById('k-azkar').innerText = getWinner('azkar');
+        });
+    }
+
     function sendMessage() {
         const inp = document.getElementById('chat-input');
         const user = document.getElementById('chat-user-selector').value || currentUser;
@@ -461,6 +532,7 @@
         db.ref('osraty/' + d).on('value', snap => render(snap.val() || {}));
         db.ref('osraty_chat').limitToLast(20).on('value', snap => renderChat(snap.val() || {}));
         updateAnnual();
+        updateWeeklyKnights();
         checkNiyaAlert();
     }
 
