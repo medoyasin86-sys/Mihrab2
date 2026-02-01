@@ -31,7 +31,6 @@
         .niya-alert { background: #fff3cd; color: #856404; padding: 10px; border-radius: 10px; margin-top: 10px; border: 1px solid #ffeeba; font-weight: bold; animation: pulse 2s infinite; display: none; text-align: center; width: 100%; box-sizing: border-box; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
-        /* تعديل الشريط ليصبح ثابتاً تماماً */
         .hadith-marquee { background: var(--accent); color: white; padding: 12px 15px; border-radius: 15px; font-size: 1.1rem; border: 2px solid var(--gold); margin: 15px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; display: flex; justify-content: center; align-items: center; min-height: 40px; overflow: hidden; }
         .hadith-text { display: block; white-space: normal; animation: none; font-weight: bold; line-height: 1.4; }
 
@@ -120,7 +119,7 @@
         </div>
         
         <div class="section-card"><h3 class="section-title">🕋 الفرائض (المسجد | جماعة | فردي)</h3><div id="fard-list"></div></div>
-        <div class="section-card"><h3 class="section-title">🌱 السنن والرواتب</h3><div id="sunan-list"></div></div>
+        <div class="section-card"><h3 class="section-title">🌱 السنن والرواتب والضحى</h3><div id="sunan-list"></div></div>
         <div class="section-card"><h3 class="section-title">📿 الأذكار والورد</h3><div id="extra-list"></div></div>
     </div>
 
@@ -172,7 +171,7 @@
             {id:'isha', n:'🌃 العشاء', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'}
         ],
         sunan: [
-            {id:'s_fajr', n:'✨ سنة الفجر', p:20}, {id:'s_dhuhr_b', n:'✨ الظهر قبل', p:20},
+            {id:'s_fajr', n:'✨ سنة الفجر', p:20}, {id:'s_duha', n:'☀️ صلاة الضحى', p:25}, {id:'s_dhuhr_b', n:'✨ الظهر قبل', p:20},
             {id:'s_dhuhr_a', n:'✨ الظهر بعد', p:15}, {id:'s_maghrib', n:'✨ سنة المغرب', p:15},
             {id:'s_isha', n:'✨ سنة العشاء', p:15}, {id:'s_shaf', n:'🕯️ الشفع', p:15},
             {id:'s_witr', n:'🌌 الوتر', p:20}, {id:'s_qyam', n:'🌙 قيام الليل', p:40}
@@ -182,6 +181,7 @@
             {id:'azkar_e', n:'🌙 أذكار المساء', p:30, l:'https://alazkar.today/'},
             {id:'azkar_n', n:'😴 أذكار النوم', p:30, l:'https://alazkar.today/'}, 
             {id:'mulk', n:'📖 سورة الملك', p:30, l:'https://quran.com/67'}, 
+            {id:'baqara_end', n:'📖 خواتيم سورة البقرة', p:20, l:'https://quran.com/2/285-286'},
             {id:'quran', n:'📖 الورد القرآني', p:50, l:'https://quran.com'}
         ]
     };
