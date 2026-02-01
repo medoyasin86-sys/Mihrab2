@@ -31,9 +31,9 @@
         .niya-alert { background: #fff3cd; color: #856404; padding: 10px; border-radius: 10px; margin-top: 10px; border: 1px solid #ffeeba; font-weight: bold; animation: pulse 2s infinite; display: none; text-align: center; width: 100%; box-sizing: border-box; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
-        .hadith-marquee { background: var(--accent); color: white; padding: 10px 0; border-radius: 15px; font-size: 1rem; overflow: hidden; white-space: nowrap; border: 2px solid var(--gold); margin: 15px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .hadith-text { display: inline-block; padding-right: 100%; animation: marquee 30s linear infinite; }
-        @keyframes marquee { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        /* تعديل الشريط ليصبح ثابتاً */
+        .hadith-marquee { background: var(--accent); color: white; padding: 12px 15px; border-radius: 15px; font-size: 1.1rem; border: 2px solid var(--gold); margin: 15px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; display: flex; justify-content: center; align-items: center; min-height: 30px; }
+        .hadith-text { display: block; white-space: normal; animation: none; font-weight: bold; }
 
         .podium-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 130px; gap: 5px; padding-bottom: 25px; }
@@ -107,7 +107,7 @@
     </div>
 
     <div class="hadith-marquee">
-        <div class="hadith-text" id="daily-hadith">قال ﷺ: (أحب الأعمال إلى الله أدومها وإن قل)</div>
+        <div class="hadith-text" id="daily-hadith">جاري تحميل حديث اليوم...</div>
     </div>
 
     <div id="cards-ui" class="user-cards"></div>
@@ -320,7 +320,6 @@
                 const m = Math.floor((nextP.time % 3600000) / 60000);
                 const s = Math.floor((nextP.time % 60000) / 1000);
                 info += `<div>${cityName}: صلاة <b style="color:var(--gold-light)">${nextP.name}</b> خلال <span class="timer-span">${h}س ${m}د ${s}ث</span></div>`;
-                // تنبيه الاستعداد قبل 10 دقائق (600,000 مللي ثانية)
                 if (nextP.time <= 600000 && nextP.time > 0) { showAlert = true; alertPrayerName = nextP.name; }
             } else { info += `<div>${cityName}: بانتظار فجر الغد 🌅</div>`; }
         }
