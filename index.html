@@ -26,7 +26,9 @@
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
         .hadith-marquee { background: var(--accent); color: white; padding: 12px 15px; border-radius: 15px; font-size: 1.1rem; border: 2px solid var(--gold); margin: 15px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; display: flex; justify-content: center; align-items: center; min-height: 40px; overflow: hidden; }
         .hadith-text { display: block; white-space: normal; animation: none; font-weight: bold; line-height: 1.4; }
-        .podium-section { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
+        
+        /* Rankings Layout */
+        .rankings-grid { display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 10px; margin: 20px 0; }
         .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 110px; gap: 3px; padding-bottom: 25px; background: #fdfdfd; border-radius: 10px; border: 1px solid #eee; }
         .podium-step { width: 35px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: white; border-radius: 5px; position: relative; font-size: 0.65rem; transition: 0.5s; }
         .p-1 { height: 80px; background: linear-gradient(135deg, #ffd700, #b8860b); }
@@ -34,6 +36,13 @@
         .p-3 { height: 45px; background: linear-gradient(135deg, #cd7f32, #8b4513); }
         .p-4 { height: 30px; background: linear-gradient(135deg, #95a5a6, #2c3e50); }
         .p-name { position: absolute; bottom: -22px; color: var(--text); font-weight: bold; font-size: 0.7rem; white-space: nowrap; }
+        
+        /* Knights Section Styles */
+        .knights-list { background: #fff; border: 1px solid var(--gold); border-radius: 10px; padding: 5px; display: flex; flex-direction: column; gap: 4px; height: 110px; overflow-y: auto; }
+        .knight-item { font-size: 0.75rem; border-bottom: 1px solid #f0f0f0; padding: 2px; display: flex; justify-content: space-between; }
+        .knight-title { color: var(--primary); font-weight: bold; }
+        .knight-name { color: var(--accent); font-weight: bold; }
+
         .user-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
         .comp-card { padding: 10px; text-align: center; border: 2px solid var(--gold-light); border-radius: 15px; cursor: pointer; background: #fff; transition: 0.3s; }
         .comp-card.active { border-color: var(--primary); background: #f0f7f2; transform: scale(1.02); }
@@ -83,10 +92,21 @@
         </div>
     </div>
 
-    <div class="podium-section">
-        <div><h4 style="text-align:center; margin:2px; font-size:0.8rem;">🏆 توب اليوم</h4><div id="daily-podium" class="podium-container"></div></div>
-        <div><h4 style="text-align:center; margin:2px; font-size:0.8rem;">🥇 فرسان الأسبوع</h4><div id="weekly-podium" class="podium-container"></div></div>
-        <div><h4 style="text-align:center; margin:2px; font-size:0.8rem;">✨ الترتيب السنوي</h4><div id="annual-podium" class="podium-container"></div></div>
+    <div class="rankings-grid">
+        <div>
+            <h4 style="text-align:center; margin:2px; font-size:0.8rem;">🏆 توب اليوم</h4>
+            <div id="daily-podium" class="podium-container"></div>
+        </div>
+        <div>
+            <h4 style="text-align:center; margin:2px; font-size:0.8rem;">🥇 فرسان الأسبوع</h4>
+            <div id="weekly-knights" class="knights-list">
+                <div class="knight-item"><span>بانتظار الفرسان...</span></div>
+            </div>
+        </div>
+        <div>
+            <h4 style="text-align:center; margin:2px; font-size:0.8rem;">✨ الترتيب السنوي</h4>
+            <div id="annual-podium" class="podium-container"></div>
+        </div>
     </div>
 
     <div class="hadith-marquee">
@@ -404,25 +424,64 @@
         db.ref('osraty').once('value', snap => {
             const data = snap.val() || {}; 
             let annual = users.map(u => ({n:u, s:0}));
-            let weekly = users.map(u => ({n:u, s:0}));
             
+            // Knights Stats
+            let weeklyKnights = {
+                fajr: { n: 'لاشيء', v: 0, scores: {} },
+                fast: { n: 'لاشيء', v: 0, scores: {} },
+                sunan: { n: 'لاشيء', v: 0, scores: {} },
+                quran: { n: 'لاشيء', v: 0, scores: {} },
+                azkar: { n: 'لاشيء', v: 0, scores: {} }
+            };
+
             const now = new Date();
             const startOfWeek = new Date(now);
             startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday start
 
             Object.entries(data).forEach(([dateStr, dayData]) => {
                 const entryDate = new Date(dateStr);
-                users.forEach((u, i) => {
+                users.forEach((u) => {
                     if(dayData[u]) {
-                        Object.values(dayData[u]).forEach(t => {
-                            annual[i].s += (t.p || 0);
-                            if(entryDate >= startOfWeek) weekly[i].s += (t.p || 0);
+                        Object.entries(dayData[u]).forEach(([habitId, t]) => {
+                            annual.find(a => a.n === u).s += (t.p || 0);
+                            
+                            if(entryDate >= startOfWeek) {
+                                // Logic for Knights
+                                if(!weeklyKnights.fajr.scores[u]) weeklyKnights.fajr.scores[u] = 0;
+                                if(!weeklyKnights.fast.scores[u]) weeklyKnights.fast.scores[u] = 0;
+                                if(!weeklyKnights.sunan.scores[u]) weeklyKnights.sunan.scores[u] = 0;
+                                if(!weeklyKnights.quran.scores[u]) weeklyKnights.quran.scores[u] = 0;
+                                if(!weeklyKnights.azkar.scores[u]) weeklyKnights.azkar.scores[u] = 0;
+
+                                if(habitId === 'fajr' && t.type === 'm') weeklyKnights.fajr.scores[u]++;
+                                if(habitId === 'fasting' && t.done) weeklyKnights.fast.scores[u]++;
+                                if(habitId.startsWith('s_') && t.done) weeklyKnights.sunan.scores[u] += (t.p || 0);
+                                if(habitId === 'quran' && t.done) weeklyKnights.quran.scores[u] += (t.p || 0);
+                                if(habitId.startsWith('azkar_') && t.done) weeklyKnights.azkar.scores[u] += (t.p || 0);
+                            }
                         });
                     }
                 });
             });
+
+            // Determine Winners
+            const getBest = (scores) => {
+                let best = { n: '-', v: 0 };
+                Object.entries(scores).forEach(([name, val]) => {
+                    if(val > best.v) best = { n: name, v: val };
+                });
+                return best.n;
+            };
+
+            const knightsHtml = `
+                <div class="knight-item"><span class="knight-title">🕋 فارس الفجر (مسجد):</span> <span class="knight-name">${getBest(weeklyKnights.fajr.scores)}</span></div>
+                <div class="knight-item"><span class="knight-title">🌙 فارس الصيام:</span> <span class="knight-name">${getBest(weeklyKnights.fast.scores)}</span></div>
+                <div class="knight-item"><span class="knight-title">✨ فارس السنن:</span> <span class="knight-name">${getBest(weeklyKnights.sunan.scores)}</span></div>
+                <div class="knight-item"><span class="knight-title">📖 فارس الورد:</span> <span class="knight-name">${getBest(weeklyKnights.quran.scores)}</span></div>
+                <div class="knight-item"><span class="knight-title">📿 فارس الأذكار:</span> <span class="knight-name">${getBest(weeklyKnights.azkar.scores)}</span></div>
+            `;
+            document.getElementById('weekly-knights').innerHTML = knightsHtml;
             drawPodium('annual-podium', annual);
-            drawPodium('weekly-podium', weekly);
         });
     }
 
