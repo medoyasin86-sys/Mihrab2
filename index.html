@@ -34,6 +34,16 @@
         .p-3 { height: 55px; background: linear-gradient(135deg, #cd7f32, #8b4513); }
         .p-4 { height: 40px; background: linear-gradient(135deg, #95a5a6, #2c3e50); }
         .p-name { position: absolute; bottom: -25px; color: var(--text); font-weight: bold; font-size: 0.8rem; white-space: nowrap; }
+        
+        /* تصميم قسم الفرسان الجديد */
+        .knights-section { background: linear-gradient(135deg, #fff, #fdf8e6); border: 2px solid var(--gold); border-radius: 15px; padding: 15px; margin: 20px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .knights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
+        .knight-card { background: white; border: 1px solid var(--gold-light); border-radius: 12px; padding: 10px; text-align: center; position: relative; overflow: hidden; transition: 0.3s; }
+        .knight-card:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .knight-title { font-size: 0.75rem; font-weight: bold; color: var(--accent); margin-bottom: 5px; display: block; border-bottom: 1px solid #eee; padding-bottom: 3px; }
+        .knight-name { font-size: 1rem; color: var(--primary); font-weight: bold; display: block; margin-top: 5px; }
+        .knight-icon { font-size: 1.5rem; display: block; }
+
         .user-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
         .comp-card { padding: 10px; text-align: center; border: 2px solid var(--gold-light); border-radius: 15px; cursor: pointer; background: #fff; transition: 0.3s; }
         .comp-card.active { border-color: var(--primary); background: #f0f7f2; transform: scale(1.02); }
@@ -86,6 +96,12 @@
     <div class="podium-section">
         <div><h4 style="text-align:center; margin:2px;">🏆 توب اليوم</h4><div id="daily-podium" class="podium-container"></div></div>
         <div><h4 style="text-align:center; margin:2px;">✨ الترتيب السنوي</h4><div id="annual-podium" class="podium-container"></div></div>
+    </div>
+
+    <div class="knights-section">
+        <h3 style="text-align:center; margin:0 0 15px 0; color:var(--primary); font-family:'Reem Kufi';">⚔️ فرسان الأسبوع</h3>
+        <div class="knights-grid" id="knights-display">
+            </div>
     </div>
 
     <div class="hadith-marquee">
@@ -414,7 +430,37 @@
 
     function updateAnnual() {
         db.ref('osraty').once('value', snap => {
-            const data = snap.val() || {}; let annual = users.map(u => ({n:u, s:0}));
+            const data = snap.val() || {}; 
+            let annual = users.map(u => ({n:u, s:0}));
+            
+            // حساب فرسان الأسبوع (آخر 7 أيام)
+            let knightStats = users.reduce((acc, u) => {
+                acc[u] = { fajr:0, fasting:0, quran:0, sunan:0, azkar:0 }; return acc;
+            }, {});
+
+            const dates = Object.keys(data).sort().reverse().slice(0, 7);
+            dates.forEach(d => {
+                users.forEach(u => {
+                    const ud = data[d][u] || {};
+                    if(ud.fajr && ud.fajr.type === 'm') knightStats[u].fajr++;
+                    if(ud.fasting && ud.fasting.done) knightStats[u].fasting++;
+                    if(ud.quran && ud.quran.done) knightStats[u].quran++;
+                    model.sunan.forEach(s => { if(ud[s.id] && ud[s.id].done) knightStats[u].sunan++; });
+                    ['azkar_s', 'azkar_e', 'azkar_n'].forEach(a => { if(ud[a] && ud[a].done) knightStats[u].azkar++; });
+                });
+            });
+
+            const getBest = (key) => users.reduce((a, b) => knightStats[a][key] >= knightStats[b][key] ? a : b);
+
+            document.getElementById('knights-display').innerHTML = `
+                <div class="knight-card"><span class="knight-icon">🕌</span><span class="knight-title">فارس الفجر</span><span class="knight-name">${getBest('fajr')}</span></div>
+                <div class="knight-card"><span class="knight-icon">🌙</span><span class="knight-title">فارس الصيام</span><span class="knight-name">${getBest('fasting')}</span></div>
+                <div class="knight-card"><span class="knight-icon">📖</span><span class="knight-title">فارس الورد</span><span class="knight-name">${getBest('quran')}</span></div>
+                <div class="knight-card"><span class="knight-icon">🌱</span><span class="knight-title">فارس السنن</span><span class="knight-name">${getBest('sunan')}</span></div>
+                <div class="knight-card"><span class="knight-icon">📿</span><span class="knight-title">فارس الأذكار</span><span class="knight-name">${getBest('azkar')}</span></div>
+            `;
+
+            // الترتيب السنوي الأصلي
             Object.values(data).forEach(day => { users.forEach((u, i) => { 
                 if(day[u]) Object.values(day[u]).forEach(t => annual[i].s += (t.p || 0)); }); });
             drawPodium('annual-podium', annual);
