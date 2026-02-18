@@ -316,6 +316,7 @@
     <div class="lantern">🏮</div>
   </div>
   <div class="garland"></div>
+
   <div class="crescent">🌙</div>
   <div class="stars"></div>
 </div>
@@ -692,7 +693,7 @@
         let url = h.l || null;
         if (h.id === 'quran' && rDay) url = `https://quran.com/juz/${rDay}`;
         const label = url
-          ? `<a class="habit-link" href="${url}" target="_blank" rel="noopener noreferrer">${h.n}</a>`
+          ? `${url}${h.n}</a>`
           : h.n;
         return `<div class="habit-row">
           <span>${label} <small>(+${h.p}ن)</small></span>
@@ -844,7 +845,7 @@
   const RAMADAN_YMD     = "2026-02-19";
   function addDaysYMD_Muscat(ymd, days){
     const [y,m,d] = ymd.split('-').map(Number);
-    const base = Date.UTC(y, m-1, d, 0,0,0) - 4*60*60*1000;
+    const base = Date.UTC(y, m-1, d, 0,0,0) - 4*60*60*1000; // منتصف الليل - مسقط
     const next = new Date(base + days * 86400000);
     return ymdInTz(next, APP_TZ);
   }
@@ -893,7 +894,7 @@
   }
 
   /* ============================= */
-  /*     أدوات مدى التاريخ + فلاتر + تقارير */
+  /*     أدوات مدى التاريخ + فلاتر + تقارير + إصلاح فجر مسجد */
   /* ============================= */
   function pad2(n){ return String(n).padStart(2,'0'); }
   function ymdOfDate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
@@ -928,7 +929,7 @@
     s_fajr:'سنة الفجر', s_duha:'الضحى', s_dhuhr_b:'الظهر قبل', s_dhuhr_a:'الظهر بعد',
     s_maghrib:'سنة المغرب', s_isha:'سنة العشاء', s_shaf:'الشفع', s_witr:'الوتر', s_qyam:'قيام الليل',
     azkar_s:'أذكار الصباح', azkar_e:'أذكار المساء', azkar_n:'أذكار النوم',
-    mulk:'سورة الملك', baqarah_end:'خواتيم سورة البقرة', quran:'الورد القرآني',
+    mulk:'سورة الملك', baqarah_end:'خواتيم البقرة', quran:'الورد القرآني',
     fasting:'الصيام'
   };
   const FARD_TYPE_DISPLAY = { m:'م', g:'ج', f:'ف', q:'ق' };
@@ -973,7 +974,8 @@
     usersList.forEach(u => summary[u] = {
       totalPoints:0, daysActive:0,
       fastingCount:0, quranCount:0,
-      fardCounts:{ m:0, g:0, f:0, q:0 },
+      fardCounts:{ m:0, g:0, f:0, q:0 }, // قد تحتاجها لاحقًا
+      fajrMosqueCount: 0,                // ✅ عداد فجر المسجد الفعلي
       catTotals:{ fard:0, sunan:0, extra:0, fasting:0 },
       days:[],
       missingDates:[]
@@ -993,6 +995,9 @@
           return;
         }
 
+        // ✅ فقط إذا الفجر مسجل "مسجد" نحسبه لهذا اليوم
+        if (uData['fajr']?.type === 'm') summary[u].fajrMosqueCount++;
+
         const pts = computeDayPointsForUserFiltered(uData, isFriday, flt);
         if(pts > 0) summary[u].daysActive++;
         summary[u].totalPoints += pts;
@@ -1006,6 +1011,7 @@
         if(uData['fasting']?.done) summary[u].fastingCount++;
         if(uData['quran']?.done)   summary[u].quranCount++;
 
+        // تبقى كما هي إذا احتجتها لأغراض أخرى
         (model.fard || []).forEach(f => {
           const typ = uData[f.id]?.type;
           if(typ && summary[u].fardCounts[typ] != null) summary[u].fardCounts[typ]++;
@@ -1035,8 +1041,8 @@
       const on = uData?.[id]?.done;
       return on ? `<span class="badge badge-ok">✓</span>` : `<span class="muted">—</span>`;
     }
-    function dayPoints(uData){
-      return computeDayPointsForUserFiltered(uData, false, flt);
+    function dayPoints(uData, isFriday){
+      return computeDayPointsForUserFiltered(uData, isFriday, flt);
     }
     function stackedBarHTML(totals){
       const total = Math.max(1, (flt.fard?totals.fard:0) + (flt.sunan?totals.sunan:0) + (flt.extra?totals.extra:0) + (flt.fasting?totals.fasting:0));
@@ -1071,7 +1077,8 @@
       const rows = fullDates.map(d=>{
         const day = rangeData[d] || {};
         const uData = day[user] || {};
-        const points = dayPoints(uData);
+        const isFriday = (new Date(d+'T00:00:00')).getDay()===5;
+        const points = dayPoints(uData, isFriday);
 
         const cells = [`<td class="c-date">${d}</td>`];
         if(flt.fard)    cells.push(...FARD_ORDER.map(id=>`<td class="c-fard">${fardCell(uData, id)}</td>`));
@@ -1126,7 +1133,8 @@
             <div class="kpi"><span class="kpi-title">أيام فعّالة</span><span class="kpi-val">${data.daysActive}</span></div>
             <div class="kpi"><span class="kpi-title">أيّام الصيام</span><span class="kpi-val">${data.fastingCount}</span></div>
             <div class="kpi"><span class="kpi-title">ورد قرآني</span><span class="kpi-val">${data.quranCount}</span></div>
-            <div class="kpi"><span class="kpi-title">فجر مسجد</span><span class="kpi-val">${f.m||0}</span></div>
+            <!-- ✅ عداد فجر المسجد الفعلي -->
+            <div class="kpi"><span class="kpi-title">فجر مسجد</span><span class="kpi-val">${data.fajrMosqueCount || 0}</span></div>
           </div>
 
           <div class="sub-title">📊 توزيع النقاط حسب الفئة</div>
@@ -1143,17 +1151,6 @@
           ${userDetailTableHTML(u)}
         </section>
       `;
-    }
-
-    function overallStackHTML(){
-      const total = { fard:0, sunan:0, extra:0, fasting:0 };
-      Object.values(summary).forEach(s=>{
-        total.fard    += s.catTotals.fard;
-        total.sunan   += s.catTotals.sunan;
-        total.extra   += s.catTotals.extra;
-        total.fasting += s.catTotals.fasting;
-      });
-      return stackedBarHTML(total);
     }
 
     // لو التقرير لمستخدم محدد: نحصر الـ summary على هذا المستخدم فقط
@@ -1198,7 +1195,7 @@
 
   .kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:8px; }
   .kpi{ background:var(--soft); border:1px solid var(--border); border-radius:10px; padding:6px; text-align:center; }
-  .kpi-title{ display:block; color:#7a6ب4e; font-size:.85rem; }
+  .kpi-title{ display:block; color:#7a6b4e; font-size:.85rem; }
   .kpi-val{ display:block; font-weight:800; font-size:1.05rem; }
 
   .sub-title{ margin:10px 0 6px 0; font-weight:800; color:#7a6b4e; }
@@ -1271,7 +1268,125 @@
     </section>
 
     <main class="grid">
-      ${ Object.keys(filteredSummary).map(u => userBlockHTML(u, filteredSummary[u])).join('') }
+      ${ Object.keys(filteredSummary).map(u => (function(){
+          const data = filteredSummary[u];
+          const top = data.topDays || [];
+          const missing = data.missingDates || [];
+          function barsHTML(items){
+            if(!items.length) return `<div class="nodata">لا توجد بيانات مميزة في هذا المدى.</div>`;
+            const max = Math.max(...items.map(x=>x.pointsFiltered), 1);
+            return items.map(x=>{
+              const w = Math.round((x.pointsFiltered/max)*100);
+              return `
+                <div class="bar-row">
+                  <div class="bar-label">${x.date}</div>
+                  <div class="bar">
+                    <div class="bar-fill" style="width:${w}%"></div>
+                    <div class="bar-val">${x.pointsFiltered} ن</div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+          return `
+            <section class="user-card">
+              <h3>👤 ${u}</h3>
+
+              <div class="kpis">
+                <div class="kpi"><span class="kpi-title">إجمالي النقاط (مُصفّى)</span><span class="kpi-val">${data.totalPoints}</span></div>
+                <div class="kpi"><span class="kpi-title">أيام فعّالة</span><span class="kpi-val">${data.daysActive}</span></div>
+                <div class="kpi"><span class="kpi-title">أيّام الصيام</span><span class="kpi-val">${data.fastingCount}</span></div>
+                <div class="kpi"><span class="kpi-title">ورد قرآني</span><span class="kpi-val">${data.quranCount}</span></div>
+                <!-- ✅ عداد فجر المسجد الفعلي -->
+                <div class="kpi"><span class="kpi-title">فجر مسجد</span><span class="kpi-val">${data.fajrMosqueCount || 0}</span></div>
+              </div>
+
+              <div class="sub-title">📊 توزيع النقاط حسب الفئة</div>
+              ${(function(){ 
+                  const totals = data.catTotals || {fard:0,sunan:0,extra:0,fasting:0};
+                  const total = Math.max(1, (totals.fard) + (totals.sunan) + (totals.extra) + (totals.fasting));
+                  const segs = [
+                    {c:'#b8860b', t:'فرائض', v:totals.fard},
+                    {c:'#1a6a3b', t:'سنن', v:totals.sunan},
+                    {c:'#118ab2', t:'أذكار/ورد', v:totals.extra},
+                    {c:'#ef476f', t:'صيام', v:totals.fasting}
+                  ].filter(s=>s.v>0);
+                  return `
+                    <div class="stack">
+                      ${segs.map(s=>`<span class="seg" style="width:${Math.round((s.v/total)*100)}%; background:${s.c}"></span>`).join('')}
+                    </div>
+                    <div class="legend">
+                      ${segs.map(s=>`<span class="lg"><i style="background:${s.c}"></i>${s.t}: <b>${s.v}</b></span>`).join('')}
+                    </div>`;
+                })() }
+
+              <div class="sub-title">📈 أفضل 5 أيام</div>
+              <div class="bars">${barsHTML(top)}</div>
+
+              <div class="sub-title">📅 تواريخ بلا تسجيل (${missing.length})</div>
+              <div class="missing-wrap">
+                ${missing.length? missing.map(d=>`<span class="chip">${d}</span>`).join('') : `<span class="muted">— لا توجد</span>`}
+              </div>
+
+              ${ (function(){ 
+                const headCols = ['التاريخ'];
+                headCols.push(...${JSON.stringify(FARD_ORDER)}.map(id=>${JSON.stringify(LABELS_AR)}[id]));
+                headCols.push(...${JSON.stringify(SUNAN_ORDER)}.map(id=>${JSON.stringify(LABELS_AR)}[id]));
+                headCols.push(...${JSON.stringify(EXTRA_ORDER)}.map(id=>${JSON.stringify(LABELS_AR)}[id]));
+                headCols.push(${JSON.stringify(LABELS_AR)}.fasting);
+                headCols.push('نقاط اليوم');
+
+                const rows = ${JSON.stringify(fullDates)}.map(d=>{
+                  const day = ${JSON.stringify(rangeData)}[d] || {};
+                  const uData = day['${u}'] || {};
+                  const isFriday = (new Date(d+'T00:00:00')).getDay()===5;
+                  const points = (function(uData,isFriday){
+                    return (function(u,isF,flt){ 
+                      return (function(uData,isFriday,flt){
+                        let s=0; 
+                        ( ${JSON.stringify(FARD_ORDER)} ).forEach(fid=>{ if(uData[fid]) s+=(uData[fid].p||0); });
+                        ( ${JSON.stringify(SUNAN_ORDER)} ).forEach(id=>{ if(uData[id]?.done) s+=(${JSON.stringify(model)}.sunan.find(x=>x.id===id)?.p||0); });
+                        ( ${JSON.stringify(EXTRA_ORDER)} ).forEach(id=>{ if(uData[id]?.done) s+=(${JSON.stringify(model)}.extra.find(x=>x.id===id)?.p||0); });
+                        if(uData['fasting']?.done) s+=100; 
+                        return s;
+                      })(uData,isFriday,${JSON.stringify({fard:true,sunan:true,extra:true,fasting:true)});
+                    })(uData,isFriday,${JSON.stringify({})});
+                  })(uData,isFriday);
+
+                  const tds = [];
+                  tds.push(\`<td class="c-date">\${d}</td>\`);
+                  tds.push(...${JSON.stringify(FARD_ORDER)}.map(id=>{
+                    const typ = uData?.[id]?.type;
+                    if(!typ) return '<td class="c-fard"><span class="muted">—</span></td>';
+                    const short = ${JSON.stringify(FARD_TYPE_DISPLAY)}[typ]||typ;
+                    const title = (typ==='m'?'مسجد':typ==='g'?'جماعة':typ==='f'?'فرد':'قضاء');
+                    return \`<td class="c-fard"><span class="badge badge-fard \${typ}" title="\${title}">\${short}</span></td>\`;
+                  }));
+                  tds.push(...${JSON.stringify(SUNAN_ORDER)}.map(id=>{
+                    const on = uData?.[id]?.done; return \`<td class="c-check">\${on?'<span class="badge badge-ok">✓</span>':'<span class="muted">—</span>'}</td>\`;
+                  }));
+                  tds.push(...${JSON.stringify(EXTRA_ORDER)}.map(id=>{
+                    const on = uData?.[id]?.done; return \`<td class="c-check">\${on?'<span class="badge badge-ok">✓</span>':'<span class="muted">—</span>'}</td>\`;
+                  }));
+                  const onFast = uData?.['fasting']?.done;
+                  tds.push(\`<td class="c-check">\${onFast?'<span class="badge badge-ok">✓</span>':'<span class="muted">—</span>'}</td>\`);
+                  tds.push(\`<td class="c-pts">\${points}</td>\`);
+                  return \`<tr>\${tds.join('')}</tr>\`;
+                }).join('');
+
+                return \`
+                  <div class="sub-title">📋 التفصيل اليومي الكامل</div>
+                  <div class="table-wrap">
+                    <table class="detail-table" dir="rtl">
+                      <thead><tr>\${headCols.map(c=>\`<th>\${c}</th>\`).join('')}</tr></thead>
+                      <tbody>\${rows}</tbody>
+                    </table>
+                  </div>
+                \`;
+              })() }
+            </section>
+          `;
+        })()).join('') }
     </main>
   </div>
 </body>
@@ -1388,7 +1503,7 @@
   }
   function submitAdminPassword(){
     const val = (document.getElementById('admin-password')?.value || '').trim();
-    // كلمة السر الوحيدة المعتمدة
+    // كلمة السر المعتمدة الوحيدة
     if (val === 'medo'){
       closeAdminDialog();
       showAdminControls(true);
@@ -1421,7 +1536,7 @@
       };
     }
 
-    // ربط الأزرار (دون تغيير وظائفها)
+    // ربط الأزرار كما هي
     document.getElementById('btn-refresh').onclick = refreshAll;
     const btnSaveAll = document.getElementById('btn-save-all'); if (btnSaveAll) btnSaveAll.onclick = saveAllChanges;
 
