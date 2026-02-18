@@ -178,6 +178,11 @@
       <select id="city-select-1" class="city-select" title="اختر مدينة"></select>
       <label for="city-select-2"><b>مدينة 2:</b></label>
       <select id="city-select-2" class="city-select" title="اختر مدينة"></select>
+
+      <!-- تقارير PDF -->
+      <button class="refresh-btn" id="btn-report-daily"   title="تقرير يومي (PDF)">📄 تقرير يومي</button>
+      <button class="refresh-btn" id="btn-report-monthly" title="تقرير شهري (PDF)">📄 تقرير شهري</button>
+      <button class="refresh-btn" id="btn-report-yearly"  title="تقرير سنوي (PDF)">📄 تقرير سنوي</button>
     </div>
 
     <div class="date-container">
@@ -570,7 +575,7 @@
     }).join('');
   }
 
-  /* ✅ رسم النماذج + تمييز العناصر بـ data-* لدعم زر الحفظ */
+  /* ✅ رسم النماذج + تمييز العناصر بـ data-* لدعم زر الحفظ + روابط خارجية قابلة للنقر */
   const RAMADAN_START_YMD = '2026-02-19';
   function getRamadanDayFor(dateObj){
     const ymdSel = ymdInTz(dateObj, APP_TZ);
@@ -610,20 +615,15 @@
         }</div></div>`;
     }).join('');
 
-    /* ⬇️⬇️ التعديل هنا: الروابط الخارجية تُفتح عند الضغط ⬇️⬇️ */
     const drawCheck = (list, tid) => {
       const rDay = getRamadanDayFor(selectedDate);
       document.getElementById(tid).innerHTML = list.map(h => {
         const done = userData[h.id]?.done;
         let url = h.l || null;
-        // افتح جزء اليوم تلقائيًا للورد القرآني في رمضان
         if (h.id === 'quran' && rDay) url = `https://quran.com/juz/${rDay}`;
-
-        // إن وُجد رابط: لفّ الاسم داخل <a> وافتح في تبويب جديد
         const label = url
           ? `<a class="habit-link" href="${url}" target="_blank" rel="noopener noreferrer">${h.n}</a>`
           : h.n;
-
         return `<div class="habit-row">
           <span>${label} <small>(+${h.p}ن)</small></span>
           <input type="checkbox" ${done?'checked':''}
@@ -633,8 +633,6 @@
         </div>`;
       }).join('');
     };
-    /* ⬆️⬆️ نهاية التعديل ⬆️⬆️ */
-
     drawCheck(model.sunan, 'sunan-list');
     drawCheck(curExtra, 'extra-list');
   }
@@ -827,6 +825,236 @@
     }
   }
 
+  /* ============================= */
+  /*     أدوات مدى التاريخ (ميلادي) */
+  /* ============================= */
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function ymdOfDate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+  function monthRangeFromYMD(ymd){
+    const [y,m] = ymd.split('-').map(Number);
+    const start = `${y}-${pad2(m)}-01`;
+    const lastDay = new Date(y, m, 0).getDate();
+    const end = `${y}-${pad2(m)}-${pad2(lastDay)}`;
+    return {start, end, label:`${y}-${pad2(m)}`};
+  }
+  function yearRangeFromYMD(ymd){
+    const [y] = ymd.split('-').map(Number);
+    return {start:`${y}-01-01`, end:`${y}-12-31`, label:`${y}`};
+  }
+
+  /* ===================================== */
+  /*  حساب نقاط اليوم مستخدمًا نفس منطقك  */
+  /* ===================================== */
+  function computeDayPointsForUser(uData, isFriday){
+    let s = 0;
+    [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
+    if(isFriday && uData['kahf']) s += 40;
+    if(uData['fasting']) s += 100;
+    return s;
+  }
+
+  /* ===================================== */
+  /*  جلب بيانات مدى زمني وتجميعها للتقرير */
+  /* ===================================== */
+  async function fetchRangeSummary(startYMD, endYMD){
+    const snap = await db.ref('osraty').once('value');
+    const all = snap.val() || {};
+    const dates = Object.keys(all).filter(k => k >= startYMD && k <= endYMD).sort();
+    const usersList = users || [];
+    const summary = {};
+    usersList.forEach(u => summary[u] = {
+      totalPoints:0, daysActive:0, fastingCount:0, quranCount:0,
+      fardCounts:{ m:0, g:0, f:0, q:0 },
+      days:[]
+    });
+
+    dates.forEach(d => {
+      const day = all[d] || {};
+      const dateObj = new Date(d+'T00:00:00');
+      const isFriday = (dateObj.getDay() === 5);
+
+      usersList.forEach(u => {
+        const uData = day[u] || {};
+        const pts = computeDayPointsForUser(uData, isFriday);
+        if(pts > 0) summary[u].daysActive++;
+        summary[u].totalPoints += pts;
+        summary[u].days.push({date:d, points:pts});
+
+        if(uData['fasting']?.done) summary[u].fastingCount++;
+        if(uData['quran']?.done) summary[u].quranCount++;
+        (model.fard || []).forEach(f => {
+          const typ = uData[f.id]?.type;
+          if(typ && summary[u].fardCounts[typ] != null) summary[u].fardCounts[typ]++;
+        });
+      });
+    });
+
+    usersList.forEach(u => {
+      summary[u].topDays = [...summary[u].days].sort((a,b)=> b.points - a.points).slice(0,5);
+    });
+
+    return { dates, summary };
+  }
+
+  /* ===================================== */
+  /*            نافذة التقرير (طباعة)       */
+  /* ===================================== */
+  function openReportWindow({modeLabel, rangeLabel, startYMD, endYMD, summary, dates}){
+    const nowStr = new Date().toLocaleString('ar-EG');
+
+    function userBlockHTML(u, data){
+      const f = data.fardCounts || {m:0,g:0,f:0,q:0};
+      const top = data.topDays || [];
+
+      function barsHTML(items){
+        if(!items.length) return `<div class="nodata">لا توجد بيانات مميزة في هذا المدى.</div>`;
+        const max = Math.max(...items.map(x=>x.points), 1);
+        return items.map(x=>{
+          const w = Math.round((x.points/max)*100);
+          return `
+            <div class="bar-row">
+              <div class="bar-label">${x.date}</div>
+              <div class="bar">
+                <div class="bar-fill" style="width:${w}%"></div>
+                <div class="bar-val">${x.points} ن</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      return `
+        <section class="user-card">
+          <h3>👤 ${u}</h3>
+          <div class="kpis">
+            <div class="kpi"><span class="kpi-title">إجمالي النقاط</span><span class="kpi-val">${data.totalPoints}</span></div>
+            <div class="kpi"><span class="kpi-title">أيام فعّالة</span><span class="kpi-val">${data.daysActive}</span></div>
+            <div class="kpi"><span class="kpi-title">أيّام الصيام</span><span class="kpi-val">${data.fastingCount}</span></div>
+            <div class="kpi"><span class="kpi-title">ورد قرآني</span><span class="kpi-val">${data.quranCount}</span></div>
+            <div class="kpi"><span class="kpi-title">فجر مسجد</span><span class="kpi-val">${f.m||0}</span></div>
+          </div>
+
+          <div class="sub-title">📈 أفضل 5 أيام</div>
+          <div class="bars">
+            ${barsHTML(top)}
+          </div>
+
+          <div class="fard-breakdown">
+            <span>🕌 مسجد: <b>${f.m||0}</b></span>
+            <span>👥 جماعة: <b>${f.g||0}</b></span>
+            <span>🙇‍♂️ فرد: <b>${f.f||0}</b></span>
+            <span>⏱️ قضاء: <b>${f.q||0}</b></span>
+          </div>
+        </section>
+      `;
+    }
+
+    const html = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>تقرير ${modeLabel} | ${rangeLabel}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap">
+<style>
+  :root{
+    --primary:#1a4d2e; --gold:#c5a059; --gold-light:#e6cc92; --bg:#fff; --text:#1a4d2e;
+    --muted:#6b6b6b; --border:#e6dec7;
+  }
+  body{ font-family:'Amiri',serif; margin:24px; background:#fff; color:var(--text); }
+  .hdr{
+    border:2px solid var(--gold); border-radius:14px; padding:14px 18px; margin-bottom:18px;
+    background:linear-gradient(135deg,#fdf7e8,#fff);
+  }
+  .hdr-title{ font-family:'Reem Kufi',sans-serif; font-size:1.35rem; margin:0 0 6px 0; color:#634e1e; }
+  .hdr-sub{ display:flex; gap:12px; flex-wrap:wrap; color:#7a6b4e; font-weight:700; }
+  .tag{ background:#fff7d6; border:1px solid var(--gold); padding:2px 8px; border-radius:999px; }
+  .small{ color:#7a7a7a; font-size:.9rem; }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:12px; }
+  .user-card{
+    border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+    break-inside: avoid;
+  }
+  .user-card h3{ margin:0 0 10px 0; font-family:'Reem Kufi',sans-serif; color:#0f3b22; }
+
+  .kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:8px; }
+  .kpi{ background:#f9f6ef; border:1px solid var(--border); border-radius:10px; padding:6px; text-align:center; }
+  .kpi-title{ display:block; color:#7a6b4e; font-size:.85rem; }
+  .kpi-val{ display:block; font-weight:800; font-size:1.05rem; }
+
+  .sub-title{ margin:6px 0; font-weight:800; color:#7a6b4e; }
+  .bars{ display:flex; flex-direction:column; gap:6px; }
+  .bar-row{ display:flex; align-items:center; gap:8px; }
+  .bar-label{ width:120px; color:#6b6b6b; font-size:.9rem; }
+  .bar{ position:relative; flex:1; height:18px; background:#f1ede0; border:1px solid #e0d6b8; border-radius:999px; overflow:hidden; }
+  .bar-fill{ height:100%; background:linear-gradient(90deg,#1a4d2e,#2d6a4f); }
+  .bar-val{ position:absolute; right:8px; top:-1px; font-size:.85rem; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); }
+
+  .fard-breakdown{ display:flex; gap:10px; margin-top:8px; color:#534d3d; font-size:.95rem; }
+
+  @media print{
+    body{ margin:12mm; }
+    .hdr{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .kpi, .bar{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .user-card{ box-shadow:none; }
+  }
+</style>
+</head>
+<body>
+  <header class="hdr">
+    <div class="hdr-title">تقرير ${modeLabel} — المدة: <span class="tag">${rangeLabel}</span></div>
+    <div class="hdr-sub">
+      <span>من <span class="tag">${startYMD}</span> إلى <span class="tag">${endYMD}</span></span>
+      <span class="small">تاريخ الإصدار: ${nowStr}</span>
+    </div>
+  </header>
+
+  <main class="grid">
+    ${ Object.keys(summary).map(u => userBlockHTML(u, summary[u])).join('') }
+  </main>
+</body>
+</html>`;
+    const w = window.open('', '_blank');
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    setTimeout(()=>{ try{ w.focus(); w.print(); }catch(_){/* */} }, 700);
+  }
+
+  /* ===================================== */
+  /*          مُولِّد التقرير العام         */
+  /* ===================================== */
+  async function generateReport(mode){
+    const ymd = document.getElementById('date-picker').value || todayYMDMuscat();
+    let startYMD, endYMD, rangeLabel, modeLabel;
+
+    if(mode === 'daily'){
+      startYMD = endYMD = ymd;
+      rangeLabel = ymd;
+      modeLabel = 'يومي (PDF)';
+    }else if(mode === 'monthly'){
+      const r = monthRangeFromYMD(ymd);
+      startYMD = r.start; endYMD = r.end; rangeLabel = `شهر ${r.label}`;
+      modeLabel = 'شهري (PDF)';
+    }else if(mode === 'yearly'){
+      const r = yearRangeFromYMD(ymd);
+      startYMD = r.start; endYMD = r.end; rangeLabel = `سنة ${r.label}`;
+      modeLabel = 'سنوي (PDF)';
+    }else{
+      alert('وضع التقرير غير معروف'); return;
+    }
+
+    try{
+      const {dates, summary} = await fetchRangeSummary(startYMD, endYMD);
+      openReportWindow({modeLabel, rangeLabel, startYMD, endYMD, summary, dates});
+    }catch(e){
+      console.error('Report error:', e);
+      alert('تعذّر توليد التقرير. حاول مجددًا.');
+    }
+  }
+
   function sync() {
     const d = document.getElementById('date-picker').value;
     db.ref('osraty/' + d).on('value', snap => render(snap.val() || {}));
@@ -837,30 +1065,30 @@
 
   window.onload = () => {
     if(localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
-    // تاريخ اليوم وفق مسقط
     document.getElementById('date-picker').value = todayYMDMuscat();
 
-    // المدن + المواقيت
     populateCitySelects();
     applyCitySelection();
 
-    // المؤقّتات
     updateCountdowns();
     initEmojis();
 
-    // الأحداث
     document.getElementById('date-picker').onchange = () => { sync(); updateHeaderTitleForRamadan(); };
     document.getElementById('btn-refresh').onclick = refreshAll;
-    const btnSaveAll = document.getElementById('btn-save-all');
-    if (btnSaveAll) btnSaveAll.onclick = saveAllChanges;
+    const btnSaveAll = document.getElementById('btn-save-all'); if (btnSaveAll) btnSaveAll.onclick = saveAllChanges;
 
-    // أول مزامنة
+    // أزرار التقارير
+    const btnDaily   = document.getElementById('btn-report-daily');
+    const btnMonthly = document.getElementById('btn-report-monthly');
+    const btnYearly  = document.getElementById('btn-report-yearly');
+    if(btnDaily)   btnDaily.onclick   = ()=> generateReport('daily');
+    if(btnMonthly) btnMonthly.onclick = ()=> generateReport('monthly');
+    if(btnYearly)  btnYearly.onclick  = ()=> generateReport('yearly');
+
     sync();
 
-    // إن كان اليوم أول رمضان وفق مسقط
     if (todayYMDMuscat() === '2026-02-19') showRamadanToastOnce();
 
-    // الزينة + العنوان (دوريًا)
     toggleRamadanDecorations();
     updateHeaderTitleForRamadan();
     setInterval(() => { toggleRamadanDecorations(); updateHeaderTitleForRamadan(); }, 60000);
