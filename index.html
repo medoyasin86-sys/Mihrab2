@@ -94,6 +94,68 @@
         .toast { position: fixed; top: 12px; right: 12px; z-index: 2000; background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: #fff; border: 2px solid var(--gold); border-radius: 12px; padding: 10px 14px; box-shadow: 0 10px 24px rgba(0,0,0,.2); display: none; }
         .toast.show { display: block; animation: fadeInOut 6s ease forwards; }
         @keyframes fadeInOut { 0% { opacity: 0; transform: translateY(-8px); } 10% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
+
+        /* ⭐ NEW: زينة رمضان (فوانيس + هلال + نجوم) */
+        .decor-container {
+            position: fixed; inset: 0; pointer-events: none; z-index: 999;
+        }
+        .decor-top {
+            position: absolute; top: 0; left: 0; right: 0; height: 80px;
+            display: flex; align-items: flex-start; justify-content: center; gap: 40px;
+            background: linear-gradient(180deg, rgba(197,160,89,.25), rgba(197,160,89,0));
+        }
+        .lantern {
+            font-size: 30px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.2));
+            animation: swing 3.8s ease-in-out infinite;
+            transform-origin: top center;
+            margin-top: 6px;
+        }
+        .lantern:nth-child(2){ animation-duration: 4.3s }
+        .lantern:nth-child(3){ animation-duration: 4.9s }
+        @keyframes swing {
+            0% { transform: rotate(0deg) translateY(0); }
+            50% { transform: rotate(6deg) translateY(1px); }
+            100% { transform: rotate(0deg) translateY(0); }
+        }
+        .crescent {
+            position: absolute; top: 12px; right: 16px; font-size: 28px;
+            filter: drop-shadow(0 0 6px rgba(255,255,180,.6));
+        }
+        .stars {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                radial-gradient(2px 2px at 10% 20%, rgba(255,255,200,.9) 50%, transparent 51%),
+                radial-gradient(1.5px 1.5px at 30% 35%, rgba(255,255,200,.8) 50%, transparent 51%),
+                radial-gradient(1.8px 1.8px at 65% 15%, rgba(255,255,200,.8) 50%, transparent 51%),
+                radial-gradient(1.6px 1.6px at 85% 30%, rgba(255,255,200,.8) 50%, transparent 51%),
+                radial-gradient(1.4px 1.4px at 55% 50%, rgba(255,255,200,.8) 50%, transparent 51%);
+            opacity: .7;
+            animation: twinkle 6s ease-in-out infinite alternate;
+        }
+        @keyframes twinkle {
+            from { opacity: .35; } to { opacity: .8; }
+        }
+
+        /* ⭐ NEW: لافتة عيد الفطر + قصاصات */
+        .eid-banner {
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #1a4d2e, #0a2b1a);
+            color: #fff; border: 2px solid var(--gold); border-radius: 14px;
+            padding: 8px 16px; z-index: 1000; font-weight: 800;
+            display: none;
+        }
+        .confetti {
+            position: fixed; inset: 0; pointer-events: none; z-index: 998; display: none;
+        }
+        .confetti i {
+            position: absolute; width: 8px; height: 12px; opacity: .9; border-radius: 2px;
+            animation: fall 3.5s linear infinite;
+        }
+        .confetti i:nth-child(odd){ transform: rotate(20deg); }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); }
+            100% { transform: translateY(110vh) rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -192,6 +254,19 @@
 <!-- توست إشعار رمضان -->
 <div id="toast-ramadan" class="toast">🌙 رمضان كريم! نسأل الله القبول</div>
 
+<!-- ⭐ NEW: زينة رمضان الثابتة -->
+<div id="decor-container" class="decor-container" style="display:none" aria-hidden="true">
+    <div class="decor-top">
+        <div class="lantern">🏮</div>
+        <div class="lantern">🟡</div>
+        <div class="lantern">🏮</div>
+    </div>
+    <div class="crescent">🌙</div>
+    <div class="stars"></div>
+</div>
+<div id="eid-banner" class="eid-banner">✨🌙 عيد فطر مبارك 🌙✨</div>
+<div id="confetti" class="confetti" aria-hidden="true"></div>
+
 <script>
     /* ========= Firebase ========= */
     const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1" };
@@ -202,7 +277,7 @@
     let currentUser = null;
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
 
-    /* ========= مرجع التوقيت لتوحيد العرض (مسقط) ========= */
+    /* ========= مرجع التوقيت: مسقط ========= */
     const APP_TZ = 'Asia/Muscat';
     function ymdInTz(d, tz) {
         try {
@@ -210,7 +285,7 @@
             let y='', m='', day='';
             for (const p of parts) { if (p.type==='year') y=p.value; else if (p.type==='month') m=p.value; else if (p.type==='day') day=p.value; }
             return `${y}-${m}-${day}`;
-        } catch(e) { // fallback بسيط +04:00
+        } catch(e) {
             const utc = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes()));
             const muscatMs = utc.getTime() + 4*60*60*1000;
             const muscat = new Date(muscatMs);
@@ -356,9 +431,7 @@
         if (c2) await fetchCityPrayers(c2.apiCity, c2.country, 'row-kafr',     c2.label, 'slot2');
     }
 
-    /* ========= عدّاد رمضان (موحّد: مسقط) =========
-       - الهدف ثابت: 1 رمضان 1447هـ = 2026-02-19 (منتصف الليل في مسقط)
-       - يمنع الاختلاف بين الأجهزة والمناطق. */
+    /* ========= عدّاد رمضان (موحّد: مسقط) ========= */
     function showRamadanToastOnce() {
         const key='ramadanToastShown_2026'; if(localStorage.getItem(key)==='1') return;
         const el=document.getElementById('toast-ramadan'); if(!el) return; el.classList.add('show');
@@ -380,7 +453,6 @@
     async function updateCountdowns() {
         const ramadanYMD = "2026-02-19"; // 1 رمضان ثابت
         const targetMs = muscatMidnightMsFromYMD(ramadanYMD); // منتصف الليل - مسقط
-        // توست عند اليوم نفسه (مسقط)
         if (todayYMDMuscat() === ramadanYMD) showRamadanToastOnce();
 
         const dayMs=86400000, hourMs=3600000, minMs=60000, secMs=1000;
@@ -467,7 +539,7 @@
                 }</div></div>`;
         }).join('');
 
-        // ✅ إصلاح الروابط الخارجية: بناء <a> صحيح يفتح في تبويب جديد
+        // إصلاح الروابط الخارجية: بناء <a> صحيح
         const drawCheck = (list, tid) => {
             document.getElementById(tid).innerHTML = list.map(h => {
                 const done = userData[h.id]?.done;
@@ -487,7 +559,7 @@
         const hijri = await getHijriData(selectedDate);
         if(hijri) document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
 
-        // ✅ تصحيح ثابت: 19 فبراير 2026 = 1 رمضان، 18 فبراير = 30 شعبان (مرجع مسقط)
+        // تصحيح ثابت: 19 فبراير 2026 = 1 رمضان، 18 فبراير = 30 شعبان (مرجع مسقط)
         const selectedYMD_Muscat = ymdInTz(selectedDate, APP_TZ);
         if (selectedYMD_Muscat === '2026-02-18') document.getElementById('hijri-display').innerText = `30 شعبان 1447هـ`;
         if (selectedYMD_Muscat === '2026-02-19') document.getElementById('hijri-display').innerText = `1 رمضان 1447هـ`;
@@ -566,8 +638,49 @@
         db.ref('osraty_chat').limitToLast(20).on('value', snap => renderChat(snap.val() || {}));
         updateAnnual(); checkNiyaAlert();
     }
-
     async function refreshAll() { await applyCitySelection(); sync(); }
+
+    /* ⭐ NEW: أدوات زينة رمضان (المدى الزمني + التبديل) */
+    const DECOR_START_YMD = "2026-02-18"; // من اليوم السابق لرمضان
+    const RAMADAN_YMD     = "2026-02-19"; // 1 رمضان ثابت
+    function addDaysYMD_Muscat(ymd, days){
+        const ms = muscatMidnightMsFromYMD(ymd) + (days * 86400000);
+        // تحويل ms (UTC) إلى YMD في مسقط
+        return ymdInTz(new Date(ms), APP_TZ);
+    }
+    const EID_YMD = addDaysYMD_Muscat(RAMADAN_YMD, 30); // يغطي 29/30
+
+    function seedConfetti(containerId, pieces=40){
+        const c = document.getElementById(containerId);
+        c.innerHTML = '';
+        const colors = ['#ffd166','#ef476f','#06d6a0','#118ab2','#8338ec','#ffbe0b'];
+        for(let i=0;i<pieces;i++){
+            const el = document.createElement('i');
+            el.style.left = Math.floor(Math.random()*100)+'%';
+            el.style.animationDelay = (Math.random()*2)+'s';
+            el.style.background = colors[i % colors.length];
+            c.appendChild(el);
+        }
+    }
+    function toggleRamadanDecorations(){
+        const today = todayYMDMuscat();
+        const decor = document.getElementById('decor-container');
+        const eidBanner = document.getElementById('eid-banner');
+        const confetti = document.getElementById('confetti');
+        // إظهار من 18 فبراير وحتى يوم العيد (شامل)
+        const inRange = (today >= DECOR_START_YMD && today <= EID_YMD);
+        decor.style.display = inRange ? 'block' : 'none';
+
+        // يوم العيد فقط: لافتة + قصاصات
+        if (today === EID_YMD){
+            eidBanner.style.display = 'block';
+            confetti.style.display = 'block';
+            if(!confetti.dataset.seeded){ seedConfetti('confetti', 60); confetti.dataset.seeded = '1'; }
+        } else {
+            eidBanner.style.display = 'none';
+            confetti.style.display = 'none';
+        }
+    }
 
     window.onload = () => {
         if(localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
@@ -591,6 +704,10 @@
 
         // توست إن كان اليوم هو أول رمضان وفق مسقط
         if (todayYMDMuscat() === '2026-02-19') showRamadanToastOnce();
+
+        // ⭐ NEW: تفعيل زينة رمضان + فحص دوري
+        toggleRamadanDecorations();
+        setInterval(toggleRamadanDecorations, 60000); // كل دقيقة
     };
 
     /* ========= أحاديث ========= */
