@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ملتقى طاعاتنا 2026 | النسخة المطورة</title>
 
-    <!-- مكاتب خارجية -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
+    <!-- مكاتب خارجية (كما هي) -->
+    https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js</script>
+    https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js</script>
+    https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap
 
     <style>
         :root { 
             --primary: #1a4d2e; --gold: #c5a059; --gold-light: #e6cc92; --bg: #f9f6f0; 
-            --card-bg: #ffffff; --text: #1a4d2e; --accent: #d35400; --crimson: #900c3f; 
+            --card-bg: #ffffff; --text: #1a4d2e; --accent: #d35400; --crimson: #900c3ف; 
         }
         
         /* إعدادات الوضع الليلي */
@@ -46,7 +46,7 @@
             color: #1a1a1a; padding: 6px 10px; border-radius: 20px;
             cursor: pointer; font-weight: 800;
         }
-        /* ✅ قوائم اختيار المدن (وضع يدوي) */
+        /* قوائم اختيار المدن (وضع يدوي) */
         .city-select {
             border: 1px solid var(--gold);
             border-radius: 8px;
@@ -153,18 +153,14 @@
         <h2 style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h2>
 
         <div class="header-actions">
-            <!-- ✅ زر تحديث البيانات -->
+            <!-- زر تحديث البيانات -->
             <button class="refresh-btn" id="btn-refresh" title="تحديث مواقيت الصلاة واللوحات">🔄 تحديث البيانات</button>
 
-            <!-- ✅ الوضع اليدوي لاختيار المدن -->
+            <!-- الوضع اليدوي لاختيار المدن -->
             <label for="city-select-1"><b>مدينة 1:</b></label>
-            <select id="city-select-1" class="city-select" title="اختر مدينة">
-                <!-- تُملأ برمجياً -->
-            </select>
+            <select id="city-select-1" class="city-select" title="اختر مدينة"></select>
             <label for="city-select-2"><b>مدينة 2:</b></label>
-            <select id="city-select-2" class="city-select" title="اختر مدينة">
-                <!-- تُملأ برمجياً -->
-            </select>
+            <select id="city-select-2" class="city-select" title="اختر مدينة"></select>
         </div>
 
         <div class="date-container">
@@ -250,28 +246,25 @@
     let currentUser = null;
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
 
-    /* ✅ مرجع التوقيت: مسقط لعلاج الانزياح */
+    /* مرجع التوقيت: مسقط لعلاج الانزياح */
     const APP_TZ = 'Asia/Muscat';
 
-    /* ✅ خريطة المدن (الوضع اليدوي) */
+    /* خريطة المدن (الوضع اليدوي) */
     const CITY_OPTIONS = [
         // عمان
-        { key:'Salalah|Oman',      apiCity:'Salalah',      country:'Oman',       label:'صلالة' },
-        { key:'Muscat|Oman',       apiCity:'Muscat',       country:'Oman',       label:'مسقط' },
-        { key:'Sohar|Oman',        apiCity:'Sohar',        country:'Oman',       label:'صحار' },
+        { key:'Salalah|Oman',         apiCity:'Salalah',        country:'Oman',  label:'صلالة' },
+        { key:'Muscat|Oman',          apiCity:'Muscat',         country:'Oman',  label:'مسقط' },
+        { key:'Sohar|Oman',           apiCity:'Sohar',          country:'Oman',  label:'صحار' },
         // مصر
         { key:'Kafr El Sheikh|Egypt', apiCity:'Kafr El Sheikh', country:'Egypt', label:'كفر الشيخ' },
-        { key:'Cairo|Egypt',       apiCity:'Cairo',        country:'Egypt',      label:'القاهرة' },
-        { key:'Alexandria|Egypt',  apiCity:'Alexandria',   country:'Egypt',      label:'الإسكندرية' }
+        { key:'Cairo|Egypt',          apiCity:'Cairo',          country:'Egypt', label:'القاهرة' },
+        { key:'Alexandria|Egypt',     apiCity:'Alexandria',     country:'Egypt', label:'الإسكندرية' }
     ];
 
-    /* ✅ مخزن المواقيت (لكل خانة: label + timings) */
-    const prayersCache = {
-        slot1: null,
-        slot2: null
-    };
+    /* مخزن المواقيت (لكل خانة: label + timings) */
+    const prayersCache = { slot1: null, slot2: null };
 
-    /* ✅ أدوات التاريخ */
+    /* أدوات التاريخ */
     function ymdInTz(d, tz) {
         try {
             const parts = new Intl.DateTimeFormat('en-CA', {
@@ -292,12 +285,14 @@
             return `${muscat.getUTCFullYear()}-${pad(muscat.getUTCMonth()+1)}-${pad(muscat.getUTCDate())}`;
         }
     }
-    function todayYMDMuscat(){
-        return ymdInTz(new Date(), APP_TZ);
-    }
-    function parseLocalYMD(ymd) {
+    function todayYMDMuscat(){ return ymdInTz(new Date(), APP_TZ); }
+    function parseLocalYMD(ymd) { const [y, m, d] = ymd.split('-').map(Number); return new Date(y, m - 1, d); }
+
+    /* ✅ جديد: طابع منتصف ليل مسقط لـ YMD (هدف العدّاد) */
+    function muscatMidnightMsFromYMD(ymd) {
         const [y, m, d] = ymd.split('-').map(Number);
-        return new Date(y, m - 1, d); // تاريخ محلي (00:00) بدون تفسير UTC
+        // منتصف الليل في مسقط (UTC+4) = UTC - 4 ساعات
+        return Date.UTC(y, m-1, d, 0, 0, 0) - 4 * 60 * 60 * 1000;
     }
 
     function toggleDarkMode() {
@@ -325,11 +320,14 @@
         ],
         sunan: [
             {id:'s_fajr', n:'✨ سنة الفجر', p:20}, 
-            {id:'s_duha', n:'☀️ صلاة الضحى', p:25},
+            {id:'s_duha',  n:'☀️ صلاة الضحى', p:25},
             {id:'s_dhuhr_b', n:'✨ الظهر قبل', p:20},
-            {id:'s_dhuhr_a', n:'✨ الظهر بعد', p:15}, {id:'s_maghrib', n:'✨ سنة المغرب', p:15},
-            {id:'s_isha', n:'✨ سنة العشاء', p:15}, {id:'s_shaf', n:'🕯️ الشفع', p:15},
-            {id:'s_witr', n:'🌌 الوتر', p:20}, {id:'s_qyam', n:'🌙 قيام الليل', p:40}
+            {id:'s_dhuhr_a', n:'✨ الظهر بعد', p:15},
+            {id:'s_maghrib', n:'✨ سنة المغرب', p:15},
+            {id:'s_isha',  n:'✨ سنة العشاء', p:15},
+            {id:'s_shaf',  n:'🕯️ الشفع', p:15},
+            {id:'s_witr',  n:'🌌 الوتر', p:20},
+            {id:'s_qyam',  n:'🌙 قيام الليل', p:40}
         ],
         extra: [
             {id:'azkar_s', n:'☀️ أذكار الصباح', p:30, l:'https://alazkar.today/'}, 
@@ -448,28 +446,50 @@
         `;
     }
 
+    /* ✅ عدّاد رمضان: هدف ثابت = منتصف ليل مسقط لليوم الأول */
     async function updateCountdowns() {
-        const ramadanStart = await computeRamadanStartDateG(2026);
-        const ramadanDate = ramadanStart.getTime();
+        // 1) احسب تاريخ بداية رمضان كما هو
+        const rStartDate = await computeRamadanStartDateG(2026);
 
-        // فحص اليوم الأول بناءً على Muscat
-        const nowYMD = ymdInTz(new Date(), APP_TZ);
-        const rStartYMD = ymdInTz(ramadanStart, APP_TZ);
-        if (nowYMD === rStartYMD) showRamadanToastOnce();
+        // 2) ثبّت التاريخ على YMD مسقط (حتى لو الجهاز في دولة أخرى)
+        const rStartYMD_Muscat = ymdInTz(rStartDate, APP_TZ);
+
+        // 3) ابنِ هدف العدّ التنازلي: منتصف ليل مسقط لليوم الأول من رمضان
+        const targetMs = muscatMidnightMsFromYMD(rStartYMD_Muscat);
+
+        // 4) أظهر توست "رمضان كريم!" مرة واحدة إذا كان اليوم في مسقط = 1 رمضان
+        const nowYMD_Muscat = ymdInTz(new Date(), APP_TZ);
+        if (nowYMD_Muscat === rStartYMD_Muscat) showRamadanToastOnce();
+
+        // 5) المؤقّت، نحسب الفرق بدون سالب
+        const dayMs   = 24 * 60 * 60 * 1000;
+        const hourMs  = 60 * 60 * 1000;
+        const minMs   = 60 * 1000;
+        const secMs   = 1000;
 
         setInterval(() => {
-            const nowTick = new Date();
-            const diffRamadan = ramadanDate - nowTick.getTime();
-            if (diffRamadan < 0) {
+            const nowMs = Date.now(); // وقت عالمي موحّد
+            const diff  = targetMs - nowMs;
+
+            if (diff <= 0) {
                 document.getElementById('ramadan-countdown').innerHTML = "🌙 <b>رمضان كريم!</b>";
             } else {
-                const d = Math.floor(diffRamadan / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diffRamadan % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diffRamadan % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diffRamadan % (1000 * 60)) / 1000);
-                document.getElementById('timer-vals').innerText = `${d}ي ${h}س ${m}د ${s}ث`;
+                const days = Math.floor(diff / dayMs);
+                const rem1 = diff - days * dayMs;
+
+                const hours = Math.floor(rem1 / hourMs);
+                const rem2  = rem1 - hours * hourMs;
+
+                const mins  = Math.floor(rem2 / minMs);
+                const rem3  = rem2 - mins * minMs;
+
+                const secs  = Math.floor(rem3 / secMs);
+
+                document.getElementById('timer-vals').innerText = `${days}ي ${hours}س ${mins}د ${secs}ث`;
             }
-            updateNextPrayerCountdown(nowTick);
+
+            // العداد التالي للصلوات كما هو
+            updateNextPrayerCountdown(new Date());
         }, 1000);
     }
 
@@ -495,17 +515,15 @@
         hint.style.display = isFirstDaySelected ? 'block' : 'none';
     }
 
-    /* ✅ جلب مواقيت مدينة */
+    /* جلب مواقيت مدينة */
     async function fetchCityPrayers(apiCity, country, rowId, displayLabel, cacheSlot) {
         try {
             const res = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(apiCity)}&country=${encodeURIComponent(country)}&method=5`);
             const data = await res.json();
             const t = data.data.timings;
 
-            // خزّنها في الـ cache بالصيغة الجديدة
             prayersCache[cacheSlot] = { label: displayLabel, timings: t };
 
-            // اكتب الصف
             document.getElementById(rowId).innerHTML = `
                 <td>${displayLabel}</td>
                 <td>${format12h(t.Fajr)}</td>
@@ -520,12 +538,12 @@
         }
     }
 
-    /* ✅ تحديث العداد القادم اعتمادًا على cache */
+    /* تحديث العداد القادم اعتمادًا على cache */
     function updateNextPrayerCountdown(now) {
         let info = "";
         let showAlert = false;
         let alertPrayerName = "";
-        const entries = Object.entries(prayersCache); // [ ['slot1', {label, timings}], ... ]
+        const entries = Object.entries(prayersCache);
         for (const [slot, entry] of entries) {
             if (!entry || !entry.timings) continue;
             const timings = entry.timings;
@@ -557,16 +575,14 @@
         } else { alertBox.style.display = 'none'; }
     }
 
-    /* ✅ تهيئة قوائم المدن وقراءة الاختيار */
+    /* تهيئة قوائم المدن وقراءة الاختيار */
     function populateCitySelects() {
         const s1 = document.getElementById('city-select-1');
         const s2 = document.getElementById('city-select-2');
-        const buildOpts = (sel) => {
-            sel.innerHTML = CITY_OPTIONS.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
-        };
+        const buildOpts = (sel) => { sel.innerHTML = CITY_OPTIONS.map(c => `<option value="${c.key}">${c.label}</option>`).join(''); };
         buildOpts(s1); buildOpts(s2);
 
-        // افتراضات سابقة: صلالة + كفر الشيخ
+        // افتراضات: صلالة + كفر الشيخ
         s1.value = 'Salalah|Oman';
         s2.value = 'Kafr El Sheikh|Egypt';
 
@@ -574,7 +590,7 @@
         s2.onchange = applyCitySelection;
     }
 
-    /* ✅ تطبيق اختيار المدن على الجدول */
+    /* تطبيق اختيار المدن على الجدول */
     async function applyCitySelection() {
         const s1 = document.getElementById('city-select-1').value;
         const s2 = document.getElementById('city-select-2').value;
@@ -673,7 +689,7 @@
         const drawCheck = (list, tid) => {
             document.getElementById(tid).innerHTML = list.map(h => {
                 const done = userData[h.id]?.done;
-                const label = h.l ? `<a href="${h.l}" target="_blank" class="habit-link">${h.n}</a>` : h.n;
+                const label = h.l ? `${h.l}${h.n}</a>` : h.n;
                 return `<div class="habit-row"><span>${label} <small>(+${h.p}ن)</small></span>
                 <input type="checkbox" ${done?'checked':''} onchange="save('${h.id}',{done:this.checked, p:this.checked?${h.p}:0})" style="transform:scale(1.5); cursor:pointer;"></div>`;
             }).join('');
@@ -795,3 +811,4 @@
 </script>
 </body>
 </html>
+``
