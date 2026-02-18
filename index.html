@@ -280,7 +280,8 @@
     }
 
     async function updateCountdowns() {
-        const ramadanDate = new Date('February 18, 2026 00:00:00').getTime();
+        /* ✅ تم تعديل تاريخ بداية رمضان إلى الخميس 19 فبراير 2026 */
+        const ramadanDate = new Date('February 19, 2026 00:00:00').getTime();
         setInterval(() => {
             const now = new Date();
             const diffRamadan = ramadanDate - now.getTime();
