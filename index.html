@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -35,9 +34,25 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
-        .header-bar { background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid var(--gold); }
+        .header-bar { background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid var(--gold); position: relative; }
+        .header-actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+        .refresh-btn { /* ✅ NEW */
+            background: linear-gradient(180deg,#ffe9b9,#e7cb83);
+            border: 1px solid var(--gold);
+            color: #1a1a1a; padding: 6px 10px; border-radius: 20px;
+            cursor: pointer; font-weight: 800;
+        }
+
         .date-container { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; margin: 10px 0; border: 1px solid rgba(197, 160, 89, 0.3); }
         #hijri-display { display: block; color: var(--gold-light); font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+
+        /* ✅ NEW: تلميح صغير عند أول رمضان (ضمن الترويسة) */
+        .ramadan-day-hint { 
+            display:none; margin-top:6px; font-weight:bold; 
+            background: #fff3cd; color:#856404; border:1px solid #ffeeba; 
+            padding:6px 10px; border-radius:8px; 
+        }
+
         .prayer-times-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; }
         .prayer-times-table th, .prayer-times-table td { padding: 5px; border: 1px solid rgba(255,255,255,0.1); text-align: center; }
         .next-prayer-banner { background: rgba(255, 255, 255, 0.1); margin-top: 10px; padding: 10px; border-radius: 10px; font-size: 0.9rem; border: 1px solid var(--gold-light); line-height: 1.6; }
@@ -88,6 +103,31 @@
         #emoji-picker { position: absolute; bottom: 65px; left: 10px; background: white; border: 2px solid var(--gold); border-radius: 10px; width: 250px; height: 200px; display: none; flex-direction: column; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         body.dark-mode #emoji-picker { background: #252525; }
         .emoji-list { overflow-y: auto; padding: 5px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; font-size: 1.2rem; text-align: center; }
+
+        /* ✅ NEW: توست إشعار رمضان */
+        .toast { 
+            position: fixed; top: 12px; right: 12px; z-index: 2000;
+            background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: #fff;
+            border: 2px solid var(--gold); border-radius: 12px; padding: 10px 14px;
+            box-shadow: 0 10px 24px rgba(0,0,0,.2);
+            display: none;
+        }
+        .toast.show { display: block; animation: fadeInOut 6s ease forwards; }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-8px); }
+            10% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-8px); }
+        }
+
+        /* ✅ NEW: صندوق اختبار التاريخ */
+        .date-debug {
+            margin-top: 8px; font-size: 0.78rem; line-height: 1.4;
+            background: #fff; color:#333; border:1px dashed var(--gold);
+            border-radius:8px; padding:6px 8px; text-align: start;
+        }
+        body.dark-mode .date-debug { background: #252525; color:#eee; }
+        .date-debug b { color: var(--primary); }
     </style>
 </head>
 <body>
@@ -97,10 +137,21 @@
 <div class="main-container">
     <div class="header-bar">
         <h2 style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h2>
+
+        <div class="header-actions">
+            <!-- ✅ NEW: زر تحديث البيانات -->
+            <button class="refresh-btn" id="btn-refresh" title="تحديث مواقيت الصلاة واللوحات">🔄 تحديث البيانات</button>
+        </div>
+
         <div class="date-container">
             <span id="hijri-display">جاري تحديد التاريخ الهجري...</span>
             <input type="date" id="date-picker" style="border-radius: 5px; border: none; padding: 5px; text-align: center; font-weight: bold;">
+            <!-- ✅ NEW: تلميح أول رمضان -->
+            <div id="ramadan-day-hint" class="ramadan-day-hint">🌙 اليوم هو <b>1 رمضان</b> — تقبّل الله منا ومنكم</div>
+            <!-- ✅ NEW: اختبار بصري للتاريخ -->
+            <div id="date-debug" class="date-debug" aria-live="polite"></div>
         </div>
+
         <table class="prayer-times-table">
             <thead><tr><th>المدينة</th><th>الفجر</th><th>الظهر</th><th>العصر</th><th>المغرب</th><th>العشاء</th></tr></thead>
             <tbody id="prayer-table-body">
@@ -136,7 +187,7 @@
     <div id="cards-ui" class="user-cards"></div>
 
     <div id="user-ui" style="display:none;">
-        <h3 id="current-user-title" style="text-align:center; color:var(--primary); background: var(--gold-light); padding: 5px; border-radius: 10px;"></h3>
+        <h3 id="current-user-title" style="text-align:center; color: var(--primary); background: var(--gold-light); padding: 5px; border-radius: 10px;"></h3>
         <div id="fasting-section" class="section-card" style="display:none; border: 2px solid var(--accent);">
             <h3 class="section-title" style="background: var(--accent);">🌟 قسم الاجتهاد (صيام التطوع)</h3>
             <div id="fasting-list"></div>
@@ -166,6 +217,9 @@
     </div>
 </div>
 
+<!-- ✅ NEW: عنصر توست إشعار رمضان -->
+<div id="toast-ramadan" class="toast">🌙 رمضان كريم! نسأل الله القبول</div>
+
 <script>
     const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1" };
     firebase.initializeApp(firebaseConfig);
@@ -174,6 +228,19 @@
     let currentUser = null;
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
     let prayersCache = {};
+
+    /* ✅ أدوات التاريخ المحلية لمنع انزياح UTC */
+    function parseLocalYMD(ymd) {
+        const [y, m, d] = ymd.split('-').map(Number);
+        return new Date(y, m - 1, d); // تاريخ محلي (00:00) بدون تفسير UTC
+    }
+    function todayLocalYMD() {
+        const t = new Date();
+        const y = t.getFullYear();
+        const m = String(t.getMonth() + 1).padStart(2, '0');
+        const d = String(t.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
 
     function toggleDarkMode() {
         document.body.classList.toggle('dark-mode');
@@ -274,19 +341,18 @@
         } catch(e) { return null; }
     }
 
-    /* ✅ دالة مساعدِة: إيجاد التاريخ الميلادي لبداية رمضان عبر التحويل التلقائي */
+    /* دالة حساب بداية رمضان (محلياً) */
     async function computeRamadanStartDateG(targetYear = 2026){
-        // نبحث في نافذة آمنة حول منتصف فبراير حتى أوائل مارس
-        const start = new Date(`${targetYear}-02-10T00:00:00`);
+        const start = new Date(targetYear, 1, 10); // 10 فبراير (محلي)
         for(let i=0;i<30;i++){
-            const d = new Date(start); d.setDate(start.getDate()+i);
+            const d = new Date(start);
+            d.setDate(start.getDate()+i);
             const h = await getHijriData(d);
             if(h && (h.month?.en === 'Ramadan' || (h.month?.ar && h.month.ar.includes('رمضان'))) && parseInt(h.day) === 1){
-                return d; // وجدنا ١ رمضان لهذا العام
+                return d;
             }
         }
-        // احتياط: إن لم نجد لأي سبب، نستخدم 19 فبراير كما هو مطلوب
-        return new Date(`${targetYear}-02-19T00:00:00`);
+        return new Date(targetYear, 1, 19); // احتياط محلي
     }
 
     function isFastingDay(dayOfWeek, hijriDay, hijriMonthEn) {
@@ -295,14 +361,47 @@
         return (dayOfWeek === 1 || dayOfWeek === 4 || whiteDays.includes(parseInt(hijriDay)));
     }
 
+    /* ✅ NEW: عرض/إخفاء توست رمضان */
+    function showRamadanToastOnce() {
+        const shownKey = 'ramadanToastShown_2026';
+        if(localStorage.getItem(shownKey) === '1') return;
+        const el = document.getElementById('toast-ramadan');
+        if(!el) return;
+        el.classList.add('show');
+        setTimeout(()=>{ el.classList.remove('show'); }, 6000);
+        localStorage.setItem(shownKey, '1');
+    }
+
+    /* ✅ NEW: تحديث صندوق اختبار التاريخ */
+    function renderDateDebug() {
+        const out = document.getElementById('date-debug');
+        const val = document.getElementById('date-picker').value || '';
+        if(!val) { out.textContent = ''; return; }
+        const dLocal = parseLocalYMD(val);
+        const pad = (n)=> String(n).padStart(2,'0');
+        const localStr = `${dLocal.getFullYear()}-${pad(dLocal.getMonth()+1)}-${pad(dLocal.getDate())} ${pad(dLocal.getHours())}:${pad(dLocal.getMinutes())}`;
+        const utcStr = `${dLocal.getUTCFullYear()}-${pad(dLocal.getUTCMonth()+1)}-${pad(dLocal.getUTCDate())} ${pad(dLocal.getUTCHours())}:${pad(dLocal.getUTCMinutes())}Z`;
+        out.innerHTML = `
+            <div><b>قيمة الحقل:</b> ${val}</div>
+            <div><b>محليًا (parseLocalYMD):</b> ${localStr}</div>
+            <div><b>UTC:</b> ${utcStr}</div>
+        `;
+    }
+
     async function updateCountdowns() {
-        /* ✅ تاريخ بداية رمضان يتم تحديده تلقائيًا */
         const ramadanStart = await computeRamadanStartDateG(2026);
         const ramadanDate = ramadanStart.getTime();
 
+        // ✅ NEW: إذا دخلنا اليوم الأول الآن، أظهر التوست مرة واحدة
+        const now = new Date();
+        const isFirstDayNow = (now.getFullYear()===ramadanStart.getFullYear() &&
+                               now.getMonth()===ramadanStart.getMonth() &&
+                               now.getDate()===ramadanStart.getDate());
+        if (isFirstDayNow) showRamadanToastOnce();
+
         setInterval(() => {
-            const now = new Date();
-            const diffRamadan = ramadanDate - now.getTime();
+            const nowTick = new Date();
+            const diffRamadan = ramadanDate - nowTick.getTime();
             if (diffRamadan < 0) {
                 document.getElementById('ramadan-countdown').innerHTML = "🌙 <b>رمضان كريم!</b>";
             } else {
@@ -312,13 +411,13 @@
                 const s = Math.floor((diffRamadan % (1000 * 60)) / 1000);
                 document.getElementById('timer-vals').innerText = `${d}ي ${h}س ${m}د ${s}ث`;
             }
-            updateNextPrayerCountdown(now);
+            updateNextPrayerCountdown(nowTick);
         }, 1000);
     }
 
     async function checkNiyaAlert() {
         const selectedDateStr = document.getElementById('date-picker').value;
-        const selectedDate = new Date(selectedDateStr);
+        const selectedDate = parseLocalYMD(selectedDateStr);
         const tomorrow = new Date(selectedDate);
         tomorrow.setDate(selectedDate.getDate() + 1);
         const hijriTomorrow = await getHijriData(tomorrow);
@@ -328,6 +427,14 @@
         }
         const hash = selectedDateStr.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
         document.getElementById('daily-hadith').innerText = ahadith[Math.abs(hash) % ahadith.length];
+
+        // ✅ NEW: إظهار/إخفاء تلميح 1 رمضان بناءً على التاريخ المختار
+        const rStart = await computeRamadanStartDateG(2026);
+        const hint = document.getElementById('ramadan-day-hint');
+        const isFirstDaySelected = (selectedDate.getFullYear()===rStart.getFullYear() &&
+                                    selectedDate.getMonth()===rStart.getMonth() &&
+                                    selectedDate.getDate()===rStart.getDate());
+        hint.style.display = isFirstDaySelected ? 'block' : 'none';
     }
 
     async function fetchCityPrayers(city, country, rowId) {
@@ -372,13 +479,13 @@
         } else { alertBox.style.display = 'none'; }
     }
 
-    async function getRemaining(userData, isFriday, selectedDate) {
+    async function getRemaining(userData, isFriday, selectedDateStr) {
         let rem = [];
         let curFard = [...model.fard];
         let curExtra = [...model.extra];
         if(isFriday) curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40});
-        const hijri = await getHijriData(new Date(selectedDate));
-        if(hijri && isFastingDay(new Date(selectedDate).getDay(), hijri.day, hijri.month.en)) {
+        const hijri = await getHijriData(parseLocalYMD(selectedDateStr));
+        if(hijri && isFastingDay(parseLocalYMD(selectedDateStr).getDay(), hijri.day, hijri.month.en)) {
             if(!userData['fasting']?.done) rem.push("الصيام 🌙");
         }
         curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
@@ -389,7 +496,7 @@
 
     async function render(allData) {
         const selectedDateStr = document.getElementById('date-picker').value;
-        const selectedDate = new Date(selectedDateStr);
+        const selectedDate = parseLocalYMD(selectedDateStr);
         const hijri = await getHijriData(selectedDate);
 
         if(hijri) {
@@ -400,7 +507,7 @@
            - 19 فبراير 2026 = 1 رمضان 1447هـ
            دون المساس بأي منطق آخر.
         */
-        if (selectedDate.getFullYear() === 2026 && selectedDate.getMonth() === 1) { // شهر فبراير (0=يناير)
+        if (selectedDate.getFullYear() === 2026 && selectedDate.getMonth() === 1) { // فبراير
             const d = selectedDate.getDate();
             if (d === 18) {
                 document.getElementById('hijri-display').innerText = `30 شعبان 1447هـ`;
@@ -414,7 +521,7 @@
 
         let stats = await Promise.all(users.map(async u => {
             let s = 0; let uData = allData[u] || {};
-            [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
+            [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (h.p ? h.p : (uData[h.id].p || 0)); });
             if(isFriday && uData['kahf']) s += 40;
             if(uData['fasting']) s += 100;
             return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
@@ -427,6 +534,9 @@
                 <div class="user-status">⏳ المتبقي: ${st.rem}</div>
             </div>`).join('');
         if(currentUser) renderForms(allData[currentUser] || {}, isFriday, fastingDay, selectedDate);
+
+        // ✅ NEW: تحديث صندوق اختبار التاريخ + تلميح رمضان
+        renderDateDebug();
         checkNiyaAlert(); 
     }
 
@@ -543,17 +653,38 @@
         db.ref('osraty_chat').limitToLast(20).on('value', snap => renderChat(snap.val() || {}));
         updateAnnual();
         checkNiyaAlert();
+        renderDateDebug(); // ✅ NEW
+    }
+
+    /* ✅ NEW: زر تحديث البيانات */
+    async function refreshAll() {
+        await Promise.all([
+            fetchCityPrayers('Salalah', 'Oman', 'row-salalah'),
+            fetchCityPrayers('Kafr El Sheikh', 'Egypt', 'row-kafr')
+        ]);
+        sync();
     }
 
     window.onload = () => {
         if(localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
-        document.getElementById('date-picker').value = new Date().toISOString().split('T')[0];
+        document.getElementById('date-picker').value = todayLocalYMD();
         fetchCityPrayers('Salalah', 'Oman', 'row-salalah');
         fetchCityPrayers('Kafr El Sheikh', 'Egypt', 'row-kafr');
         updateCountdowns();
         initEmojis();
-        document.getElementById('date-picker').onchange = sync; sync();
+        document.getElementById('date-picker').onchange = sync; 
+        document.getElementById('btn-refresh').onclick = refreshAll; // ✅ NEW
+        sync();
+
+        // ✅ NEW: فحص أول رمضان عند التحميل الحالي (توست لمرة واحدة إذا كان اليوم هو 1 رمضان)
+        computeRamadanStartDateG(2026).then(rStart => {
+            const now = new Date();
+            if (now.getFullYear()===rStart.getFullYear() && now.getMonth()===rStart.getMonth() && now.getDate()===rStart.getDate()) {
+                showRamadanToastOnce();
+            }
+        });
     };
 </script>
 </body>
 </html>
+``
