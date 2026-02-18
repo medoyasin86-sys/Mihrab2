@@ -84,7 +84,8 @@
     .section-card{ background:#fff; border:1px solid var(--gold); border-radius:15px; margin-top:15px; overflow:hidden; }
     .section-title{ background:var(--primary); color:#fff; padding:10px; margin:0; font-size:1rem; }
     .habit-row{ display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px dashed var(--gold-light); }
-    .habit-link{ color:var(--primary); text-decoration:none; border-bottom:1px solid var(--gold); }
+    .habit-link{ color:var(--primary); text-decoration:none; border-bottom:1px dashed var(--gold); }
+    .habit-link:hover{ text-decoration:underline; }
     .pts-info{ font-size:.65rem; color:#666; display:block; }
     .opt-btn{ font-size:.7rem; padding:6px 2px; border-radius:6px; border:1px solid var(--gold); cursor:pointer; flex:1; margin:0 1px; background:transparent; color:inherit; }
     .opt-btn.selected{ background:var(--gold); color:#fff; }
@@ -609,16 +610,22 @@
         }</div></div>`;
     }).join('');
 
+    /* ⬇️⬇️ التعديل هنا: الروابط الخارجية تُفتح عند الضغط ⬇️⬇️ */
     const drawCheck = (list, tid) => {
       const rDay = getRamadanDayFor(selectedDate);
       document.getElementById(tid).innerHTML = list.map(h => {
         const done = userData[h.id]?.done;
         let url = h.l || null;
+        // افتح جزء اليوم تلقائيًا للورد القرآني في رمضان
         if (h.id === 'quran' && rDay) url = `https://quran.com/juz/${rDay}`;
+
+        // إن وُجد رابط: لفّ الاسم داخل <a> وافتح في تبويب جديد
         const label = url
-          ? `${url}${h.n}</a>`
+          ? `<a class="habit-link" href="${url}" target="_blank" rel="noopener noreferrer">${h.n}</a>`
           : h.n;
-        return `<div class="habit-row"><span>${label} <small>(+${h.p}ن)</small></span>
+
+        return `<div class="habit-row">
+          <span>${label} <small>(+${h.p}ن)</small></span>
           <input type="checkbox" ${done?'checked':''}
                  data-habit="${h.id}" data-p="${h.p}"
                  onchange="save('${h.id}',{done:this.checked, p:this.checked?${h.p}:0})"
@@ -626,6 +633,8 @@
         </div>`;
       }).join('');
     };
+    /* ⬆️⬆️ نهاية التعديل ⬆️⬆️ */
+
     drawCheck(model.sunan, 'sunan-list');
     drawCheck(curExtra, 'extra-list');
   }
