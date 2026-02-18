@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -394,9 +395,18 @@
         if(hijri) {
             document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
         }
-        /* ✅ ضمان مطابقـة العرض: ١ رمضان = ١٩ فبراير ٢٠٢٦ (عرض فقط إذا اختلفت الواجهة) */
-        if (selectedDate.getFullYear() === 2026 && selectedDate.getMonth() === 1 && selectedDate.getDate() === 19) {
-            document.getElementById('hijri-display').innerText = `1 رمضان 1447هـ`;
+        /* ✅ تصحيح العرض وفق سلطنة عُمان:
+           - 18 فبراير 2026 = 30 شعبان 1447هـ (متمّم)
+           - 19 فبراير 2026 = 1 رمضان 1447هـ
+           دون المساس بأي منطق آخر.
+        */
+        if (selectedDate.getFullYear() === 2026 && selectedDate.getMonth() === 1) { // شهر فبراير (0=يناير)
+            const d = selectedDate.getDate();
+            if (d === 18) {
+                document.getElementById('hijri-display').innerText = `30 شعبان 1447هـ`;
+            } else if (d === 19) {
+                document.getElementById('hijri-display').innerText = `1 رمضان 1447هـ`;
+            }
         }
 
         const isFriday = selectedDate.getDay() === 5;
