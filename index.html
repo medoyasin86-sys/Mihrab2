@@ -159,14 +159,7 @@
     }
     @keyframes pulseGlow{ 0%{box-shadow:0 0 8px rgba(240,198,116,.25);} 50%{box-shadow:0 0 22px rgba(240,198,116,.6);} 100%{box-shadow:0 0 8px rgba(240,198,116,.25);} }
 
-    /* 🔒 أدوات الإدارة: مخفية افتراضيًا */
-    .admin-controls{ display:none; gap:8px; flex-wrap:wrap; align-items:center; }
-    .admin-controls.show{ display:flex; }
-
-    /* زر دخول/إخفاء الإدارة */
-    #btn-admin-lock{ background:linear-gradient(180deg,#fff9d9,#f1d78f); border:1px solid var(--gold); font-weight:800; }
-
-    /* 🪟 Modal عام (نستغله لكلمة السر أيضًا) */
+    /* 🪟 Modal لاختيار نطاق التقرير */
     .modal-backdrop{
       position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; z-index:3000;
       align-items:center; justify-content:center; padding:12px;
@@ -179,9 +172,14 @@
     .modal .row{ margin:8px 0; }
     .modal .actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
     .modal label{ cursor:pointer; }
-    .modal select, .modal input[type="password"]{ width:100%; padding:8px; border:1px solid var(--gold); border-radius:8px; }
-    .btn{ padding:6px 10px; border-radius:10px; border:1px solid var(--gold); cursor:pointer; background:#fff7d6; font-weight:800; }
-    .btn.primary{ background:linear-gradient(180deg,#ffe9b9,#e7cb83); }
+    .modal select{ width:100%; padding:6px; border:1px solid var(--gold); border-radius:8px; }
+
+    /* 🔒 أدوات الإدارة: مخفية افتراضيًا */
+    .admin-controls{ display:none; gap:8px; flex-wrap:wrap; align-items:center; }
+    .admin-controls.show{ display:flex; }
+
+    /* زر دخول/إخفاء الإدارة */
+    #btn-admin-lock{ background:linear-gradient(180deg,#fff9d9,#f1d78f); border:1px solid var(--gold); font-weight:800; }
   </style>
 </head>
 <body>
@@ -310,7 +308,7 @@
 <!-- توست إشعار رمضان -->
 <div id="toast-ramadan" class="toast">🌙 رمضان كريم! نسأل الله القبول</div>
 
-<!-- ⭐ زينة رمضان -->
+<!-- ⭐ زينة رمضان (كما طلبت) -->
 <div id="decor-container" class="decor-container" style="display:none" aria-hidden="true">
   <div class="decor-top">
     <div class="lantern">🏮</div>
@@ -345,14 +343,13 @@
   </div>
 </div>
 
-<!-- 🪟 نافذة كلمة السر لأدوات الإدارة -->
+<!-- 🪟 نافذة كلمة السر (بدون تلميحات) -->
 <div id="admin-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;">
   <div class="modal" role="document">
     <h3>دخول أدوات الإدارة</h3>
     <div class="row">
       <label for="admin-password" style="font-weight:800;">أدخل كلمة السر:</label>
-      <input type="password" id="admin-password" placeholder="••••">
-      <small style="color:#7a6b4e; display:block; margin-top:6px;">الكلمة حساسة لحالة الأحرف — كلمة السر: medo</small>
+      <input type="password" id="admin-password" placeholder="••••" style="width:100%; padding:8px; border:1px solid var(--gold); border-radius:8px; margin-top:6px;">
     </div>
     <div class="actions">
       <button class="btn" onclick="closeAdminDialog()">إلغاء</button>
@@ -509,7 +506,7 @@
     }
   }
 
-  /* ✅ عدّاد الصلاة القادمة */
+  /* ✅ عدّاد الصلاة القادمة (يدعم مناطق المدن الزمنية) */
   function updateNextPrayerCountdown(){
     let info=""; let showAlert=false; let alertName="";
     const labels={Fajr:"الفجر",Dhuhr:"الظهر",Asr:"العصر",Maghrib:"المغرب",Isha:"العشاء"};
@@ -716,7 +713,7 @@
     const hijri = await getHijriData(selectedDate);
     if(hijri) document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
 
-    // تصحيح ثابت
+    // تصحيح ثابت: 19 فبراير 2026 = 1 رمضان، 18 فبراير = 30 شعبان (مرجع مسقط)
     const selectedYMD_Muscat = ymdInTz(selectedDate, APP_TZ);
     if (selectedYMD_Muscat === '2026-02-18') document.getElementById('hijri-display').innerText = `30 شعبان 1447هـ`;
     if (selectedYMD_Muscat === '2026-02-19') document.getElementById('hijri-display').innerText = `1 رمضان 1447هـ`;
@@ -931,7 +928,7 @@
     s_fajr:'سنة الفجر', s_duha:'الضحى', s_dhuhr_b:'الظهر قبل', s_dhuhr_a:'الظهر بعد',
     s_maghrib:'سنة المغرب', s_isha:'سنة العشاء', s_shaf:'الشفع', s_witr:'الوتر', s_qyam:'قيام الليل',
     azkar_s:'أذكار الصباح', azkar_e:'أذكار المساء', azkar_n:'أذكار النوم',
-    mulk:'سورة الملك', baqarah_end:'خواتيم البقرة', quran:'الورد القرآني',
+    mulk:'سورة الملك', baqarah_end:'خواتيم سورة البقرة', quran:'الورد القرآني',
     fasting:'الصيام'
   };
   const FARD_TYPE_DISPLAY = { m:'م', g:'ج', f:'ف', q:'ق' };
@@ -1159,7 +1156,7 @@
       return stackedBarHTML(total);
     }
 
-    // نطاق التقرير (الجميع/مستخدم)
+    // لو التقرير لمستخدم محدد: نحصر الـ summary على هذا المستخدم فقط
     let filteredSummary = summary;
     if(scope === 'user' && userName && summary[userName]){
       filteredSummary = { [userName]: summary[userName] };
@@ -1201,7 +1198,7 @@
 
   .kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:8px; }
   .kpi{ background:var(--soft); border:1px solid var(--border); border-radius:10px; padding:6px; text-align:center; }
-  .kpi-title{ display:block; color:#7a6b4e; font-size:.85rem; }
+  .kpi-title{ display:block; color:#7a6ب4e; font-size:.85rem; }
   .kpi-val{ display:block; font-weight:800; font-size:1.05rem; }
 
   .sub-title{ margin:10px 0 6px 0; font-weight:800; color:#7a6b4e; }
@@ -1354,7 +1351,7 @@
   }
   async function refreshAll() { await applyCitySelection(); sync(); }
 
-  /* 🔐 قفل أدوات الإدارة بكلمة السر */
+  /* 🔐 قفل أدوات الإدارة بكلمة السر (بدون عرضها) */
   let isAdminUnlocked = false;
   function showAdminControls(show){
     const group = document.getElementById('admin-controls');
@@ -1391,6 +1388,7 @@
   }
   function submitAdminPassword(){
     const val = (document.getElementById('admin-password')?.value || '').trim();
+    // كلمة السر الوحيدة المعتمدة
     if (val === 'medo'){
       closeAdminDialog();
       showAdminControls(true);
@@ -1423,7 +1421,7 @@
       };
     }
 
-    // ربط الأزرار كما هي
+    // ربط الأزرار (دون تغيير وظائفها)
     document.getElementById('btn-refresh').onclick = refreshAll;
     const btnSaveAll = document.getElementById('btn-save-all'); if (btnSaveAll) btnSaveAll.onclick = saveAllChanges;
 
