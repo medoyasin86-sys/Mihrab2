@@ -158,6 +158,30 @@
       box-shadow:0 0 14px rgba(240,198,116,.45); animation:pulseGlow 2.8s ease-in-out infinite;
     }
     @keyframes pulseGlow{ 0%{box-shadow:0 0 8px rgba(240,198,116,.25);} 50%{box-shadow:0 0 22px rgba(240,198,116,.6);} 100%{box-shadow:0 0 8px rgba(240,198,116,.25);} }
+
+    /* 🔒 أدوات الإدارة مخفية افتراضياً */
+    .admin-controls{ display:none; gap:8px; flex-wrap:wrap; align-items:center; }
+    .admin-controls.show{ display:flex; }
+
+    /* زر الدخول/القفل */
+    #btn-admin-lock{ background:linear-gradient(180deg,#fff9d9,#f1d78f); border:1px solid var(--gold); font-weight:800; }
+
+    /* 🪟 Modal (مستخدم مسبقًا لعدة نوافذ) */
+    .modal-backdrop{
+      position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; z-index:3000;
+      align-items:center; justify-content:center; padding:12px;
+    }
+    .modal{
+      background:#fff; color:#222; border:2px solid var(--gold); border-radius:14px; padding:14px;
+      max-width:420px; width:100%; box-shadow:0 15px 40px rgba(0,0,0,.25);
+    }
+    .modal h3{ margin:0 0 10px 0; color:#1a4d2e; font-family:'Reem Kufi'; }
+    .modal .row{ margin:8px 0; }
+    .modal .actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+    .modal label{ cursor:pointer; }
+    .modal select, .modal input[type="password"]{ width:100%; padding:8px; border:1px solid var(--gold); border-radius:8px; }
+    .btn{ padding:6px 10px; border-radius:10px; border:1px solid var(--gold); cursor:pointer; background:#fff7d6; font-weight:800; }
+    .btn.primary{ background:linear-gradient(180deg,#ffe9b9,#e7cb83); }
   </style>
 </head>
 <body>
@@ -169,20 +193,23 @@
     <h2 id="app-title" style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h2>
 
     <div class="header-actions">
-      <button class="refresh-btn" id="btn-refresh" title="تحديث مواقيت الصلاة واللوحات">🔄 تحديث البيانات</button>
-      <!-- زر حفظ التعديلات -->
-      <button class="refresh-btn" id="btn-save-all" title="حفظ كل تعديلات اليوم">💾 حفظ التعديلات</button>
+      <!-- زر دخول الإدارة -->
+      <button class="refresh-btn" id="btn-admin-lock" title="فتح أدوات الإدارة">🔒 دخول الإدارة</button>
 
-      <!-- اختيار المدن -->
+      <!-- أدوات الإدارة (مخفية حتى إدخال كلمة السر) -->
+      <div id="admin-controls" class="admin-controls">
+        <button class="refresh-btn" id="btn-refresh"   title="تحديث مواقيت الصلاة واللوحات">🔄 تحديث البيانات</button>
+        <button class="refresh-btn" id="btn-save-all"  title="حفظ كل تعديلات اليوم">💾 حفظ التعديلات</button>
+        <button class="refresh-btn" id="btn-report-daily"   title="تقرير يومي (PDF)">📄 تقرير يومي</button>
+        <button class="refresh-btn" id="btn-report-monthly" title="تقرير شهري (PDF)">📄 تقرير شهري</button>
+        <button class="refresh-btn" id="btn-report-yearly"  title="تقرير سنوي (PDF)">📄 تقرير سنوي</button>
+      </div>
+
+      <!-- اختيار المدن (ظاهر دائمًا) -->
       <label for="city-select-1"><b>مدينة 1:</b></label>
       <select id="city-select-1" class="city-select" title="اختر مدينة"></select>
       <label for="city-select-2"><b>مدينة 2:</b></label>
       <select id="city-select-2" class="city-select" title="اختر مدينة"></select>
-
-      <!-- تقارير PDF -->
-      <button class="refresh-btn" id="btn-report-daily"   title="تقرير يومي (PDF)">📄 تقرير يومي</button>
-      <button class="refresh-btn" id="btn-report-monthly" title="تقرير شهري (PDF)">📄 تقرير شهري</button>
-      <button class="refresh-btn" id="btn-report-yearly"  title="تقرير سنوي (PDF)">📄 تقرير سنوي</button>
     </div>
 
     <!-- فلاتر التقرير -->
@@ -296,6 +323,43 @@
 </div>
 <div id="eid-banner" class="eid-banner">✨🌙 عيد فطر مبارك 🌙✨</div>
 <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+<!-- 🪟 نافذة اختيار نطاق التقرير -->
+<div id="report-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal" role="document">
+    <h3 id="report-title">إنشاء تقرير</h3>
+    <div class="row">
+      <label><input type="radio" name="report-scope" value="all" checked> تقرير للجميع</label>
+    </div>
+    <div class="row">
+      <label><input type="radio" name="report-scope" value="user"> تقرير لمستخدم محدد</label>
+      <div id="report-user-row" style="margin-top:6px; display:none;">
+        <select id="report-user-select"></select>
+      </div>
+    </div>
+    <input type="hidden" id="report-mode" value="">
+    <div class="actions">
+      <button class="btn" onclick="closeReportDialog()">إلغاء</button>
+      <button class="btn primary" onclick="submitReport()">إنشاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🪟 نافذة كلمة السر لأدوات الإدارة -->
+<div id="admin-backdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;">
+  <div class="modal" role="document">
+    <h3>دخول أدوات الإدارة</h3>
+    <div class="row">
+      <label for="admin-password" style="font-weight:800;">أدخل كلمة السر:</label>
+      <input type="password" id="admin-password" placeholder="••••">
+      <small style="color:#7a6b4e; display:block; margin-top:6px;">تلميح: الكلمة حساسة لحالة الأحرف.</small>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="closeAdminDialog()">إلغاء</button>
+      <button class="btn primary" onclick="submitAdminPassword()">دخول</button>
+    </div>
+  </div>
+</div>
 
 <script>
   /* ========= Firebase ========= */
@@ -747,8 +811,9 @@
   function save(id, val) { if(!currentUser) return alert("اختر اسمك أولاً من البطاقات!"); db.ref(`osraty/${document.getElementById('date-picker').value}/${currentUser}/${id}`).set(val); }
   function selectUser(u) { currentUser = u; document.getElementById('user-ui').style.display='block'; document.getElementById('current-user-title').innerText="سجل طاعاتك يا " + u; sync(); }
 
-  /* ✅ زر حفظ التعديلات دفعة واحدة */
+  /* ✅ زر حفظ التعديلات دفعة واحدة (مع حماية الإدارة) */
   function saveAllChanges() {
+    if (!isAdminUnlocked) { openAdminDialog(); return; }
     if (!currentUser) { alert("اختر اسمك أولاً من البطاقات!"); return; }
     const dateStr = document.getElementById('date-picker').value;
     if (!dateStr) { alert("اختر التاريخ أولاً"); return; }
@@ -770,7 +835,7 @@
       save(hid, { done: ch.checked, p: ch.checked ? p : 0 });
     });
 
-    // تنبيه لطيف
+    // توست
     const toast = document.createElement('div');
     toast.textContent = "تم حفظ التعديلات ✅";
     toast.style.cssText = 'position:fixed;top:12px;right:12px;background:#1a4d2e;color:#fff;border:2px solid #c5a059;border-radius:12px;padding:8px 12px;z-index:2500;';
@@ -778,7 +843,7 @@
     setTimeout(()=> toast.remove(), 1800);
   }
 
-  /* ⭐ NEW: أدوات زينة رمضان (المدى الزمني + العنوان) */
+  /* ⭐ زينة رمضان + العنوان */
   const DECOR_START_YMD = "2026-02-18";
   const RAMADAN_YMD     = "2026-02-19";
   function addDaysYMD_Muscat(ymd, days){
@@ -788,7 +853,6 @@
     return ymdInTz(next, APP_TZ);
   }
   const EID_YMD = addDaysYMD_Muscat(RAMADAN_YMD, 30);
-
   function seedConfetti(containerId, pieces=40){
     const c = document.getElementById(containerId);
     c.innerHTML = '';
@@ -819,8 +883,6 @@
       }
     }
   }
-
-  /* ✅ عنوان الهيدر في رمضان */
   function updateHeaderTitleForRamadan(){
     const today = todayYMDMuscat();
     const inRamadan = (today >= RAMADAN_YMD && today <= EID_YMD);
@@ -835,7 +897,7 @@
   }
 
   /* ============================= */
-  /*     أدوات مدى التاريخ (ميلادي) + فلاتر التقرير + رسوم  */
+  /*     أدوات مدى التاريخ + فلاتر + تقارير + اختيار نطاق (الجميع/مستخدم) */
   /* ============================= */
   function pad2(n){ return String(n).padStart(2,'0'); }
   function ymdOfDate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
@@ -962,7 +1024,7 @@
     return { fullDates, rangeData, summary };
   }
 
-  function openReportWindow({modeLabel, rangeLabel, startYMD, endYMD, summary, fullDates, rangeData, flt}){
+  function openReportWindow({modeLabel, rangeLabel, startYMD, endYMD, summary, fullDates, rangeData, flt, scope, userName}){
     const nowStr = new Date().toLocaleString('ar-EG');
     const CAT_COLORS = { fard:'#b8860b', sunan:'#1a6a3b', extra:'#118ab2', fasting:'#ef476f' };
 
@@ -1088,9 +1150,9 @@
       `;
     }
 
-    function overallStackHTML(){
+    function overallStackHTML(filteredSummary){
       const total = { fard:0, sunan:0, extra:0, fasting:0 };
-      Object.values(summary).forEach(s=>{
+      Object.values(filteredSummary).forEach(s=>{
         total.fard    += s.catTotals.fard;
         total.sunan   += s.catTotals.sunan;
         total.extra   += s.catTotals.extra;
@@ -1099,12 +1161,18 @@
       return stackedBarHTML(total);
     }
 
+    // فلترة على مستوى النطاق (الجميع/مستخدم)
+    let filteredSummary = summary;
+    if(scope === 'user' && userName && summary[userName]){
+      filteredSummary = { [userName]: summary[userName] };
+    }
+
     const html = `
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>تقرير ${modeLabel} | ${rangeLabel}</title>
+<title>تقرير ${modeLabel} | ${rangeLabel}${scope==='user' && userName? ' — ' + userName : ''}</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
 <style>
   @page{ size: A4 landscape; margin: 12mm; }
@@ -1185,7 +1253,7 @@
 <body>
   <div class="container">
     <header class="hdr">
-      <div class="hdr-title">تقرير ${modeLabel} — المدة: <span class="tag">${rangeLabel}</span></div>
+      <div class="hdr-title">تقرير ${modeLabel} — <span class="tag">${rangeLabel}</span>${scope==='user' && userName? ' — المستخدم: ' + userName : ''}</div>
       <div class="hdr-sub">
         <span>من <span class="tag">${startYMD}</span> إلى <span class="tag">${endYMD}</span></span>
         <span class="small">تاريخ الإصدار: ${nowStr}</span>
@@ -1193,12 +1261,143 @@
     </header>
 
     <section class="overall">
-      <div class="title">📊 توزيع النقاط (إجمالي الفريق) حسب الفئات</div>
-      ${overallStackHTML()}
+      <div class="title">📊 توزيع النقاط (${scope==='user' ? 'المستخدم' : 'إجمالي الفريق'}) حسب الفئات</div>
+      ${ (function(){ 
+          if('${scope}'==='user' && '${userName}'){
+            const one = ${JSON.stringify(filteredSummary)}['${userName}']; 
+            return one ? (${stackedBarHTML.toString()})(one.catTotals) : '';
+          } else {
+            const all = ${JSON.stringify(filteredSummary)};
+            const total = { fard:0, sunan:0, extra:0, fasting:0 };
+            Object.values(all).forEach(s=>{ total.fard+=s.catTotals.fard; total.sunan+=s.catTotals.sunan; total.extra+=s.catTotals.extra; total.fasting+=s.catTotals.fasting; });
+            return (${stackedBarHTML.toString()})(total);
+          }
+        })()
+      }
     </section>
 
     <main class="grid">
-      ${ Object.keys(summary).map(u => userBlockHTML(u, summary[u])).join('') }
+      ${ Object.keys(filteredSummary).map(u => (function(){
+          const data = filteredSummary[u];
+          const f = data.fardCounts || {m:0,g:0,f:0,q:0};
+          const top = data.topDays || [];
+          const missing = data.missingDates || [];
+          function barsHTML(items){
+            if(!items.length) return `<div class="nodata">لا توجد بيانات مميزة في هذا المدى.</div>`;
+            const max = Math.max(...items.map(x=>x.pointsFiltered), 1);
+            return items.map(x=>{
+              const w = Math.round((x.pointsFiltered/max)*100);
+              return `
+                <div class="bar-row">
+                  <div class="bar-label">${x.date}</div>
+                  <div class="bar">
+                    <div class="bar-fill" style="width:${w}%"></div>
+                    <div class="bar-val">${x.pointsFiltered} ن</div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+          return `
+            <section class="user-card">
+              <h3>👤 ${u}</h3>
+
+              <div class="kpis">
+                <div class="kpi"><span class="kpi-title">إجمالي النقاط (مُصفّى)</span><span class="kpi-val">${data.totalPoints}</span></div>
+                <div class="kpi"><span class="kpi-title">أيام فعّالة</span><span class="kpi-val">${data.daysActive}</span></div>
+                <div class="kpi"><span class="kpi-title">أيّام الصيام</span><span class="kpi-val">${data.fastingCount}</span></div>
+                <div class="kpi"><span class="kpi-title">ورد قرآني</span><span class="kpi-val">${data.quranCount}</span></div>
+                <div class="kpi"><span class="kpi-title">فجر مسجد</span><span class="kpi-val">${f.m||0}</span></div>
+              </div>
+
+              <div class="sub-title">📊 توزيع النقاط حسب الفئة</div>
+              ${(function(){ 
+                  const totals = data.catTotals || {fard:0,sunan:0,extra:0,fasting:0};
+                  const total = Math.max(1, (flt.fard?totals.fard:0) + (flt.sunan?totals.sunan:0) + (flt.extra?totals.extra:0) + (flt.fasting?totals.fasting:0));
+                  const segs = [];
+                  if(flt.fard)    segs.push({c:'#b8860b', t:'فرائض', v:totals.fard});
+                  if(flt.sunan)   segs.push({c:'#1a6a3b', t:'سنن',   v:totals.sunan});
+                  if(flt.extra)   segs.push({c:'#118ab2', t:'أذكار/ورد', v:totals.extra});
+                  if(flt.fasting) segs.push({c:'#ef476f', t:'صيام', v:totals.fasting});
+                  return `
+                    <div class="stack">
+                      ${segs.map(s=>`<span class="seg" style="width:${Math.round((s.v/total)*100)}%; background:${s.c}"></span>`).join('')}
+                    </div>
+                    <div class="legend">
+                      ${segs.map(s=>`<span class="lg"><i style="background:${s.c}"></i>${s.t}: <b>${s.v}</b></span>`).join('')}
+                    </div>`;
+                })() }
+
+              <div class="sub-title">📈 أفضل 5 أيام</div>
+              <div class="bars">${barsHTML(top)}</div>
+
+              <div class="sub-title">📅 تواريخ بلا تسجيل (${missing.length})</div>
+              <div class="missing-wrap">
+                ${missing.length? missing.map(d=>`<span class="chip">${d}</span>`).join('') : `<span class="muted">— لا توجد</span>`}
+              </div>
+
+              ${(function(){ 
+                const headCols = ['التاريخ'];
+                if(flt.fard)  headCols.push(...${JSON.stringify(FARD_ORDER)}.map(id=>${JSON.stringify(LABELS_AR)}[id]));
+                if(flt.sunan) headCols.push(...${JSON.stringify(SUNAN_ORDER)}.map(id=>${JSON.stringify(LABELS_AR)}[id]));
+                if(flt.extra) headCols.push(...${JSON.stringify(EXTRA_ORDER)}.map(id=>${JSON.stringify(LABELS_AR)}[id]));
+                if(flt.fasting) headCols.push(${JSON.stringify(LABELS_AR)}.fasting);
+                headCols.push('نقاط اليوم');
+
+                const rows = ${JSON.stringify(fullDates)}.map(d=>{
+                  const day = ${JSON.stringify(rangeData)}[d] || {};
+                  const uData = day['${u}'] || {};
+                  const isFriday = (new Date(d+'T00:00:00')).getDay()===5;
+                  const points = (function(uData){
+                    let s=0; 
+                    if(${JSON.stringify(flt)}.fard){ ${JSON.stringify(FARD_ORDER)}.forEach(fid=>{ if(uData[fid]) s+=(uData[fid].p||0); }); }
+                    if(${JSON.stringify(flt)}.sunan){ ${JSON.stringify(SUNAN_ORDER)}.forEach(id=>{ if(uData[id]?.done) s+=(${JSON.stringify(model)}.sunan.find(x=>x.id===id)?.p||0); }); }
+                    if(${JSON.stringify(flt)}.extra){ ${JSON.stringify(EXTRA_ORDER)}.forEach(id=>{ if(uData[id]?.done) s+=(${JSON.stringify(model)}.extra.find(x=>x.id===id)?.p||0); }); }
+                    if(${JSON.stringify(flt)}.fasting){ if(uData['fasting']?.done) s+=100; }
+                    return s; 
+                  })(uData);
+
+                  const tds = [];
+                  tds.push(\`<td class="c-date">\${d}</td>\`);
+                  if(${JSON.stringify(flt)}.fard){
+                    tds.push(...${JSON.stringify(FARD_ORDER)}.map(id=>{
+                      const typ = uData?.[id]?.type;
+                      if(!typ) return '<td class="c-fard"><span class="muted">—</span></td>';
+                      const short = ${JSON.stringify(FARD_TYPE_DISPLAY)}[typ]||typ;
+                      const title = (typ==='m'?'مسجد':typ==='g'?'جماعة':typ==='f'?'فرد':'قضاء');
+                      return \`<td class="c-fard"><span class="badge badge-fard \${typ}" title="\${title}">\${short}</span></td>\`;
+                    }));
+                  }
+                  if(${JSON.stringify(flt)}.sunan){
+                    tds.push(...${JSON.stringify(SUNAN_ORDER)}.map(id=>{
+                      const on = uData?.[id]?.done; return \`<td class="c-check">\${on?'<span class="badge badge-ok">✓</span>':'<span class="muted">—</span>'}</td>\`;
+                    }));
+                  }
+                  if(${JSON.stringify(flt)}.extra){
+                    tds.push(...${JSON.stringify(EXTRA_ORDER)}.map(id=>{
+                      const on = uData?.[id]?.done; return \`<td class="c-check">\${on?'<span class="badge badge-ok">✓</span>':'<span class="muted">—</span>'}</td>\`;
+                    }));
+                  }
+                  if(${JSON.stringify(flt)}.fasting){
+                    const on = uData?.['fasting']?.done;
+                    tds.push(\`<td class="c-check">\${on?'<span class="badge badge-ok">✓</span>':'<span class="muted">—</span>'}</td>\`);
+                  }
+                  tds.push(\`<td class="c-pts">\${points}</td>\`);
+                  return \`<tr>\${tds.join('')}</tr>\`;
+                }).join('');
+
+                return \`
+                  <div class="table-wrap">
+                    <table class="detail-table" dir="rtl">
+                      <thead><tr>\${headCols.map(c=>\`<th>\${c}</th>\`).join('')}</tr></thead>
+                      <tbody>\${rows}</tbody>
+                    </table>
+                  </div>
+                \`;
+              })()}
+            </section>
+          `;
+        })()).join('') }
     </main>
   </div>
 </body>
@@ -1210,7 +1409,35 @@
     setTimeout(()=>{ try{ w.focus(); w.print(); }catch(_){/* */} }, 700);
   }
 
-  async function generateReport(mode){
+  function openReportDialog(mode){
+    document.getElementById('report-mode').value = mode;
+    document.getElementById('report-title').textContent = 
+      mode==='daily' ? 'إنشاء تقرير يومي' : mode==='monthly' ? 'إنشاء تقرير شهري' : 'إنشاء تقرير سنوي';
+
+    // تعبئة أسماء المستخدمين
+    const sel = document.getElementById('report-user-select');
+    sel.innerHTML = users.map(u=>`<option value="${u}">${u}</option>`).join('');
+    if(currentUser && users.includes(currentUser)) sel.value = currentUser;
+
+    // إعادة الضبط
+    document.querySelectorAll('input[name="report-scope"]').forEach(r=>{ r.checked = (r.value==='all'); });
+    document.getElementById('report-user-row').style.display = 'none';
+
+    // إظهار المودال
+    const bd = document.getElementById('report-backdrop');
+    bd.style.display = 'flex'; bd.setAttribute('aria-hidden','false');
+  }
+  function closeReportDialog(){
+    const bd = document.getElementById('report-backdrop');
+    bd.style.display = 'none';
+    bd.setAttribute('aria-hidden','true');
+  }
+  async function submitReport(){
+    if (!isAdminUnlocked) { openAdminDialog(); return; }
+    const mode = document.getElementById('report-mode').value;
+    const scope = Array.from(document.querySelectorAll('input[name="report-scope"]')).find(r=>r.checked)?.value || 'all';
+    const userName = scope==='user' ? document.getElementById('report-user-select').value : null;
+
     const ymd = document.getElementById('date-picker').value || todayYMDMuscat();
     const flt = getReportFilter();
     let startYMD, endYMD, rangeLabel, modeLabel;
@@ -1230,7 +1457,8 @@
 
     try{
       const { fullDates, rangeData, summary } = await fetchRangeSummaryFiltered(startYMD, endYMD, flt);
-      openReportWindow({modeLabel, rangeLabel, startYMD, endYMD, summary, fullDates, rangeData, flt});
+      openReportWindow({modeLabel, rangeLabel, startYMD, endYMD, summary, fullDates, rangeData, flt, scope, userName});
+      closeReportDialog();
     }catch(e){
       console.error('Report error:', e);
       alert('تعذّر توليد التقرير. حاول مجددًا.');
@@ -1243,7 +1471,67 @@
     db.ref('osraty_chat').limitToLast(20).on('value', snap => renderChat(snap.val() || {}));
     updateAnnual(); checkNiyaAlert();
   }
-  async function refreshAll() { await applyCitySelection(); sync(); }
+  async function refreshAll() { 
+    if (!isAdminUnlocked) { openAdminDialog(); return; }
+    await applyCitySelection(); 
+    sync(); 
+  }
+
+  /* 🔐 قفل/فتح أدوات الإدارة */
+  let isAdminUnlocked = false;
+  function showAdminControls(show){
+    const group = document.getElementById('admin-controls');
+    const lockBtn = document.getElementById('btn-admin-lock');
+    if (!group || !lockBtn) return;
+    if (show){
+      group.classList.add('show');
+      isAdminUnlocked = true;
+      sessionStorage.setItem('adminUnlocked','1');
+      lockBtn.textContent = '🔓 إخفاء الأدوات';
+      lockBtn.title = 'إخفاء أدوات الإدارة';
+    } else {
+      group.classList.remove('show');
+      isAdminUnlocked = false;
+      sessionStorage.removeItem('adminUnlocked');
+      lockBtn.textContent = '🔒 دخول الإدارة';
+      lockBtn.title = 'فتح أدوات الإدارة';
+    }
+  }
+  function requireAdmin(action){
+    if (isAdminUnlocked){ if (typeof action === 'function') action(); return; }
+    openAdminDialog();
+  }
+  function openAdminDialog(){
+    const bd = document.getElementById('admin-backdrop');
+    const inp = document.getElementById('admin-password');
+    if (!bd || !inp) return;
+    inp.value = '';
+    bd.style.display = 'flex';
+    bd.setAttribute('aria-hidden','false');
+    setTimeout(()=> inp.focus(), 30);
+  }
+  function closeAdminDialog(){
+    const bd = document.getElementById('admin-backdrop');
+    if (!bd) return;
+    bd.style.display = 'none';
+    bd.setAttribute('aria-hidden','true');
+  }
+  function submitAdminPassword(){
+    const val = (document.getElementById('admin-password')?.value || '').trim();
+    if (val === 'medo'){
+      closeAdminDialog();
+      showAdminControls(true);
+    } else {
+      alert('❌ كلمة السر غير صحيحة.');
+    }
+  }
+  document.addEventListener('keydown', (e)=>{
+    const bd = document.getElementById('admin-backdrop');
+    if (bd && bd.style.display === 'flex' && e.key === 'Enter'){
+      e.preventDefault();
+      submitAdminPassword();
+    }
+  });
 
   window.onload = () => {
     if(localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
@@ -1256,16 +1544,33 @@
     initEmojis();
 
     document.getElementById('date-picker').onchange = () => { sync(); updateHeaderTitleForRamadan(); };
-    document.getElementById('btn-refresh').onclick = refreshAll;
-    const btnSaveAll = document.getElementById('btn-save-all'); if (btnSaveAll) btnSaveAll.onclick = saveAllChanges;
 
-    // أزرار التقارير
+    // استعادة حالة أدوات الإدارة من الجلسة
+    showAdminControls(sessionStorage.getItem('adminUnlocked') === '1');
+
+    // زر دخول/قفل الإدارة
+    const btnAdminLock = document.getElementById('btn-admin-lock');
+    if (btnAdminLock){
+      btnAdminLock.onclick = () => {
+        if (isAdminUnlocked) showAdminControls(false);
+        else openAdminDialog();
+      };
+    }
+
+    // الأزرار الإدارية تُحاط بـ requireAdmin
+    const btnRefresh = document.getElementById('btn-refresh');
+    if (btnRefresh) btnRefresh.onclick = () => requireAdmin(refreshAll);
+
+    const btnSaveAll = document.getElementById('btn-save-all');
+    if (btnSaveAll) btnSaveAll.onclick = () => requireAdmin(saveAllChanges);
+
+    // أزرار التقارير → فتح نافذة اختيار التقرير بعد التحقق
     const btnDaily   = document.getElementById('btn-report-daily');
     const btnMonthly = document.getElementById('btn-report-monthly');
     const btnYearly  = document.getElementById('btn-report-yearly');
-    if(btnDaily)   btnDaily.onclick   = ()=> generateReport('daily');
-    if(btnMonthly) btnMonthly.onclick = ()=> generateReport('monthly');
-    if(btnYearly)  btnYearly.onclick  = ()=> generateReport('yearly');
+    if (btnDaily)   btnDaily.onclick   = () => requireAdmin(()=> openReportDialog('daily'));
+    if (btnMonthly) btnMonthly.onclick = () => requireAdmin(()=> openReportDialog('monthly'));
+    if (btnYearly)  btnYearly.onclick  = () => requireAdmin(()=> openReportDialog('yearly'));
 
     sync();
 
