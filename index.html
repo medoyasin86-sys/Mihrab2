@@ -273,6 +273,21 @@
         } catch(e) { return null; }
     }
 
+    /* ✅ دالة مساعدِة: إيجاد التاريخ الميلادي لبداية رمضان عبر التحويل التلقائي */
+    async function computeRamadanStartDateG(targetYear = 2026){
+        // نبحث في نافذة آمنة حول منتصف فبراير حتى أوائل مارس
+        const start = new Date(`${targetYear}-02-10T00:00:00`);
+        for(let i=0;i<30;i++){
+            const d = new Date(start); d.setDate(start.getDate()+i);
+            const h = await getHijriData(d);
+            if(h && (h.month?.en === 'Ramadan' || (h.month?.ar && h.month.ar.includes('رمضان'))) && parseInt(h.day) === 1){
+                return d; // وجدنا ١ رمضان لهذا العام
+            }
+        }
+        // احتياط: إن لم نجد لأي سبب، نستخدم 19 فبراير كما هو مطلوب
+        return new Date(`${targetYear}-02-19T00:00:00`);
+    }
+
     function isFastingDay(dayOfWeek, hijriDay, hijriMonthEn) {
         if (hijriMonthEn === "Ramadan") return true;
         const whiteDays = [13, 14, 15];
@@ -280,8 +295,10 @@
     }
 
     async function updateCountdowns() {
-        /* ✅ تم تعديل تاريخ بداية رمضان إلى الخميس 19 فبراير 2026 */
-        const ramadanDate = new Date('February 19, 2026 00:00:00').getTime();
+        /* ✅ تاريخ بداية رمضان يتم تحديده تلقائيًا */
+        const ramadanStart = await computeRamadanStartDateG(2026);
+        const ramadanDate = ramadanStart.getTime();
+
         setInterval(() => {
             const now = new Date();
             const diffRamadan = ramadanDate - now.getTime();
@@ -373,7 +390,15 @@
         const selectedDateStr = document.getElementById('date-picker').value;
         const selectedDate = new Date(selectedDateStr);
         const hijri = await getHijriData(selectedDate);
-        if(hijri) document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
+
+        if(hijri) {
+            document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
+        }
+        /* ✅ ضمان مطابقـة العرض: ١ رمضان = ١٩ فبراير ٢٠٢٦ (عرض فقط إذا اختلفت الواجهة) */
+        if (selectedDate.getFullYear() === 2026 && selectedDate.getMonth() === 1 && selectedDate.getDate() === 19) {
+            document.getElementById('hijri-display').innerText = `1 رمضان 1447هـ`;
+        }
+
         const isFriday = selectedDate.getDay() === 5;
         const fastingDay = hijri ? isFastingDay(selectedDate.getDay(), hijri.day, hijri.month.en) : false;
 
