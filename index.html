@@ -185,6 +185,15 @@
       <button class="refresh-btn" id="btn-report-yearly"  title="تقرير سنوي (PDF)">📄 تقرير سنوي</button>
     </div>
 
+    <!-- فلاتر التقرير -->
+    <div class="report-filters" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;margin-top:8px;">
+      <span style="font-weight:800;color:var(--gold-light);">تصفية التقرير:</span>
+      <label><input type="checkbox" id="flt-fard"    checked> الفرائض</label>
+      <label><input type="checkbox" id="flt-sunan"   checked> السنن</label>
+      <label><input type="checkbox" id="flt-extra"   checked> الأذكار/الورد</label>
+      <label><input type="checkbox" id="flt-fasting" checked> الصيام</label>
+    </div>
+
     <div class="date-container">
       <span id="hijri-display">جاري تحديد التاريخ الهجري...</span>
       <input type="date" id="date-picker" style="border-radius:5px; border:none; padding:5px; text-align:center; font-weight:bold;">
@@ -575,7 +584,7 @@
     }).join('');
   }
 
-  /* ✅ رسم النماذج + تمييز العناصر بـ data-* لدعم زر الحفظ + روابط خارجية قابلة للنقر */
+  /* ✅ رسم النماذج + روابط خارجية + data-* لدعم زر الحفظ */
   const RAMADAN_START_YMD = '2026-02-19';
   function getRamadanDayFor(dateObj){
     const ymdSel = ymdInTz(dateObj, APP_TZ);
@@ -769,16 +778,16 @@
     setTimeout(()=> toast.remove(), 1800);
   }
 
-  /* ⭐ NEW: أدوات زينة رمضان (المدى الزمني + التبديل + العنوان) */
-  const DECOR_START_YMD = "2026-02-18"; // من اليوم السابق لرمضان
-  const RAMADAN_YMD     = "2026-02-19"; // 1 رمضان ثابت
+  /* ⭐ NEW: أدوات زينة رمضان (المدى الزمني + العنوان) */
+  const DECOR_START_YMD = "2026-02-18";
+  const RAMADAN_YMD     = "2026-02-19";
   function addDaysYMD_Muscat(ymd, days){
     const [y,m,d] = ymd.split('-').map(Number);
     const base = Date.UTC(y, m-1, d, 0,0,0) - 4*60*60*1000; // منتصف الليل - مسقط
     const next = new Date(base + days * 86400000);
     return ymdInTz(next, APP_TZ);
   }
-  const EID_YMD = addDaysYMD_Muscat(RAMADAN_YMD, 30); // يغطي 29/30
+  const EID_YMD = addDaysYMD_Muscat(RAMADAN_YMD, 30);
 
   function seedConfetti(containerId, pieces=40){
     const c = document.getElementById(containerId);
@@ -826,10 +835,21 @@
   }
 
   /* ============================= */
-  /*     أدوات مدى التاريخ (ميلادي) */
+  /*     أدوات مدى التاريخ (ميلادي) + فلاتر التقرير + رسوم  */
   /* ============================= */
   function pad2(n){ return String(n).padStart(2,'0'); }
   function ymdOfDate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+  function generateDateList(startYMD, endYMD){
+    const [sy, sm, sd] = startYMD.split('-').map(Number);
+    const [ey, em, ed] = endYMD.split('-').map(Number);
+    const start = new Date(sy, sm-1, sd);
+    const end   = new Date(ey, em-1, ed);
+    const out=[];
+    for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+      out.push(ymdOfDate(d));
+    }
+    return out;
+  }
   function monthRangeFromYMD(ymd){
     const [y,m] = ymd.split('-').map(Number);
     const start = `${y}-${pad2(m)}-01`;
@@ -842,46 +862,92 @@
     return {start:`${y}-01-01`, end:`${y}-12-31`, label:`${y}`};
   }
 
-  /* ===================================== */
-  /*  حساب نقاط اليوم مستخدمًا نفس منطقك  */
-  /* ===================================== */
-  function computeDayPointsForUser(uData, isFriday){
+  const FARD_ORDER  = ['fajr','dhuhr','asr','maghrib','isha'];
+  const SUNAN_ORDER = ['s_fajr','s_duha','s_dhuhr_b','s_dhuhr_a','s_maghrib','s_isha','s_shaf','s_witr','s_qyam'];
+  const EXTRA_ORDER = ['azkar_s','azkar_e','azkar_n','mulk','baqarah_end','quran'];
+  const LABELS_AR = {
+    fajr:'الفجر', dhuhr:'الظهر', asr:'العصر', maghrib:'المغرب', isha:'العشاء',
+    s_fajr:'سنة الفجر', s_duha:'الضحى', s_dhuhr_b:'الظهر قبل', s_dhuhr_a:'الظهر بعد',
+    s_maghrib:'سنة المغرب', s_isha:'سنة العشاء', s_shaf:'الشفع', s_witr:'الوتر', s_qyam:'قيام الليل',
+    azkar_s:'أذكار الصباح', azkar_e:'أذكار المساء', azkar_n:'أذكار النوم',
+    mulk:'سورة الملك', baqarah_end:'خواتيم البقرة', quran:'الورد القرآني',
+    fasting:'الصيام'
+  };
+  const FARD_TYPE_DISPLAY = { m:'م', g:'ج', f:'ف', q:'ق' };
+
+  function getReportFilter(){
+    const g = id => !!document.getElementById(id)?.checked;
+    return {
+      fard:    g('flt-fard'),
+      sunan:   g('flt-sunan'),
+      extra:   g('flt-extra'),
+      fasting: g('flt-fasting')
+    };
+  }
+
+  function computeDayPointsForUserFiltered(uData, isFriday, flt){
     let s = 0;
-    [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
-    if(isFriday && uData['kahf']) s += 40;
-    if(uData['fasting']) s += 100;
+    if(flt.fard){
+      (model.fard||[]).forEach(f => { if(uData[f.id]) s += (uData[f.id].p || 0); });
+    }
+    if(flt.sunan){
+      (model.sunan||[]).forEach(h => { if(uData[h.id]?.done) s += (h.p || 0); });
+    }
+    if(flt.extra){
+      (model.extra||[]).forEach(h => { if(uData[h.id]?.done) s += (h.p || 0); });
+    }
+    if(flt.fasting){
+      if(uData['fasting']?.done) s += 100;
+    }
     return s;
   }
 
-  /* ===================================== */
-  /*  جلب بيانات مدى زمني وتجميعها للتقرير */
-  /* ===================================== */
-  async function fetchRangeSummary(startYMD, endYMD){
+  async function fetchRangeSummaryFiltered(startYMD, endYMD, flt){
     const snap = await db.ref('osraty').once('value');
     const all = snap.val() || {};
-    const dates = Object.keys(all).filter(k => k >= startYMD && k <= endYMD).sort();
+    const fullDates = generateDateList(startYMD, endYMD);
     const usersList = users || [];
+
+    const rangeData = {};
+    fullDates.forEach(d=>{ rangeData[d] = all[d] || {}; });
+
     const summary = {};
     usersList.forEach(u => summary[u] = {
-      totalPoints:0, daysActive:0, fastingCount:0, quranCount:0,
+      totalPoints:0, daysActive:0,
+      fastingCount:0, quranCount:0,
       fardCounts:{ m:0, g:0, f:0, q:0 },
-      days:[]
+      catTotals:{ fard:0, sunan:0, extra:0, fasting:0 },
+      days:[],
+      missingDates:[]
     });
 
-    dates.forEach(d => {
-      const day = all[d] || {};
+    fullDates.forEach(d => {
+      const day = rangeData[d] || {};
       const dateObj = new Date(d+'T00:00:00');
       const isFriday = (dateObj.getDay() === 5);
 
       usersList.forEach(u => {
         const uData = day[u] || {};
-        const pts = computeDayPointsForUser(uData, isFriday);
+        const hasAny = uData && Object.keys(uData).length>0;
+        if(!hasAny){
+          summary[u].missingDates.push(d);
+          summary[u].days.push({date:d, pointsFiltered:0});
+          return;
+        }
+
+        const pts = computeDayPointsForUserFiltered(uData, isFriday, flt);
         if(pts > 0) summary[u].daysActive++;
         summary[u].totalPoints += pts;
-        summary[u].days.push({date:d, points:pts});
+        summary[u].days.push({date:d, pointsFiltered:pts});
+
+        (model.fard||[]).forEach(f => { if(uData[f.id]) summary[u].catTotals.fard += (uData[f.id].p||0); });
+        (model.sunan||[]).forEach(h => { if(uData[h.id]?.done) summary[u].catTotals.sunan += (h.p||0); });
+        (model.extra||[]).forEach(h => { if(uData[h.id]?.done) summary[u].catTotals.extra += (h.p||0); });
+        if(uData['fasting']?.done) summary[u].catTotals.fasting += 100;
 
         if(uData['fasting']?.done) summary[u].fastingCount++;
-        if(uData['quran']?.done) summary[u].quranCount++;
+        if(uData['quran']?.done)   summary[u].quranCount++;
+
         (model.fard || []).forEach(f => {
           const typ = uData[f.id]?.type;
           if(typ && summary[u].fardCounts[typ] != null) summary[u].fardCounts[typ]++;
@@ -890,33 +956,104 @@
     });
 
     usersList.forEach(u => {
-      summary[u].topDays = [...summary[u].days].sort((a,b)=> b.points - a.points).slice(0,5);
+      summary[u].topDays = [...summary[u].days].filter(x=>x.pointsFiltered>0).sort((a,b)=> b.pointsFiltered - a.pointsFiltered).slice(0,5);
     });
 
-    return { dates, summary };
+    return { fullDates, rangeData, summary };
   }
 
-  /* ===================================== */
-  /*            نافذة التقرير (طباعة)       */
-  /* ===================================== */
-  function openReportWindow({modeLabel, rangeLabel, startYMD, endYMD, summary, dates}){
+  function openReportWindow({modeLabel, rangeLabel, startYMD, endYMD, summary, fullDates, rangeData, flt}){
     const nowStr = new Date().toLocaleString('ar-EG');
+    const CAT_COLORS = { fard:'#b8860b', sunan:'#1a6a3b', extra:'#118ab2', fasting:'#ef476f' };
+
+    function fardCell(uData, id){
+      const typ = uData?.[id]?.type;
+      if(!typ) return `<span class="muted">—</span>`;
+      const short = FARD_TYPE_DISPLAY[typ] || typ;
+      const title = (typ==='m'?'مسجد':typ==='g'?'جماعة':typ==='f'?'فرد':'قضاء');
+      return `<span class="badge badge-fard ${typ}" title="${title}">${short}</span>`;
+    }
+    function doneCell(uData, id){
+      const on = uData?.[id]?.done;
+      return on ? `<span class="badge badge-ok">✓</span>` : `<span class="muted">—</span>`;
+    }
+    function dayPoints(uData, isFriday){
+      return computeDayPointsForUserFiltered(uData, isFriday, flt);
+    }
+    function stackedBarHTML(totals){
+      const total = Math.max(1, (flt.fard?totals.fard:0) + (flt.sunan?totals.sunan:0) + (flt.extra?totals.extra:0) + (flt.fasting?totals.fasting:0));
+      const segs = [];
+      if(flt.fard)    segs.push({k:'fard',    v:totals.fard,    c:CAT_COLORS.fard,    t:'فرائض'});
+      if(flt.sunan)   segs.push({k:'sunan',   v:totals.sunan,   c:CAT_COLORS.sunan,   t:'سنن'});
+      if(flt.extra)   segs.push({k:'extra',   v:totals.extra,   c:CAT_COLORS.extra,   t:'أذكار/ورد'});
+      if(flt.fasting) segs.push({k:'fasting', v:totals.fasting, c:CAT_COLORS.fasting, t:'صيام'});
+
+      const bar = `
+        <div class="stack">
+          ${segs.map(s=>{
+            const w = Math.round((s.v/total)*100);
+            return `<span class="seg" style="width:${w}%; background:${s.c}" title="${s.t}: ${s.v}"></span>`;
+          }).join('')}
+        </div>
+        <div class="legend">
+          ${segs.map(s=>`<span class="lg"><i style="background:${s.c}"></i>${s.t}: <b>${s.v}</b></span>`).join('')}
+        </div>
+      `;
+      return bar;
+    }
+
+    function userDetailTableHTML(user){
+      const headCols = ['التاريخ'];
+      if(flt.fard)  headCols.push(...FARD_ORDER.map(id=>LABELS_AR[id]));
+      if(flt.sunan) headCols.push(...SUNAN_ORDER.map(id=>LABELS_AR[id]));
+      if(flt.extra) headCols.push(...EXTRA_ORDER.map(id=>LABELS_AR[id]));
+      if(flt.fasting) headCols.push(LABELS_AR.fasting);
+      headCols.push('نقاط اليوم');
+
+      const rows = fullDates.map(d=>{
+        const day = rangeData[d] || {};
+        const uData = day[user] || {};
+        const isFriday = (new Date(d+'T00:00:00')).getDay()===5;
+        const points = dayPoints(uData, isFriday);
+
+        const cells = [`<td class="c-date">${d}</td>`];
+        if(flt.fard)    cells.push(...FARD_ORDER.map(id=>`<td class="c-fard">${fardCell(uData, id)}</td>`));
+        if(flt.sunan)   cells.push(...SUNAN_ORDER.map(id=>`<td class="c-check">${doneCell(uData, id)}</td>`));
+        if(flt.extra)   cells.push(...EXTRA_ORDER.map(id=>`<td class="c-check">${doneCell(uData, id)}</td>`));
+        if(flt.fasting) cells.push(`<td class="c-check">${doneCell(uData, 'fasting')}</td>`);
+        cells.push(`<td class="c-pts">${points}</td>`);
+
+        return `<tr>${cells.join('')}</tr>`;
+      }).join('');
+
+      return `
+        <div class="sub-title">📋 التفصيل اليومي الكامل</div>
+        <div class="table-wrap">
+          <table class="detail-table" dir="rtl">
+            <thead><tr>${headCols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
 
     function userBlockHTML(u, data){
       const f = data.fardCounts || {m:0,g:0,f:0,q:0};
       const top = data.topDays || [];
+      const missing = data.missingDates || [];
+      const stack = stackedBarHTML(data.catTotals);
 
       function barsHTML(items){
         if(!items.length) return `<div class="nodata">لا توجد بيانات مميزة في هذا المدى.</div>`;
-        const max = Math.max(...items.map(x=>x.points), 1);
+        const max = Math.max(...items.map(x=>x.pointsFiltered), 1);
         return items.map(x=>{
-          const w = Math.round((x.points/max)*100);
+          const w = Math.round((x.pointsFiltered/max)*100);
           return `
             <div class="bar-row">
               <div class="bar-label">${x.date}</div>
               <div class="bar">
                 <div class="bar-fill" style="width:${w}%"></div>
-                <div class="bar-val">${x.points} ن</div>
+                <div class="bar-val">${x.pointsFiltered} ن</div>
               </div>
             </div>
           `;
@@ -926,27 +1063,40 @@
       return `
         <section class="user-card">
           <h3>👤 ${u}</h3>
+
           <div class="kpis">
-            <div class="kpi"><span class="kpi-title">إجمالي النقاط</span><span class="kpi-val">${data.totalPoints}</span></div>
+            <div class="kpi"><span class="kpi-title">إجمالي النقاط (مُصفّى)</span><span class="kpi-val">${data.totalPoints}</span></div>
             <div class="kpi"><span class="kpi-title">أيام فعّالة</span><span class="kpi-val">${data.daysActive}</span></div>
             <div class="kpi"><span class="kpi-title">أيّام الصيام</span><span class="kpi-val">${data.fastingCount}</span></div>
             <div class="kpi"><span class="kpi-title">ورد قرآني</span><span class="kpi-val">${data.quranCount}</span></div>
             <div class="kpi"><span class="kpi-title">فجر مسجد</span><span class="kpi-val">${f.m||0}</span></div>
           </div>
 
+          <div class="sub-title">📊 توزيع النقاط حسب الفئة</div>
+          ${stack}
+
           <div class="sub-title">📈 أفضل 5 أيام</div>
-          <div class="bars">
-            ${barsHTML(top)}
+          <div class="bars">${barsHTML(top)}</div>
+
+          <div class="sub-title">📅 تواريخ بلا تسجيل (${missing.length})</div>
+          <div class="missing-wrap">
+            ${missing.length? missing.map(d=>`<span class="chip">${d}</span>`).join('') : `<span class="muted">— لا توجد</span>`}
           </div>
 
-          <div class="fard-breakdown">
-            <span>🕌 مسجد: <b>${f.m||0}</b></span>
-            <span>👥 جماعة: <b>${f.g||0}</b></span>
-            <span>🙇‍♂️ فرد: <b>${f.f||0}</b></span>
-            <span>⏱️ قضاء: <b>${f.q||0}</b></span>
-          </div>
+          ${userDetailTableHTML(u)}
         </section>
       `;
+    }
+
+    function overallStackHTML(){
+      const total = { fard:0, sunan:0, extra:0, fasting:0 };
+      Object.values(summary).forEach(s=>{
+        total.fard    += s.catTotals.fard;
+        total.sunan   += s.catTotals.sunan;
+        total.extra   += s.catTotals.extra;
+        total.fasting += s.catTotals.fasting;
+      });
+      return stackedBarHTML(total);
     }
 
     const html = `
@@ -955,15 +1105,17 @@
 <head>
 <meta charset="UTF-8">
 <title>تقرير ${modeLabel} | ${rangeLabel}</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
 <style>
+  @page{ size: A4 landscape; margin: 12mm; }
   :root{
     --primary:#1a4d2e; --gold:#c5a059; --gold-light:#e6cc92; --bg:#fff; --text:#1a4d2e;
-    --muted:#6b6b6b; --border:#e6dec7;
+    --muted:#6b6b6b; --border:#e6dec7; --soft:#f9f6ef;
   }
-  body{ font-family:'Amiri',serif; margin:24px; background:#fff; color:var(--text); }
+  body{ font-family:'Amiri',serif; margin:0; padding:0; background:#fff; color:var(--text); }
+  .container{ padding:16px 18px; }
   .hdr{
-    border:2px solid var(--gold); border-radius:14px; padding:14px 18px; margin-bottom:18px;
+    border:2px solid var(--gold); border-radius:14px; padding:14px 18px; margin-bottom:14px;
     background:linear-gradient(135deg,#fdf7e8,#fff);
   }
   .hdr-title{ font-family:'Reem Kufi',sans-serif; font-size:1.35rem; margin:0 0 6px 0; color:#634e1e; }
@@ -971,49 +1123,84 @@
   .tag{ background:#fff7d6; border:1px solid var(--gold); padding:2px 8px; border-radius:999px; }
   .small{ color:#7a7a7a; font-size:.9rem; }
 
-  .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:12px; }
+  .overall{ margin:10px 0 16px; }
+  .overall .title{ font-weight:800; color:#7a6b4e; margin-bottom:6px; }
+
+  .grid{ display:grid; grid-template-columns:1fr; gap:12px; }
   .user-card{
     border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff;
-    box-shadow:0 2px 8px rgba(0,0,0,.04);
-    break-inside: avoid;
+    box-shadow:0 2px 8px rgba(0,0,0,.04); break-inside:avoid;
   }
   .user-card h3{ margin:0 0 10px 0; font-family:'Reem Kufi',sans-serif; color:#0f3b22; }
 
   .kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:8px; }
-  .kpi{ background:#f9f6ef; border:1px solid var(--border); border-radius:10px; padding:6px; text-align:center; }
+  .kpi{ background:var(--soft); border:1px solid var(--border); border-radius:10px; padding:6px; text-align:center; }
   .kpi-title{ display:block; color:#7a6b4e; font-size:.85rem; }
   .kpi-val{ display:block; font-weight:800; font-size:1.05rem; }
 
-  .sub-title{ margin:6px 0; font-weight:800; color:#7a6b4e; }
-  .bars{ display:flex; flex-direction:column; gap:6px; }
+  .sub-title{ margin:10px 0 6px 0; font-weight:800; color:#7a6b4e; }
+
+  .bars{ display:flex; flex-direction:column; gap:6px; margin-bottom:6px; }
   .bar-row{ display:flex; align-items:center; gap:8px; }
   .bar-label{ width:120px; color:#6b6b6b; font-size:.9rem; }
   .bar{ position:relative; flex:1; height:18px; background:#f1ede0; border:1px solid #e0d6b8; border-radius:999px; overflow:hidden; }
   .bar-fill{ height:100%; background:linear-gradient(90deg,#1a4d2e,#2d6a4f); }
   .bar-val{ position:absolute; right:8px; top:-1px; font-size:.85rem; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); }
 
-  .fard-breakdown{ display:flex; gap:10px; margin-top:8px; color:#534d3d; font-size:.95rem; }
+  .stack{ width:100%; height:18px; border:1px solid #e0d6b8; background:#f1ede0; border-radius:999px; overflow:hidden; display:flex; }
+  .stack .seg{ height:100%; display:inline-block; }
+  .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:6px 0 8px 0; }
+  .legend .lg{ color:#534d3d; font-size:.95rem; }
+  .legend .lg i{ display:inline-block; width:14px; height:14px; border-radius:3px; margin-left:6px; vertical-align:middle; }
+
+  .missing-wrap{ display:flex; gap:6px; flex-wrap:wrap; }
+  .chip{ display:inline-block; padding:2px 8px; border:1px solid var(--border); border-radius:999px; background:#fff; color:#534d3d; font-size:.9rem; }
+
+  .table-wrap{ overflow:auto; border:1px solid var(--border); border-radius:10px; }
+  table.detail-table{ width:100%; border-collapse:separate; border-spacing:0; font-size:.85rem; }
+  .detail-table thead th{
+    position:sticky; top:0; background:#fff7e8; z-index:5;
+    border-bottom:1px solid var(--border); padding:6px 5px; white-space:nowrap;
+  }
+  .detail-table tbody td{ border-bottom:1px solid #f0e8cf; padding:5px 6px; text-align:center; }
+  .detail-table tbody tr:nth-child(odd){ background:#fffdf7; }
+  .c-date{ font-weight:700; color:#3d3d3d; }
+  .c-pts { font-weight:800; color:#0f3b22; }
+
+  .muted{ color:#9b9b9b; }
+  .badge{ display:inline-block; min-width:20px; padding:2px 6px; border-radius:8px; font-weight:800; color:#fff; }
+  .badge-ok{ background:#2d6a4f; }
+  .badge-fard.m{ background:#b8860b; }
+  .badge-fard.g{ background:#1a6a3b; }
+  .badge-fard.f{ background:#7f8c8d; }
+  .badge-fard.q{ background:#8b4513; }
 
   @media print{
-    body{ margin:12mm; }
-    .hdr{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .kpi, .bar{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .user-card{ box-shadow:none; }
+    .detail-table thead th,
+    .badge, .kpi, .bar, .stack, .legend i{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   }
 </style>
 </head>
 <body>
-  <header class="hdr">
-    <div class="hdr-title">تقرير ${modeLabel} — المدة: <span class="tag">${rangeLabel}</span></div>
-    <div class="hdr-sub">
-      <span>من <span class="tag">${startYMD}</span> إلى <span class="tag">${endYMD}</span></span>
-      <span class="small">تاريخ الإصدار: ${nowStr}</span>
-    </div>
-  </header>
+  <div class="container">
+    <header class="hdr">
+      <div class="hdr-title">تقرير ${modeLabel} — المدة: <span class="tag">${rangeLabel}</span></div>
+      <div class="hdr-sub">
+        <span>من <span class="tag">${startYMD}</span> إلى <span class="tag">${endYMD}</span></span>
+        <span class="small">تاريخ الإصدار: ${nowStr}</span>
+      </div>
+    </header>
 
-  <main class="grid">
-    ${ Object.keys(summary).map(u => userBlockHTML(u, summary[u])).join('') }
-  </main>
+    <section class="overall">
+      <div class="title">📊 توزيع النقاط (إجمالي الفريق) حسب الفئات</div>
+      ${overallStackHTML()}
+    </section>
+
+    <main class="grid">
+      ${ Object.keys(summary).map(u => userBlockHTML(u, summary[u])).join('') }
+    </main>
+  </div>
 </body>
 </html>`;
     const w = window.open('', '_blank');
@@ -1023,32 +1210,27 @@
     setTimeout(()=>{ try{ w.focus(); w.print(); }catch(_){/* */} }, 700);
   }
 
-  /* ===================================== */
-  /*          مُولِّد التقرير العام         */
-  /* ===================================== */
   async function generateReport(mode){
     const ymd = document.getElementById('date-picker').value || todayYMDMuscat();
+    const flt = getReportFilter();
     let startYMD, endYMD, rangeLabel, modeLabel;
 
     if(mode === 'daily'){
       startYMD = endYMD = ymd;
-      rangeLabel = ymd;
-      modeLabel = 'يومي (PDF)';
+      rangeLabel = ymd; modeLabel = 'يومي (PDF)';
     }else if(mode === 'monthly'){
       const r = monthRangeFromYMD(ymd);
-      startYMD = r.start; endYMD = r.end; rangeLabel = `شهر ${r.label}`;
-      modeLabel = 'شهري (PDF)';
+      startYMD = r.start; endYMD = r.end; rangeLabel = `شهر ${r.label}`; modeLabel = 'شهري (PDF)';
     }else if(mode === 'yearly'){
       const r = yearRangeFromYMD(ymd);
-      startYMD = r.start; endYMD = r.end; rangeLabel = `سنة ${r.label}`;
-      modeLabel = 'سنوي (PDF)';
+      startYMD = r.start; endYMD = r.end; rangeLabel = `سنة ${r.label}`; modeLabel = 'سنوي (PDF)';
     }else{
       alert('وضع التقرير غير معروف'); return;
     }
 
     try{
-      const {dates, summary} = await fetchRangeSummary(startYMD, endYMD);
-      openReportWindow({modeLabel, rangeLabel, startYMD, endYMD, summary, dates});
+      const { fullDates, rangeData, summary } = await fetchRangeSummaryFiltered(startYMD, endYMD, flt);
+      openReportWindow({modeLabel, rangeLabel, startYMD, endYMD, summary, fullDates, rangeData, flt});
     }catch(e){
       console.error('Report error:', e);
       alert('تعذّر توليد التقرير. حاول مجددًا.');
