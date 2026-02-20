@@ -690,58 +690,6 @@
     };
     drawCheck(model.sunan, 'sunan-list');
     drawCheck(curExtra, 'extra-list');
-  }function renderForms(userData, isFriday, fastingDay, selectedDate) {
-    const fastSection = document.getElementById('fasting-section');
-    if(fastingDay) {
-      fastSection.style.display = 'block';
-      let fastingLabel = "صيام تطوع (الاثنين/الخميس/البيض)";
-      const isRamadan = (document.getElementById('hijri-display').innerText.includes('رمضان')) || (ymdInTz(selectedDate, APP_TZ)==='2026-02-19');
-      if(isRamadan) fastingLabel = "صيام شهر رمضان المبارك";
-      document.getElementById('fasting-list').innerHTML = `<div class="habit-row">
-        <span>🌙 ${fastingLabel} <small>(+100ن)</small></span>
-        <input type="checkbox"
-               ${userData['fasting']?.done?'checked':''}
-               data-habit="fasting" data-p="100"
-               onchange="save('fasting',{done:this.checked, p:this.checked?100:0})"
-               style="transform:scale(1.5);">
-      </div>`;
-    } else { fastSection.style.display = 'none'; }
-
-    let curFard = [...model.fard]; let curExtra = [...model.extra];
-    if(isFriday){ curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f); curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'}); }
-
-    document.getElementById('fard-list').innerHTML = curFard.map(h => {
-      const cur = userData[h.id]?.type;
-      return `<div class="habit-row"><div><b>${h.n}</b><span class="pts-info">${h.d}</span></div>
-        <div style="display:flex; gap:2px;">${
-          Object.entries(h.pts).map(([k,v]) =>
-            `<button class="opt-btn ${cur===k?'selected':''}"
-                     data-habit="${h.id}" data-type="${k}" data-p="${v}"
-                     onclick="save('${h.id}',{type:'${k}', p:${v}})">${k=='m'?'مسجد':k=='g'?'جماعة':k=='f'?'فرد':'قضاء'}</button>`
-          ).join('')
-        }</div></div>`;
-    }).join('');
-
-    const drawCheck = (list, tid) => {
-      const rDay = getRamadanDayFor(selectedDate);
-      document.getElementById(tid).innerHTML = list.map(h => {
-        const done = userData[h.id]?.done;
-        let url = h.l || null;
-        if (h.id === 'quran' && rDay) url = `https://quran.com/juz/${rDay}`;
-        const label = url
-          ? `<a class="habit-link" href="${url}" target="_blank" rel="noopener noreferrer">${h.n}</a>`
-          : h.n;
-        return `<div class="habit-row">
-          <span>${label} <small>(+${h.p}ن)</small></span>
-          <input type="checkbox" ${done?'checked':''}
-                 data-habit="${h.id}" data-p="${h.p}"
-                 onchange="save('${h.id}',{done:this.checked, p:this.checked?${h.p}:0})"
-                 style="transform:scale(1.5); cursor:pointer;">
-        </div>`;
-      }).join('');
-    };
-    drawCheck(model.sunan, 'sunan-list');
-    drawCheck(curExtra, 'extra-list');
   }
 
   async function render(allData) {
