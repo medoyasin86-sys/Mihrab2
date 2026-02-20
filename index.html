@@ -238,7 +238,18 @@
       <h3 class="section-title" style="background:var(--accent);">🌟 قسم الاجتهاد (صيام التطوع)</h3>
       <div id="fasting-list"></div>
     </div>
-    <div class="section-card"><h3 class="section-title">🕋 الفرائض (المسجد | جماعة | فردي)</h3><div id="fard-list"></div></div>
+    <div class="section-card"><h3 class="section-title">🕋 الفرائض (المسجد | جماعة | فردي)</h3><div id="fard-list"><!-- 🌙 فريضة صيام يوم رمضان (يظهر فقط في رمضان) -->
+<div class="habit-row" id="ramadan-fard-row" style="display:none;">
+  <div>
+    <b>🌙 صيام يوم رمضان (فرض)</b>
+    <span class="pts-info">(+100ن)</span>
+  </div>
+  <input type="checkbox"
+         data-habit="ramadan_fasting"
+         data-p="100"
+         onchange="save('ramadan_fasting',{done:this.checked, p:this.checked?100:0})"
+         style="transform:scale(1.5); cursor:pointer;">
+</div></div></div>
     <div class="section-card"><h3 class="section-title">🌱 السنن والرواتب</h3><div id="sunan-list"></div></div>
     <div class="section-card"><h3 class="section-title">📿 الأذكار والورد</h3><div id="extra-list"></div></div>
   </div>
@@ -645,6 +656,14 @@
 
     // تصحيح ثابت: 19 فبراير 2026 = 1 رمضان، 18 فبراير = 30 شعبان (مرجع مسقط)
     const selectedYMD_Muscat = ymdInTz(selectedDate, APP_TZ);
+    // إظهار فريضة صيام رمضان داخل الفرائض خلال رمضان فقط
+const ramadanFard = document.getElementById("ramadan-fard-row");
+if (selectedYMD_Muscat >= "2026-02-19" && selectedYMD_Muscat <= "2026-03-20") {
+    ramadanFard.style.display = "flex";
+} else {
+    ramadanFard.style.display = "none";
+}
+``
     if (selectedYMD_Muscat === '2026-02-18') document.getElementById('hijri-display').innerText = `30 شعبان 1447هـ`;
     if (selectedYMD_Muscat === '2026-02-19') document.getElementById('hijri-display').innerText = `1 رمضان 1447هـ`;
 
@@ -655,8 +674,13 @@
       let s = 0; let uData = allData[u] || {};
       [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
       if(isFriday && uData['kahf']) s += 40;
-      if(uData['fasting']) s += 100;
-      return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
+// داخل رمضان: صيام رمضان (فرض)
+// خارج رمضان: صيام التطوع
+if (selectedYMD_Muscat >= "2026-02-19" && selectedYMD_Muscat <= "2026-03-20") {
+    if (uData['ramadan_fasting']) s += 100;
+} else {
+    if (uData['fasting']) s += 100;
+}      return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
     }));
 
     drawPodium('daily-podium', stats);
@@ -754,8 +778,12 @@
     });
 
     // السنن/الأذكار/الصيام: كل الـ checkbox
-    const checks = document.querySelectorAll('#sunan-list input[type="checkbox"][data-habit], #extra-list input[type="checkbox"][data-habit], #fasting-list input[type="checkbox"][data-habit]');
-    checks.forEach(ch => {
+const checks = document.querySelectorAll(
+  '#sunan-list input[data-habit], \
+   #extra-list input[data-habit], \
+   #fasting-list input[data-habit], \
+   #ramadan-fard-row input[data-habit]'
+);    checks.forEach(ch => {
       const hid = ch.getAttribute('data-habit');
       const p   = parseInt(ch.getAttribute('data-p'), 10) || 0;
       save(hid, { done: ch.checked, p: ch.checked ? p : 0 });
