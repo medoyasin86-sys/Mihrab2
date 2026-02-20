@@ -640,12 +640,20 @@
 
   function renderForms(userData, isFriday, fastingDay, selectedDate) {
     const fastSection = document.getElementById('fasting-section');
-    if(fastingDay) {
-      fastSection.style.display = 'block';
-      let fastingLabel = "صيام تطوع (الاثنين/الخميس/البيض)";
-      const isRamadan = (document.getElementById('hijri-display').innerText.includes('رمضان')) || (ymdInTz(selectedDate, APP_TZ)==='2026-02-19');
-      if(isRamadan) fastingLabel = "صيام شهر رمضان المبارك";
-      document.getElementById('fasting-list').innerHTML = `<div class="habit-row">
+    // 🔥 خلال شهر رمضان: لا يظهر صيام التطوع إطلاقًا
+const ymd = ymdInTz(selectedDate, APP_TZ);
+const isRamadan =
+    (ymd >= '2026-02-19' && ymd <= addDaysYMD_Muscat('2026-02-19', 29));
+
+const fastSection = document.getElementById('fasting-section');
+if (isRamadan) {
+  fastSection.style.display = 'none';
+} else {
+  if (fastingDay) {
+    fastSection.style.display = 'block';
+    let fastingLabel = "صيام تطوع (الاثنين/الخميس/البيض)";
+    document.getElementById('fasting-list').innerHTML = `
+      <div class="habit-row">
         <span>🌙 ${fastingLabel} <small>(+100ن)</small></span>
         <input type="checkbox"
                ${userData['fasting']?.done?'checked':''}
@@ -653,9 +661,20 @@
                onchange="save('fasting',{done:this.checked, p:this.checked?100:0})"
                style="transform:scale(1.5);">
       </div>`;
-    } else { fastSection.style.display = 'none'; }
+  } else {
+    fastSection.style.display = 'none';
+  }
+}
 
-    let curFard = [...model.fard]; let curExtra = [...model.extra];
+    let curFard = [...model.fard];// 🌙 إضافة صيام يوم رمضان كفريضة سادسة خلال شهر رمضان فقط
+if (isRamadan) {
+  curFard.push({
+    id: 'ramadan_fast',
+    n: '🌙 صيام يوم رمضان',
+    pts: { m: 100, g: 0, f: 0, q: 0 },
+    d: 'فريضة رمضان'
+  });
+} let curExtra = [...model.extra];
     if(isFriday){ curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f); curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'}); }
 
     document.getElementById('fard-list').innerHTML = curFard.map(h => {
