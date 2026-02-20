@@ -558,11 +558,7 @@
     let rem = []; let curFard = [...model.fard]; let curExtra = [...model.extra];
     if(isFriday) curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'});
     const hijri = await getHijriData(parseLocalYMD(selectedDateStr));
-    if (hijri && hijri.month.en === 'Ramadan') {
-  if (!userData['ramadan_fasting']?.done) rem.push('🌙 صيام يوم رمضان');
-} else if (hijri && isFastingDay(parseLocalYMD(selectedDateStr).getDay(), hijri.day, hijri.month.en)) {
-  if (!userData['fasting']?.done) rem.push('🌙 صيام تطوع');
-}
+    if(hijri && isFastingDay(parseLocalYMD(selectedDateStr).getDay(), hijri.day, hijri.month.en)) if(!userData['fasting']?.done) rem.push("الصيام 🌙");
     curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
     model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
     curExtra.forEach(e => { if(!userData[e.id]?.done) rem.push(e.n); });
@@ -589,52 +585,35 @@
 
   function renderForms(userData, isFriday, fastingDay, selectedDate) {
     const fastSection = document.getElementById('fasting-section');
-const isRamadanNow = (document.getElementById('hijri-display').innerText.includes('رمضان'));
-if (isRamadanNow) {
-  // إيقاف صيام التطوع في رمضان
-  fastSection.style.display = 'none';
-} else if (fastingDay) {
-  fastSection.style.display = 'block';
-  document.getElementById('fasting-list').innerHTML = `
-    <div class="habit-row">
-      <span>🌙 صيام تطوع <small>(+100ن)</small></span>
-      <input type="checkbox"
-             ${userData['fasting']?.done?'checked':''}
-             data-habit="fasting" data-p="100"
-             onchange="save('fasting',{done:this.checked, p:this.checked?100:0})"
-             style="transform:scale(1.5);">
-    </div>`;
-} else {
-  fastSection.style.display = 'none';
-}
-let curFard = [...model.fard]; let curExtra = [...model.extra];
-if (isRamadanNow) { curFard.push({id:'ramadan_fasting', n:'🌙 صيام يوم رمضان', p:100}); }
+    if(fastingDay) {
+      fastSection.style.display = 'block';
+      let fastingLabel = "صيام تطوع (الاثنين/الخميس/البيض)";
+      const isRamadan = (document.getElementById('hijri-display').innerText.includes('رمضان')) || (ymdInTz(selectedDate, APP_TZ)==='2026-02-19');
+      if(isRamadan) fastingLabel = "صيام شهر رمضان المبارك";
+      document.getElementById('fasting-list').innerHTML = `<div class="habit-row">
+        <span>🌙 ${fastingLabel} <small>(+100ن)</small></span>
+        <input type="checkbox"
+               ${userData['fasting']?.done?'checked':''}
+               data-habit="fasting" data-p="100"
+               onchange="save('fasting',{done:this.checked, p:this.checked?100:0})"
+               style="transform:scale(1.5);">
+      </div>`;
+    } else { fastSection.style.display = 'none'; }
+
+    let curFard = [...model.fard]; let curExtra = [...model.extra];
     if(isFriday){ curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f); curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'}); }
 
-    document.getElementById('fard-list').innerHTML =
-  curFard.map(h => {
-    if (h.id === 'ramadan_fasting') {
-      const done = userData['ramadan_fasting']?.done;
-      return `
-      <div class="habit-row">
-        <div><b>${h.n}</b><span class="pts-info">(+100ن)</span></div>
-        <input type="checkbox" ${done?'checked':''}
-               data-habit="ramadan_fasting" data-p="100"
-               onchange="save('ramadan_fasting',{done:this.checked, p:this.checked?100:0})"
-               style="transform:scale(1.5); cursor:pointer;">
-      </div>`;
-    }
-    const cur = userData[h.id]?.type;
-    return `
-    <div class="habit-row"><div><b>${h.n}</b><span class="pts-info">${h.d}</span></div>
-      <div style="display:flex; gap:2px;">${
-        Object.entries(h.pts).map(([k,v]) =>
-          `<button class="opt-btn ${cur===k?'selected':''}"
-           data-habit="${h.id}" data-type="${k}" data-p="${v}"
-           onclick="save('${h.id}',{type:'${k}', p:${v}})">${k=='m'?'مسجد':k=='g'?'جماعة':k=='f'?'فرد':'قضاء'}</button>`
-        ).join('')
-      }</div></div>`;
-  }).join('');
+    document.getElementById('fard-list').innerHTML = curFard.map(h => {
+      const cur = userData[h.id]?.type;
+      return `<div class="habit-row"><div><b>${h.n}</b><span class="pts-info">${h.d}</span></div>
+        <div style="display:flex; gap:2px;">${
+          Object.entries(h.pts).map(([k,v]) =>
+            `<button class="opt-btn ${cur===k?'selected':''}"
+                     data-habit="${h.id}" data-type="${k}" data-p="${v}"
+                     onclick="save('${h.id}',{type:'${k}', p:${v}})">${k=='m'?'مسجد':k=='g'?'جماعة':k=='f'?'فرد':'قضاء'}</button>`
+          ).join('')
+        }</div></div>`;
+    }).join('');
 
     const drawCheck = (list, tid) => {
       const rDay = getRamadanDayFor(selectedDate);
@@ -662,23 +641,20 @@ if (isRamadanNow) { curFard.push({id:'ramadan_fasting', n:'🌙 صيام يوم 
     const selectedDateStr = document.getElementById('date-picker').value;
     const selectedDate = parseLocalYMD(selectedDateStr);
     const hijri = await getHijriData(selectedDate);
-    if(hijri){ let hday = parseInt(hijri.day, 10); if (hijri.month.en === 'Ramadan' && hday === 3) { hday = 2; } document.getElementById('hijri-display').innerText = `${hday} ${hijri.month.ar} ${hijri.year}هـ`; }
-
-    // تصحيح ثابت: 19 فبراير 2026 = 1 رمضان، 18 فبراير = 30 شعبان (مرجع مسقط)
-    const selectedYMD_Muscat = ymdInTz(selectedDate, APP_TZ);
-    if (selectedYMD_Muscat === '2026-02-18') document.getElementById('hijri-display').innerText = `30 شعبان 1447هـ`;
-    if (selectedYMD_Muscat === '2026-02-19') document.getElementById('hijri-display').innerText = `1 رمضان 1447هـ`;
-
-    const isFriday = selectedDate.getDay() === 5;
-    const fastingDay = hijri ? isFastingDay(selectedDate.getDay(), hijri.day, hijri.month.en) : false;
-
-    let stats = await Promise.all(users.map(async u => {
-      let s = 0; let uData = allData[u] || {};
-      [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
+    if (hijri) {
+  const ymdMuscat = ymdInTz(selectedDate, APP_TZ);
+  const manual = manualHijriOverride(ymdMuscat);
+  if (manual) {
+    document.getElementById('hijri-display').innerText = manual;
+  } else {
+    const hday = parseInt(hijri.day, 10);
+    const hmon = hijri.month.ar;
+    const hyear = hijri.year;
+    document.getElementById('hijri-display').innerText = `${hday} ${hmon} ${hyear}هـ`;
+  }
+});
       if(isFriday && uData['kahf']) s += 40;
-if(uData['fasting']) s += 100;
-if(uData['ramadan_fasting']) s += (uData['ramadan_fasting'].p || 0);
-if(uData['ramadan_fasting']) s += (uData['ramadan_fasting'].p || 0);
+      if(uData['fasting']) s += 100;
       return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
     }));
 
@@ -738,7 +714,6 @@ if(uData['ramadan_fasting']) s += (uData['ramadan_fasting'].p || 0);
           const ud = day[u] || {};
           if(ud.fajr && ud.fajr.type === 'm') knightStats[u].fajr++;
           if(ud.fasting && ud.fasting.done) knightStats[u].fasting++;
-if(ud.ramadan_fasting && ud.ramadan_fasting.done) knightStats[u].fasting++;
           if(ud.quran && ud.quran.done) knightStats[u].quran++;
           (model.sunan||[]).forEach(s => { if(ud[s.id] && ud[s.id].done) knightStats[u].sunan++; });
           ['azkar_s','azkar_e','azkar_n'].forEach(a => { if(ud[a] && ud[a].done) knightStats[u].azkar++; });
@@ -778,7 +753,7 @@ if(ud.ramadan_fasting && ud.ramadan_fasting.done) knightStats[u].fasting++;
     });
 
     // السنن/الأذكار/الصيام: كل الـ checkbox
-    const checks = document.querySelectorAll('#sunan-list input[type="checkbox"][data-habit], #extra-list input[type="checkbox"][data-habit], #fasting-list input[type="checkbox"][data-habit], #fard-list input[type="checkbox"][data-habit]');
+    const checks = document.querySelectorAll('#sunan-list input[type="checkbox"][data-habit], #extra-list input[type="checkbox"][data-habit], #fasting-list input[type="checkbox"][data-habit]');
     checks.forEach(ch => {
       const hid = ch.getAttribute('data-habit');
       const p   = parseInt(ch.getAttribute('data-p'), 10) || 0;
@@ -905,7 +880,6 @@ if(ud.ramadan_fasting && ud.ramadan_fasting.done) knightStats[u].fasting++;
         summary[u].days.push({date:d, points:pts});
 
         if(uData['fasting']?.done) summary[u].fastingCount++;
-if(uData['ramadan_fasting']?.done) summary[u].fastingCount++;
         if(uData['quran']?.done) summary[u].quranCount++;
         (model.fard || []).forEach(f => {
           const typ = uData[f.id]?.type;
