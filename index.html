@@ -440,7 +440,7 @@
       for (const p of parts) { if (p.type==='year') y=p.value; else if (p.type==='month') m=p.value; else if (p.type==='day') day=p.value; }
       return `${y}-${m}-${day}`;
     } catch(e) {
-      const utc = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes()));
+      const utc = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours(), d.getUTCHours()));
       const muscatMs = utc.getTime() + 4*60*60*1000;
       const muscat = new Date(muscatMs);
       const pad = n => String(n).padStart(2,'0');
@@ -780,11 +780,32 @@
     hint.style.display = (ymdInTz(selectedDate, APP_TZ) === '2026-02-19') ? 'block' : 'none';
   }
 
+  // ⭐ مساعد بسيط: هل التاريخ داخل رمضان؟
+  const RAMADAN_START_YMD = '2026-02-19';
+  function getRamadanDayFor(dateObj){
+    const ymdSel = ymdInTz(dateObj, APP_TZ);
+    const diff = Math.floor((muscatMidnightMsFromYMD(ymdSel) - muscatMidnightMsFromYMD(RAMADAN_START_YMD)) / 86400000) + 1;
+    return (diff >= 1 && diff <= 30) ? diff : null;
+  }
+  function isInRamadan(dateObj){ return getRamadanDayFor(dateObj) !== null; } // ⭐
+
   async function getRemaining(userData, isFriday, selectedDateStr) {
     let rem = []; let curFard = [...model.fard]; let curExtra = [...model.extra];
+
     if(isFriday) curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'});
-    const hijri = await getHijriForDateWithOverride(parseLocalYMD(selectedDateStr));
-    if(hijri && isFastingDay(parseLocalYMD(selectedDateStr).getDay(), hijri.day, hijri.month.en)) if(!userData['fasting']?.done) rem.push("الصيام 🌙");
+
+    const dateObj = parseLocalYMD(selectedDateStr);
+    const inRamadan = isInRamadan(dateObj); // ⭐
+
+    // ⭐ أثناء رمضان: لا نقترح صيام التطوع، ونضيف "صيام رمضان (فرض)" إن لم يُنجز
+    if (inRamadan) {
+      if(!userData['r_fasting']?.done) rem.push("صيام رمضان (فرض) 🌙");
+    } else {
+      // خارج رمضان: منطقك الأصلي لصيام التطوع
+      const hijri = await getHijriForDateWithOverride(dateObj);
+      if(hijri && isFastingDay(dateObj.getDay(), hijri.day, hijri.month.en)) if(!userData['fasting']?.done) rem.push("الصيام 🌙");
+    }
+
     curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
     model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
     curExtra.forEach(e => { if(!userData[e.id]?.done) rem.push(e.n); });
@@ -801,21 +822,18 @@
     }).join('');
   }
 
-  /* ✅ يوم رمضان لروابط الأجزاء */
-  const RAMADAN_START_YMD = '2026-02-19';
-  function getRamadanDayFor(dateObj){
-    const ymdSel = ymdInTz(dateObj, APP_TZ);
-    const diff = Math.floor((muscatMidnightMsFromYMD(ymdSel) - muscatMidnightMsFromYMD(RAMADAN_START_YMD)) / 86400000) + 1;
-    return (diff >= 1 && diff <= 30) ? diff : null;
-  }
-
   function renderForms(userData, isFriday, fastingDay, selectedDate) {
     const fastSection = document.getElementById('fasting-section');
-    if(fastingDay) {
+
+    // ⭐ تحديد رمضان
+    const inRamadan = isInRamadan(selectedDate);
+
+    // ⭐ خارج رمضان فقط نعرض "صيام التطوع" حسب منطقك
+    if(!inRamadan && fastingDay) {
       fastSection.style.display = 'block';
       let fastingLabel = "صيام تطوع (الاثنين/الخميس/البيض)";
-      const isRamadan = (document.getElementById('hijri-display').innerText.includes('رمضان')) || (ymdInTz(selectedDate, APP_TZ)==='2026-02-19');
-      if(isRamadan) fastingLabel = "صيام شهر رمضان المبارك";
+      const isRamadanLabelOnly = (document.getElementById('hijri-display').innerText.includes('رمضان')) || (ymdInTz(selectedDate, APP_TZ)==='2026-02-19');
+      if(isRamadanLabelOnly) fastingLabel = "صيام شهر رمضان المبارك";
       document.getElementById('fasting-list').innerHTML = `<div class="habit-row">
         <span>🌙 ${fastingLabel} <small>(+100ن)</small></span>
         <input type="checkbox"
@@ -824,11 +842,15 @@
                onchange="save('fasting',{done:this.checked, p:this.checked?100:0})"
                style="transform:scale(1.5);">
       </div>`;
-    } else { fastSection.style.display = 'none'; }
+    } else {
+      // ⭐ أثناء رمضان: نعطِّل عرض صيام التطوع
+      fastSection.style.display = 'none';
+    }
 
     let curFard = [...model.fard]; let curExtra = [...model.extra];
     if(isFriday){ curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f); curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'}); }
 
+    // الفرائض الأساسية
     document.getElementById('fard-list').innerHTML = curFard.map(h => {
       const cur = userData[h.id]?.type;
       return `<div class="habit-row"><div><b>${h.n}</b><span class="pts-info">${h.d}</span></div>
@@ -841,6 +863,22 @@
         }</div></div>`;
     }).join('');
 
+    // ⭐ إضافة "صيام رمضان (فرض)" داخل الفرائض أثناء رمضان فقط (+100 نقطة)
+    if (inRamadan){
+      const doneRF = userData['r_fasting']?.done;
+      const rfRow = document.createElement('div');
+      rfRow.className = 'habit-row';
+      rfRow.innerHTML = `
+        <span><b>🌙 صيام رمضان (فرض)</b> <small>(+100ن)</small></span>
+        <input type="checkbox" ${doneRF?'checked':''}
+               data-habit="r_fasting" data-p="100"
+               onchange="save('r_fasting',{done:this.checked, p:this.checked?100:0})"
+               style="transform:scale(1.5); cursor:pointer;">
+      `;
+      document.getElementById('fard-list').appendChild(rfRow);
+    }
+
+    // السنن + الأذكار كما هي
     const drawCheck = (list, tid) => {
       const rDay = getRamadanDayFor(selectedDate);
       document.getElementById(tid).innerHTML = list.map(h => {
@@ -881,7 +919,8 @@
       let s = 0; let uData = allData[u] || {};
       [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
       if(isFriday && uData['kahf']) s += 40;
-      if(uData['fasting']) s += 100;
+      if(uData['fasting']) s += 100;           // كما هو خارج رمضان
+      if(uData['r_fasting']?.done) s += 100;   // ⭐ احتساب صيام رمضان (فرض) أثناء رمضان
       return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
     }));
 
@@ -947,7 +986,7 @@
         users.forEach(u => {
           const ud = day[u] || {};
           if(ud.fajr && ud.fajr.type === 'm') knightStats[u].fajr++;
-          if(ud.fasting && ud.fasting.done) knightStats[u].fasting++;
+          if(ud.fasting && ud.fasting.done) knightStats[u].fasting++; // (نُبقيه كما هو)
           if(ud.quran && ud.quran.done) knightStats[u].quran++;
           (model.sunan||[]).forEach(s => { if(ud[s.id] && ud[s.id].done) knightStats[u].sunan++; });
           ['azkar_s','azkar_e','azkar_n'].forEach(a => { if(ud[a] && ud[a].done) knightStats[u].azkar++; });
@@ -1001,7 +1040,8 @@
       save(hid, { type: typ, p: p });
     });
 
-    const checks = document.querySelectorAll('#sunan-list input[type="checkbox"][data-habit], #extra-list input[type="checkbox"][data-habit], #fasting-list input[type="checkbox"][data-habit]');
+    // ⭐ تضمين الـ checkbox ضمن الفرائض أيضًا (لدعم r_fasting) إضافةً للموجود أصلًا
+    const checks = document.querySelectorAll('#fard-list input[type="checkbox"][data-habit], #sunan-list input[type="checkbox"][data-habit], #extra-list input[type="checkbox"][data-habit], #fasting-list input[type="checkbox"][data-habit]');
     checks.forEach(ch => {
       const hid = ch.getAttribute('data-habit');
       const p   = parseInt(ch.getAttribute('data-p'), 10) || 0;
@@ -1105,6 +1145,7 @@
     [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
     if(isFriday && uData['kahf']) s += 40;
     if(uData['fasting']) s += 100;
+    if(uData['r_fasting'] && uData['r_fasting'].done) s += 100; // ⭐ دعم صيام رمضان (فرض)
     return s;
   }
 
