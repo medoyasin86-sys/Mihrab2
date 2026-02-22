@@ -6,11 +6,11 @@
   <title>ملتقى طاعاتنا 2026 | النسخة المطورة</title>
 
   <!-- Firebase (Compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js</script>
+  https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js</script>
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet"/>
+  https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap
 
   <style>
     :root{
@@ -41,7 +41,7 @@
     #hijri-display{ display:block; color:var(--gold-light); font-size:1.2rem; font-weight:bold; margin-bottom:5px; }
     .ramadan-day-hint{ display:none; margin-top:6px; font-weight:bold; background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:6px 10px; border-radius:8px; }
 
-    /* === زر ولوحة ضبط الهجري (إضافة) === */
+    /* === زر ولوحة ضبط الهجري (إضافة سابقة) === */
     .hijri-adjust-wrap{ display:flex; gap:6px; align-items:center; justify-content:center; margin-top:6px; flex-wrap:wrap; }
     .hijri-adjust-btn{ background:#fff7d6; border:1px solid var(--gold); color:#634e1e; padding:4px 10px; border-radius:10px; cursor:pointer; font-weight:800; }
     .hijri-adjust-panel{
@@ -201,7 +201,7 @@
     <div class="date-container">
       <span id="hijri-display">جاري تحديد التاريخ الهجري...</span>
 
-      <!-- === إضافة: زر ولوحة ضبط الهجري === -->
+      <!-- === زر ولوحة ضبط الهجري (إضافة سابقة) === -->
       <div class="hijri-adjust-wrap">
         <button id="btn-hijri-panel" class="hijri-adjust-btn" title="ضبط التاريخ الهجري يدويًا">⚙️ ضبط الهجري</button>
       </div>
@@ -429,7 +429,7 @@
     catch(e) { return null; }
   }
 
-  /* ==== (إضافة) تحكم يدوي للهجري ==== */
+  /* ==== (إضافة سابقة) تحكم يدوي للهجري ==== */
   const HIJRI_OFFSET_KEY = 'hijri_offset_days_2026';
   function getHijriOffset(){ return parseInt(localStorage.getItem(HIJRI_OFFSET_KEY) || '0', 10) || 0; }
   function setHijriOffset(v){ localStorage.setItem(HIJRI_OFFSET_KEY, String(v)); }
@@ -630,7 +630,7 @@
     const selectedDate = parseLocalYMD(selectedDateStr);
     const tomorrow = new Date(selectedDate); tomorrow.setDate(selectedDate.getDate() + 1);
 
-    // (استبدال) استخدام الهجري المصحح
+    // استخدام الهجري المصحح
     const hijriTomorrow = await getHijriCorrected(tomorrow);
     if (hijriTomorrow) {
       const isTomorrowFasting = isFastingDay(tomorrow.getDay(), hijriTomorrow.day, hijriTomorrow.month.en);
@@ -647,7 +647,6 @@
   async function getRemaining(userData, isFriday, selectedDateStr) {
     let rem = []; let curFard = [...model.fard]; let curExtra = [...model.extra];
     if(isFriday) curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'});
-    // (استبدال) استخدام الهجري المصحح لليوم المحدد
     const hijri = await getHijriCorrected(parseLocalYMD(selectedDateStr));
     if(hijri && isFastingDay(parseLocalYMD(selectedDateStr).getDay(), hijri.day, hijri.month.en)) if(!userData['fasting']?.done) rem.push("الصيام 🌙");
     curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
@@ -666,8 +665,9 @@
     }).join('');
   }
 
-  /* ✅ رسم النماذج + تمييز العناصر بـ data-* لدعم زر الحفظ + روابط خارجية قابلة للنقر */
+  /* ✅ صيام رمضان بنقاط مجزية داخل رمضان فقط */
   const RAMADAN_START_YMD = '2026-02-19';
+  const RAMADAN_FASTING_POINTS = 200; /* نقاط صيام يوم رمضان */
   function getRamadanDayFor(dateObj){
     const ymdSel = ymdInTz(dateObj, APP_TZ);
     const diff = Math.floor((muscatMidnightMsFromYMD(ymdSel) - muscatMidnightMsFromYMD(RAMADAN_START_YMD)) / 86400000) + 1;
@@ -678,15 +678,24 @@
     const fastSection = document.getElementById('fasting-section');
     if(fastingDay) {
       fastSection.style.display = 'block';
-      let fastingLabel = "صيام تطوع (الاثنين/الخميس/البيض)";
-      const isRamadan = (document.getElementById('hijri-display').innerText.includes('رمضان')) || (ymdInTz(selectedDate, APP_TZ)==='2026-02-19');
-      if(isRamadan) fastingLabel = "صيام شهر رمضان المبارك";
+
+      /* خلال رمضان: إلغاء صيام التطوع واستبداله بصيام يوم رمضان بنقاط مجزية */
+      let isRamadan = (document.getElementById('hijri-display').innerText.includes('رمضان')) || (ymdInTz(selectedDate, APP_TZ)==='2026-02-19');
+      let fastingLabel, fastingPoints;
+      if (isRamadan) {
+        fastingLabel = "صيام يوم رمضان";
+        fastingPoints = RAMADAN_FASTING_POINTS; // 200
+      } else {
+        fastingLabel = "صيام تطوع (الاثنين/الخميس/البيض)";
+        fastingPoints = 100;
+      }
+
       document.getElementById('fasting-list').innerHTML = `<div class="habit-row">
-        <span>🌙 ${fastingLabel} <small>(+100ن)</small></span>
+        <span>🌙 ${fastingLabel} <small>(+${fastingPoints}ن)</small></span>
         <input type="checkbox"
                ${userData['fasting']?.done?'checked':''}
-               data-habit="fasting" data-p="100"
-               onchange="save('fasting',{done:this.checked, p:this.checked?100:0})"
+               data-habit="fasting" data-p="${fastingPoints}"
+               onchange="save('fasting',{done:this.checked, p:this.checked?${fastingPoints}:0})"
                style="transform:scale(1.5);">
       </div>`;
     } else { fastSection.style.display = 'none'; }
@@ -713,7 +722,7 @@
         let url = h.l || null;
         if (h.id === 'quran' && rDay) url = `https://quran.com/juz/${rDay}`;
         const label = url
-          ? `<a class="habit-link" href="${url}" target="_blank" rel="noopener noreferrer">${h.n}</a>`
+          ? `${url}${h.n}</a>`
           : h.n;
         return `<div class="habit-row">
           <span>${label} <small>(+${h.p}ن)</small></span>
@@ -732,7 +741,7 @@
     const selectedDateStr = document.getElementById('date-picker').value;
     const selectedDate = parseLocalYMD(selectedDateStr);
 
-    // (استبدال) استخدام الهجري المصحح للعرض والمنطق
+    // استخدام الهجري المصحح للعرض والمنطق
     const hijri = await getHijriCorrected(selectedDate);
     if(hijri) document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
 
@@ -748,7 +757,7 @@
       let s = 0; let uData = allData[u] || {};
       [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
       if(isFriday && uData['kahf']) s += 40;
-      if(uData['fasting']) s += 100;
+      if(uData['fasting']) s += uData['fasting'].p || 0; /* نقاط الصيام كما حُفظت (100 خارج رمضان، 200 داخل رمضان) */
       return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
     }));
 
@@ -940,9 +949,9 @@
   /* ===================================== */
   function computeDayPointsForUser(uData, isFriday){
     let s = 0;
-    [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
+    [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (h && uData[h.id].p) ? uData[h.id].p : 0; });
     if(isFriday && uData['kahf']) s += 40;
-    if(uData['fasting']) s += 100;
+    if(uData['fasting']) s += uData['fasting'].p || 0; /* نقاط الصيام كما حُفظت */
     return s;
   }
 
@@ -1048,7 +1057,7 @@
 <head>
 <meta charset="UTF-8">
 <title>تقرير ${modeLabel} | ${rangeLabel}</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap">
+https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap
 <style>
   :root{
     --primary:#1a4d2e; --gold:#c5a059; --gold-light:#e6cc92; --bg:#fff; --text:#1a4d2e;
