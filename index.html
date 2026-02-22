@@ -3,76 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ملتقى طاعاتنا 2026 | النسخة الشاملة</title>
+    <title>ملتقى طاعاتنا 2026 | النسخة الاحترافية</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #1a4d2e; --gold: #c5a059; --gold-light: #e6cc92; --bg: #f9f6f0; --card-bg: #ffffff; --text: #1a4d2e; --accent: #d35400; }
-        body.dark-mode { --bg: #121212; --card-bg: #1e1e1e; --text: #e0e0e0; --primary: #2d6a4f; }
-        body { font-family: 'Amiri', serif; background-color: var(--bg); margin: 0; padding: 10px; color: var(--text); transition: background 0.3s; }
+        body { font-family: 'Amiri', serif; background-color: var(--bg); margin: 0; padding: 10px; color: var(--text); }
         .main-container { max-width: 950px; margin: auto; background: var(--card-bg); border: 3px double var(--gold); border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .header-bar { background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid var(--gold); position: relative; }
+        .header-bar { background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: white; padding: 15px; border-radius: 15px; text-align: center; position: relative; border: 2px solid var(--gold); }
+        #admin-lock { position: absolute; top: 10px; right: 10px; cursor: pointer; background: none; border: none; font-size: 1.5rem; filter: grayscale(1); }
         
-        /* Admin Section */
-        #admin-auth-btn { position: absolute; top: 10px; right: 10px; opacity: 0.3; cursor: pointer; background: none; border: none; font-size: 1.2rem; }
-        .admin-section { background: #fff; border: 2px solid var(--accent); border-radius: 15px; margin: 20px 0; padding: 15px; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-        .report-table th, .report-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-        .report-table th { background: var(--primary); color: white; }
+        .admin-section { display: none; background: #fff; border: 3px solid var(--accent); border-radius: 15px; margin: 20px 0; padding: 15px; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* General UI */
         .podium-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 120px; gap: 5px; padding-bottom: 25px; }
-        .podium-step { width: 45px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: white; border-radius: 8px; position: relative; font-size: 0.75rem; transition: 0.5s; }
+        .podium-step { width: 45px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: white; border-radius: 8px; position: relative; font-size: 0.75rem; }
         .p-1 { height: 100px; background: linear-gradient(135deg, #ffd700, #b8860b); }
         .p-2 { height: 75px; background: linear-gradient(135deg, #bdc3c7, #7f8c8d); }
         .p-3 { height: 55px; background: linear-gradient(135deg, #cd7f32, #8b4513); }
         .p-name { position: absolute; bottom: -25px; color: var(--text); font-weight: bold; font-size: 0.8rem; white-space: nowrap; }
-        
-        .knights-section { background: linear-gradient(135deg, #fff, #fdf8e6); border: 2px solid var(--gold); border-radius: 15px; padding: 15px; margin: 20px 0; }
-        .knights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; text-align: center; }
-        .knight-card { background: white; border: 1px solid var(--gold-light); border-radius: 12px; padding: 10px; }
+
+        .knights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin: 20px 0; }
+        .knight-card { background: white; border: 1px solid var(--gold-light); border-radius: 12px; padding: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .knight-icon { font-size: 1.5rem; display: block; }
 
         .user-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        .comp-card { padding: 10px; text-align: center; border: 2px solid var(--gold-light); border-radius: 15px; cursor: pointer; background: #fff; }
-        .comp-card.active { border-color: var(--primary); background: #f0f7f2; transform: scale(1.02); }
+        .comp-card { padding: 12px; text-align: center; border: 2px solid var(--gold-light); border-radius: 15px; cursor: pointer; background: #fff; position: relative; }
+        .comp-card.active { border-color: var(--primary); background: #f0f7f2; box-shadow: 0 0 10px var(--gold); }
+        .remaining-tasks { font-size: 0.7rem; color: #d35400; margin-top: 5px; height: 35px; overflow: hidden; }
 
         .section-card { background: white; border: 1px solid var(--gold); border-radius: 15px; margin-top: 15px; overflow: hidden; }
         .section-title { background: var(--primary); color: white; padding: 10px; margin: 0; font-size: 1rem; }
-        .habit-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px dashed #eee; }
-        .opt-btn { font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--gold); cursor: pointer; background: transparent; }
+        .habit-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px dashed #eee; }
+        .opt-btn { font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--gold); cursor: pointer; background: #fff; }
         .opt-btn.selected { background: var(--gold); color: white; }
 
-        .chat-section { background: white; border: 2px solid var(--primary); border-radius: 15px; margin-top: 20px; height: 350px; display: flex; flex-direction: column; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
-        .chat-msg { padding: 8px; border-radius: 10px; max-width: 80%; font-size: 0.85rem; }
-        .chat-input-area { padding: 10px; display: flex; gap: 5px; background: #f9f9f9; border-radius: 0 0 15px 15px; }
-        .niya-alert { background: #fff3cd; color: #856404; padding: 10px; border-radius: 10px; margin: 10px 0; display: none; text-align: center; font-weight: bold; }
+        .report-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.85rem; }
+        .report-table th, .report-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        .report-table th { background: var(--primary); color: white; }
+        
+        .chat-section { background: white; border: 2px solid var(--primary); border-radius: 15px; margin-top: 20px; height: 300px; display: flex; flex-direction: column; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
 <div class="main-container">
     <div class="header-bar">
-        <button id="admin-auth-btn" onclick="authAdmin()">⚙️</button>
+        <button id="admin-lock" onclick="toggleAdmin()">⚙️</button>
         <h2 style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h2>
-        <div class="date-container">
-            <span id="hijri-display" style="font-weight:bold; font-size:1.3rem; color:var(--gold-light);">...</span> <br>
-            <input type="date" id="date-picker" style="border-radius:5px; padding:5px; border:none; margin-top:5px;">
+        <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; margin-top: 10px;">
+            <span id="hijri-display" style="font-weight:bold; font-size:1.2rem; color:var(--gold-light);">...</span> <br>
+            <input type="date" id="date-picker" style="border-radius:5px; border:none; padding:5px; margin-top:5px; font-weight:bold;">
         </div>
-        <div id="niya-reminder" class="niya-alert"></div>
     </div>
 
     <div id="admin-panel" class="admin-section">
-        <h3 style="text-align:center; color:var(--accent);">📈 مركز التقارير السرية (9090)</h3>
-        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px;">
-            <button class="opt-btn" onclick="generateReport('daily')">تقرير يومي</button>
-            <button class="opt-btn" onclick="generateReport('monthly')">تقرير شهري</button>
-            <button class="opt-btn" onclick="generateReport('annual')">تقرير سنوي</button>
-            <button class="opt-btn" style="background:var(--primary); color:#fff;" onclick="exportPDF()">تحميل PDF 📥</button>
+        <h3 style="text-align:center; color:var(--accent);">📈 التقارير الإحصائية والتحليلية</h3>
+        <div style="display:flex; justify-content:center; gap:5px; margin-bottom:15px; flex-wrap:wrap;">
+            <button class="opt-btn" onclick="generateReport('daily')">اليومي</button>
+            <button class="opt-btn" onclick="generateReport('monthly')">الشهري</button>
+            <button class="opt-btn" onclick="exportPDF()">تحميل PDF</button>
         </div>
+        <canvas id="reportChart" style="max-height: 250px;"></canvas>
         <div id="report-output"></div>
     </div>
 
@@ -82,159 +79,165 @@
     </div>
 
     <div class="knights-section">
-        <h3 style="text-align:center; margin:0 0 10px 0; font-family:'Reem Kufi';">⚔️ فرسان الأسبوع</h3>
+        <h3 style="text-align:center; margin:10px 0; font-family:'Reem Kufi'; color: var(--primary);">⚔️ فرسان الأسبوع</h3>
         <div class="knights-grid" id="knights-display"></div>
     </div>
 
     <div id="cards-ui" class="user-cards"></div>
 
     <div id="user-ui" style="display:none;">
-        <h3 id="current-user-title" style="text-align:center; color:var(--primary); background: var(--gold-light); padding: 5px; border-radius: 10px;"></h3>
-        <div id="fasting-section" class="section-card" style="display:none; border:2px solid var(--accent);"><h3 class="section-title" style="background:var(--accent);">🌙 قسم الصيام</h3><div id="fasting-list"></div></div>
-        <div class="section-card"><h3 class="section-title">🕋 الفرائض (المسجد | جماعة | فردي)</h3><div id="fard-list"></div></div>
-        <div class="section-card"><h3 class="section-title">🌱 السنن الرواتب والقيام</h3><div id="sunan-list"></div></div>
-        <div class="section-card"><h3 class="section-title">📿 الأذكار والورد والقرآن</h3><div id="extra-list"></div></div>
+        <h3 id="current-user-title" style="text-align:center; color:var(--primary); background: var(--gold-light); padding: 8px; border-radius: 10px;"></h3>
+        
+        <div class="section-card" id="ramadan-card" style="border: 2px solid var(--accent);">
+            <h3 class="section-title" style="background:var(--accent);">🌙 ركن الصيام</h3>
+            <div class="habit-row">
+                <span>فريضة صيام اليوم (+150ن)</span>
+                <input type="checkbox" id="fast-check" style="transform: scale(1.5);">
+            </div>
+        </div>
+
+        <div class="section-card"><h3 class="section-title">🕋 الفرائض (م: مسجد | ج: جماعة | ف: فردي)</h3><div id="fard-list"></div></div>
+        <div class="section-card"><h3 class="section-title">🌱 الرواتب والقيام</h3><div id="sunan-list"></div></div>
+        <div class="section-card"><h3 class="section-title">📿 الأذكار والورد</h3><div id="extra-list"></div></div>
     </div>
 
     <div class="chat-section">
         <div id="chat-messages" class="chat-messages"></div>
-        <div class="chat-input-area">
-            <select id="chat-user-selector" style="border-radius:10px; padding:5px;"><option value="">من أنت؟</option><option value="محمد">محمد</option><option value="شيماء">شيماء</option><option value="أحمد">أحمد</option><option value="ياسين">ياسين</option></select>
-            <input type="text" id="chat-input" style="flex:1; border-radius:20px; border:1px solid #ddd; padding:0 10px;" placeholder="اكتب رسالة...">
+        <div style="padding:10px; display:flex; gap:5px; background:#f0f0f0;">
+            <select id="chat-user" style="padding:5px; border-radius:10px;"><option value="محمد">محمد</option><option value="شيماء">شيماء</option><option value="أحمد">أحمد</option><option value="ياسين">ياسين</option></select>
+            <input type="text" id="chat-input" style="flex:1; border-radius:20px; border:1px solid #ccc; padding:0 10px;" placeholder="رسالة تشجيعية...">
             <button onclick="sendMessage()" style="background:var(--primary); color:white; border:none; border-radius:50%; width:35px; height:35px;">➤</button>
         </div>
     </div>
 </div>
 
 <script>
+    // تهيئة Firebase
     const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
-    let currentUser = null;
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
+    let currentUser = null;
+    let myChart = null;
 
     const model = {
         fard: [
-            {id:'fajr', n:'🌄 الفجر', pts: {m:100, g:30, f:15}},
-            {id:'dhuhr', n:'☀️ الظهر', pts: {m:50, g:30, f:15}},
-            {id:'asr', n:'🌤️ العصر', pts: {m:50, g:30, f:15}},
-            {id:'maghrib', n:'🌅 المغرب', pts: {m:50, g:30, f:15}},
-            {id:'isha', n:'🌃 العشاء', pts: {m:50, g:30, f:15}}
+            {id:'fajr', n:'الفجر', pts: {m:100, g:30, f:15}},
+            {id:'dhuhr', n:'الظهر', pts: {m:50, g:30, f:15}},
+            {id:'asr', n:'العصر', pts: {m:50, g:30, f:15}},
+            {id:'maghrib', n:'المغرب', pts: {m:50, g:30, f:15}},
+            {id:'isha', n:'العشاء', pts: {m:50, g:30, f:15}}
         ],
         sunan: [
-            {id:'s_fajr', n:'✨ سنة الفجر', p:20},
-            {id:'s_dhuhr_b', n:'✨ سنة الظهر (قبل)', p:20},
-            {id:'s_dhuhr_a', n:'✨ سنة الظهر (بعد)', p:15},
-            {id:'s_maghrib', n:'✨ سنة المغرب', p:15},
-            {id:'s_isha', n:'✨ سنة العشاء', p:15},
-            {id:'s_duha', n:'☀️ صلاة الضحى', p:25},
-            {id:'s_shaf', n:'🕯️ الشفع', p:15},
-            {id:'s_witr', n:'🌌 الوتر', p:20},
-            {id:'s_qyam', n:'🌙 قيام الليل', p:40}
+            {id:'s_fajr', n:'سنة الفجر', p:20}, {id:'s_dhuhr_b', n:'سنة الظهر قبل', p:20},
+            {id:'s_dhuhr_a', n:'سنة الظهر بعد', p:15}, {id:'s_maghrib', n:'سنة المغرب', p:15},
+            {id:'s_isha', n:'سنة العشاء', p:15}, {id:'s_duha', n:'صلاة الضحى', p:25},
+            {id:'s_shaf', n:'الشفع والوتر', p:25}, {id:'s_qyam', n:'قيام الليل', p:40}
         ],
         extra: [
-            {id:'azkar_s', n:'☀️ أذكار الصباح', p:30},
-            {id:'azkar_e', n:'🌙 أذكار المساء', p:30},
-            {id:'azkar_n', n:'😴 أذكار النوم', p:30},
-            {id:'mulk', n:'📖 سورة الملك', p:30},
-            {id:'baqarah', n:'📖 خواتيم البقرة', p:20},
-            {id:'quran', n:'📖 الورد القرآني', p:50}
+            {id:'az_s', n:'أذكار الصباح', p:30}, {id:'az_e', n:'أذكار المساء', p:30},
+            {id:'az_n', n:'أذكار النوم', p:20}, {id:'mulk', n:'سورة الملك', p:30},
+            {id:'baqarah', n:'خواتيم البقرة', p:20}, {id:'quran', n:'الورد القرآني', p:50}
         ]
     };
 
-    function authAdmin() {
-        const pass = prompt("أدخل الرقم السري للدخول لقسم التقارير:");
+    // ضبط التاريخ (عمان: 22 فبراير = 4 رمضان)
+    async function getHijri(date) {
+        let adjDate = new Date(date);
+        adjDate.setDate(adjDate.getDate() - 1); // تعديل يدوي لعمان
+        const res = await fetch(`https://api.aladhan.com/v1/gToH/${adjDate.getDate()}-${adjDate.getMonth()+1}-${adjDate.getFullYear()}`);
+        const data = await res.json();
+        return data.data.hijri;
+    }
+
+    function toggleAdmin() {
+        const pass = prompt("أدخل الرقم السري:");
         if(pass === "9090") {
-            document.getElementById('admin-panel').style.display = 'block';
-            alert("تم تفعيل صلاحيات الإدارة");
-        } else { alert("عذراً، الرقم السري خاطئ"); }
+            const panel = document.getElementById('admin-panel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
     }
 
-    async function getHijriData(date) {
-        try {
-            let adj = new Date(date);
-            adj.setDate(adj.getDate() - 1); // ضبط عُمان (22 فبراير = 4 رمضان)
-            const d = adj.getDate(), m = adj.getMonth()+1, y = adj.getFullYear();
-            const res = await fetch(`https://api.aladhan.com/v1/gToH/${d}-${m}-${y}`);
-            const data = await res.json();
-            return data.data.hijri;
-        } catch(e) { return null; }
-    }
-
-    async function render(allData) {
+    async function updateUI(allData) {
         const selDate = document.getElementById('date-picker').value;
-        const dObj = new Date(selDate);
-        const hj = await getHijriData(dObj);
+        const hj = await getHijri(new Date(selDate));
+        document.getElementById('hijri-display').innerText = `${hj.day} ${hj.month.ar} ${hj.year}هـ`;
         
-        if(hj) document.getElementById('hijri-display').innerText = `${hj.day} ${hj.month.ar} ${hj.year}هـ`;
-        
-        const isFriday = dObj.getDay() === 5;
-        const isRamadan = hj && hj.month.en === "Ramadan";
+        const isFriday = new Date(selDate).getDay() === 5;
+        const isRamadan = hj.month.en === "Ramadan";
 
-        // التنبيه للنية
-        let tom = new Date(dObj); tom.setDate(tom.getDate()+1);
-        const hjTom = await getHijriData(tom);
-        const alertBox = document.getElementById('niya-reminder');
-        if(hjTom && (hjTom.month.en === "Ramadan" || [1,4].includes(tom.getDay()))) {
-            alertBox.style.display = 'block';
-            alertBox.innerHTML = `💡 نية الصيام: غداً ${hjTom.day} ${hjTom.month.ar}، لا تنسَ السحور.`;
-        } else { alertBox.style.display = 'none'; }
-
-        // حساب النقاط
+        // حساب نقاط كل مستخدم + المتبقي
         let stats = users.map(u => {
-            let s = 0; let ud = allData[selDate]?.[u] || {};
-            [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(ud[h.id]) s += (ud[h.id].p || 0); });
-            if(isFriday && ud['kahf']) s += 40;
-            if(ud['fasting']) s += 100;
-            return { n: u, s: s };
+            let pts = 0; let rem = [];
+            let ud = allData[selDate]?.[u] || {};
+            
+            if(ud.fast) pts += 150; else rem.push("الصيام");
+            model.fard.forEach(f => { if(ud[f.id]) pts += ud[f.id].p; else rem.push(f.n); });
+            model.sunan.forEach(s => { if(ud[s.id]) pts += s.p; else rem.push(s.n); });
+            model.extra.forEach(e => { if(ud[e.id]) pts += e.p; else rem.push(e.n); });
+            if(isFriday) { if(ud.kahf) pts += 40; else rem.push("الكهف"); }
+
+            return { n: u, s: pts, r: rem.length > 3 ? rem.slice(0,3).join('، ')+'..' : rem.join('، ') };
         });
 
+        // رسم المنصات
         drawPodium('daily-podium', stats);
         updateAnnual(allData);
         updateKnights(allData);
 
+        // بطاقات المتسابقين
         document.getElementById('cards-ui').innerHTML = stats.map(st => `
             <div class="comp-card ${st.n === currentUser ? 'active' : ''}" onclick="selectUser('${st.n}')">
-                <b>${st.n}</b> <br> <span style="color:var(--gold)">${st.s} نقطة</span>
+                <b>${st.n}</b> <br> <span style="color:var(--gold); font-weight:bold;">${st.s} نقطة</span>
+                <div class="remaining-tasks">⏳ المتبقي: ${st.r || '✅ تم الإنجاز'}</div>
             </div>`).join('');
 
-        if(currentUser) renderForms(allData[selDate]?.[currentUser] || {}, isRamadan, isFriday);
+        if(currentUser) renderUserTasks(allData[selDate]?.[currentUser] || {}, isRamadan, isFriday);
     }
 
-    function renderForms(ud, isRamadan, isFriday) {
-        document.getElementById('fasting-section').style.display = isRamadan ? 'block' : 'none';
-        if(isRamadan) {
-            document.getElementById('fasting-list').innerHTML = `<div class="habit-row"><span>🌙 صيام اليوم (+100)</span><input type="checkbox" ${ud['fasting']?.done?'checked':''} onchange="save('fasting',{done:this.checked, p:this.checked?100:0})"></div>`;
-        }
+    function renderUserTasks(ud, isRamadan, isFriday) {
+        document.getElementById('fast-check').checked = !!ud.fast;
+        document.getElementById('fast-check').onclick = (e) => save('fast', e.target.checked);
 
+        // الفرائض
         let fards = [...model.fard];
-        if(isFriday) fards = fards.map(f => f.id==='dhuhr' ? {id:'dhuhr', n:'🕌 صلاة الجمعة', pts: {m:100, g:30, f:15}} : f);
-
-        document.getElementById('fard-list').innerHTML = fards.map(h => `
-            <div class="habit-row"><span>${h.n}</span>
-            <div style="display:flex; gap:2px;">${Object.entries(h.pts).map(([k,v]) => `
-                <button class="opt-btn ${ud[h.id]?.type===k?'selected':''}" onclick="save('${h.id}',{type:'${k}', p:${v}})">${k=='m'?'مسجد':k=='g'?'جماعة':'فرد'}</button>`).join('')}
+        if(isFriday) fards = fards.map(f => f.id === 'dhuhr' ? {id:'dhuhr', n:'صلاة الجمعة', pts:{m:100, g:30, f:15}} : f);
+        
+        document.getElementById('fard-list').innerHTML = fards.map(f => `
+            <div class="habit-row"><span>${f.n}</span>
+            <div style="display:flex; gap:2px;">${Object.entries(f.pts).map(([k,v]) => `
+                <button class="opt-btn ${ud[f.id]?.t===k?'selected':''}" onclick="save('${f.id}',{t:'${k}', p:${v}})">${k=='m'?'م':k=='g'?'ج':'ف'}</button>`).join('')}
             </div></div>`).join('');
 
-        let extras = [...model.extra];
-        if(isFriday) extras.push({id:'kahf', n:'📖 سورة الكهف', p:40});
-
         const drawCheck = (list, tid) => {
-            document.getElementById(tid).innerHTML = list.map(h => `<div class="habit-row"><span>${h.n} (+${h.p || 0})</span><input type="checkbox" ${ud[h.id]?.done?'checked':''} onchange="save('${h.id}',{done:this.checked, p:this.checked?${h.p || 0}:0})"></div>`).join('');
+            document.getElementById(tid).innerHTML = list.map(h => `
+                <div class="habit-row"><span>${h.n} (+${h.p})</span>
+                <input type="checkbox" ${ud[h.id]?'checked':''} onclick="save('${h.id}', this.checked)"></div>`).join('');
         };
         drawCheck(model.sunan, 'sunan-list');
+        let extras = [...model.extra];
+        if(isFriday) extras.push({id:'kahf', n:'سورة الكهف', p:40});
         drawCheck(extras, 'extra-list');
     }
 
-    function save(id, val) { const d = document.getElementById('date-picker').value; db.ref(`osraty/${d}/${currentUser}/${id}`).set(val); }
-    function selectUser(n) { currentUser = n; document.getElementById('user-ui').style.display = 'block'; document.getElementById('current-user-title').innerText = n; db.ref('osraty').once('value', s => render(s.val()||{})); }
+    function save(id, val) {
+        const d = document.getElementById('date-picker').value;
+        db.ref(`osraty/${d}/${currentUser}/${id}`).set(val);
+    }
+
+    function selectUser(n) {
+        currentUser = n;
+        document.getElementById('user-ui').style.display = 'block';
+        document.getElementById('current-user-title').innerText = `لوحة ${n}`;
+        db.ref('osraty').once('value', s => updateUI(s.val()||{}));
+    }
 
     function drawPodium(el, data) {
         const sorted = [...data].sort((a,b) => b.s - a.s);
         const steps = ['p-2', 'p-1', 'p-3'];
-        document.getElementById(el).innerHTML = [1, 0, 2].map((idx, i) => {
-            const u = sorted[idx] || {n: '-', s: 0};
+        document.getElementById(el).innerHTML = [1,0,2].map((idx, i) => {
+            const u = sorted[idx] || {n:'-', s:0};
             return `<div class="podium-step ${steps[i]}"><span>${u.s}</span><div class="p-name">${u.n}</div></div>`;
         }).join('');
     }
@@ -242,70 +245,102 @@
     function updateAnnual(data) {
         let annual = users.map(u => {
             let total = 0;
-            Object.values(data).forEach(day => { if(day[u]) Object.values(day[u]).forEach(t => total += (t.p || 0)); });
+            Object.values(data).forEach(day => { if(day[u]) Object.values(day[u]).forEach(t => total += (t.p || (t === true ? 1 : 0))); });
+            // تصحيح نقاط الـ true (مثل الصيام والسنن)
+            Object.keys(data).forEach(d => {
+                const ud = data[d][u] || {};
+                if(ud.fast) total += 150;
+                model.sunan.forEach(s => { if(ud[s.id]) total += s.p; });
+                model.extra.forEach(e => { if(ud[e.id]) total += e.p; });
+                if(ud.kahf) total += 40;
+            });
             return { n: u, s: total };
         });
         drawPodium('annual-podium', annual);
     }
 
     function updateKnights(data) {
-        let kStats = users.reduce((acc, u) => { acc[u] = { f:0, s:0 }; return acc; }, {});
+        let knights = { fajr: '-', azkar: '-', quran: '-', sunan: '-', fast: '-' };
+        let scores = users.reduce((acc, u) => { acc[u] = { f:0, a:0, q:0, s:0, ft:0 }; return acc; }, {});
+        
         Object.keys(data).slice(-7).forEach(d => {
             users.forEach(u => {
-                if(data[d][u]?.fajr?.type === 'm') kStats[u].f++;
-                if(data[d][u]?.fasting?.done) kStats[u].s++;
+                const ud = data[d][u] || {};
+                if(ud.fajr?.t === 'm') scores[u].f++;
+                if(ud.az_s && ud.az_e) scores[u].a++;
+                if(ud.quran) scores[u].q++;
+                if(ud.s_qyam) scores[u].s++;
+                if(ud.fast) scores[u].ft++;
             });
         });
-        const getB = (k) => users.reduce((a, b) => kStats[a][k] >= kStats[b][k] ? a : b);
+
+        const getBest = (key) => users.reduce((a, b) => scores[a][key] >= scores[b][key] ? a : b);
         document.getElementById('knights-display').innerHTML = `
-            <div class="knight-card"><b>🕌 فارس الفجر</b><br>${getB('f')}</div>
-            <div class="knight-card"><b>🌙 فارس الصيام</b><br>${getB('s')}</div>
+            <div class="knight-card"><span class="knight-icon">🕌</span><b>الفجر</b><br>${getBest('f')}</div>
+            <div class="knight-card"><span class="knight-icon">📿</span><b>الأذكار</b><br>${getBest('a')}</div>
+            <div class="knight-card"><span class="knight-icon">📖</span><b>الورد</b><br>${getBest('q')}</div>
+            <div class="knight-card"><span class="knight-icon">🌙</span><b>الصيام</b><br>${getBest('ft')}</div>
         `;
     }
 
-    // نظام التقارير المطور
     function generateReport(type) {
         db.ref('osraty').once('value', snap => {
             const data = snap.val() || {};
-            let html = `<div id="report-to-print"><h2 style="text-align:center">تقرير طاعاتنا - ${type}</h2>
-                        <table class="report-table"><tr><th>الاسم</th><th>إجمالي النقاط</th><th>الحالة</th></tr>`;
-            users.forEach(u => {
+            let labels = users;
+            let currentScores = users.map(u => {
                 let total = 0;
                 if(type === 'daily') {
                     const d = document.getElementById('date-picker').value;
-                    Object.values(data[d]?.[u] || {}).forEach(t => total += (t.p || 0));
-                } else if (type === 'monthly') {
-                    const month = document.getElementById('date-picker').value.substring(0, 7);
-                    Object.keys(data).forEach(d => { if(d.startsWith(month)) Object.values(data[d]?.[u] || {}).forEach(t => total += (t.p || 0)); });
+                    const ud = data[d]?.[u] || {};
+                    if(ud.fast) total += 150;
+                    model.fard.forEach(f => total += (ud[f.id]?.p || 0));
+                    model.sunan.forEach(s => { if(ud[s.id]) total += s.p; });
                 } else {
-                    Object.values(data).forEach(day => { if(day[u]) Object.values(day[u]).forEach(t => total += (t.p || 0)); });
+                    Object.keys(data).forEach(d => {
+                        const ud = data[d][u] || {};
+                        if(ud.fast) total += 150;
+                        model.fard.forEach(f => total += (ud[f.id]?.p || 0));
+                    });
                 }
-                html += `<tr><td>${u}</td><td>${total}</td><td>${total > 300 ? '🥇 ممتاز' : '🌱 مجتهد'}</td></tr>`;
+                return total;
             });
-            document.getElementById('report-output').innerHTML = html + `</table></div>`;
+
+            if(myChart) myChart.destroy();
+            myChart = new Chart(document.getElementById('reportChart'), {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ label: 'نقاط الأداء', data: currentScores, backgroundColor: ['#1a4d2e', '#c5a059', '#d35400', '#900c3f'] }] }
+            });
+
+            let html = `<table class="report-table"><tr><th>المتسابق</th><th>النقاط</th><th>أيام النشاط</th><th>النسبة</th></tr>`;
+            users.forEach((u, i) => {
+                let activeDays = Object.keys(data).filter(d => data[d][u]).length;
+                html += `<tr><td>${u}</td><td>${currentScores[i]}</td><td>${activeDays}</td><td>${Math.round((currentScores[i]/2000)*100)}%</td></tr>`;
+            });
+            document.getElementById('report-output').innerHTML = html + `</table>`;
         });
     }
 
     function exportPDF() {
-        const element = document.getElementById('report-to-print');
-        if(!element) return alert("يرجى إنشاء التقرير أولاً");
-        html2pdf().from(element).save(`تقرير_طاعاتنا_${Date.now()}.pdf`);
+        html2pdf().from(document.getElementById('report-output')).save('تقرير_الطاعات.pdf');
     }
 
     function sendMessage() {
-        const inp = document.getElementById('chat-input'), user = document.getElementById('chat-user-selector').value;
-        if(inp.value && user) { db.ref('osraty_chat').push({ u: user, m: inp.value }); inp.value = ''; }
+        const u = document.getElementById('chat-user').value;
+        const m = document.getElementById('chat-input').value;
+        if(m) { db.ref('chat').push({ u, m, t: Date.now() }); document.getElementById('chat-input').value = ''; }
     }
 
     window.onload = () => {
         const dp = document.getElementById('date-picker');
-        dp.value = "2026-02-22"; 
-        dp.onchange = () => db.ref('osraty').once('value', s => render(s.val()||{}));
-        db.ref('osraty').on('value', s => render(s.val()||{}));
-        db.ref('osraty_chat').limitToLast(15).on('value', s => {
-            const div = document.getElementById('chat-messages');
-            div.innerHTML = Object.values(s.val()||{}).map(m => `<div class="chat-msg" style="align-self:${m.u===currentUser?'flex-end':'flex-start'}; background:${m.u===currentUser?'#dcf8c6':'#eee'}"><b>${m.u}:</b> ${m.m}</div>`).join('');
-            div.scrollTop = div.scrollHeight;
+        dp.value = new Date().toISOString().split('T')[0];
+        dp.onchange = () => db.ref('osraty').once('value', s => updateUI(s.val()||{}));
+        
+        db.ref('osraty').on('value', s => updateUI(s.val()||{}));
+        db.ref('chat').limitToLast(20).on('value', s => {
+            const msgs = s.val() || {};
+            document.getElementById('chat-messages').innerHTML = Object.values(msgs).map(m => `
+                <div style="margin-bottom:5px; border-bottom:1px solid #eee;"><b>${m.u}:</b> ${m.m}</div>`).join('');
+            const d = document.getElementById('chat-messages'); d.scrollTop = d.scrollHeight;
         });
     };
 </script>
