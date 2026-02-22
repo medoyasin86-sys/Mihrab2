@@ -241,6 +241,8 @@
 
       <!-- تقارير PDF (كما هي) -->
       <button class="refresh-btn" id="btn-report-daily"   title="تقرير يومي (PDF)">📄 تقرير يومي</button>
+      <!-- EDIT: زر التقرير الأسبوعي -->
+      <button class="refresh-btn" id="btn-report-weekly"  title="تقرير أسبوعي (PDF)">📄 تقرير أسبوعي</button>
       <button class="refresh-btn" id="btn-report-monthly" title="تقرير شهري (PDF)">📄 تقرير شهري</button>
       <button class="refresh-btn" id="btn-report-yearly"  title="تقرير سنوي (PDF)">📄 تقرير سنوي</button>
 
@@ -248,6 +250,8 @@
       <span style="font-weight:800; color:#634e1e;">نطاق:</span>
       <select id="report-range-select" class="city-select" title="مدى التقرير">
         <option value="daily">يومي</option>
+        <!-- EDIT: خيار أسبوعي -->
+        <option value="weekly">أسبوعي</option>
         <option value="monthly">شهري</option>
         <option value="yearly">سنوي</option>
       </select>
@@ -653,7 +657,7 @@
     if(!val) { out.textContent = ''; return; }
     const dLocal = parseLocalYMD(val), pad = n => String(n).padStart(2,'0');
     const localStr = `${dLocal.getFullYear()}-${pad(dLocal.getMonth()+1)}-${pad(dLocal.getDate())} ${pad(dLocal.getHours())}:${pad(dLocal.getMinutes())}`;
-    const utcStr   = `${dLocal.getUTCFullYear()}-${pad(dLocal.getUTCMonth()+1)}-${pad(dLocal.getUTCDate())} ${pad(dLocal.getUTCHours())}:${pad(dLocal.getUTCHours())}Z`;
+    const utcStr   = `${dLocal.getUTCFullYear()}-${pad(dLocal.getUTCMonth()+1)}-${pad(dLocal.getUTCDate())} ${pad(dLocal.getUTCHours())}:${pad(dLocal.getUTCMinutes())}Z`;
     const todayMuscat = todayYMDMuscat();
     out.innerHTML = `
       <div><b>قيمة الحقل:</b> ${val}</div>
@@ -995,6 +999,15 @@
     const [y] = ymd.split('-').map(Number);
     return {start:`${y}-01-01`, end:`${y}-12-31`, label:`${y}`};
   }
+  /* EDIT: مدى أسبوعي (السبت ← الجمعة) */
+  function weekRangeFromYMD(ymd, weekStart=6){ // 0=أحد .. 6=سبت
+    const d = new Date(ymd + 'T00:00:00');
+    const day = d.getDay();
+    const diffToStart = ((day - weekStart + 7) % 7);
+    const startDate = new Date(d); startDate.setDate(d.getDate() - diffToStart);
+    const endDate = new Date(startDate); endDate.setDate(startDate.getDate() + 6);
+    return { start: ymdOfDate(startDate), end: ymdOfDate(endDate), label: `${ymdOfDate(startDate)} → ${ymdOfDate(endDate)}` };
+  }
 
   /* ===================================== */
   /*  حساب نقاط اليوم مستخدمًا نفس منطقك  */
@@ -1234,12 +1247,15 @@
   /*          مُولِّد التقرير العام         */
   /* ===================================== */
   async function generateReport(mode, opts = {}){
-    // supports: 'daily' | 'monthly' | 'yearly' | 'group' | 'user'
+    // supports: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'group' | 'user'
     const ymd = document.getElementById('date-picker').value || todayYMDMuscat();
 
     function rangeFrom(kind){
       if(kind === 'daily'){
         return {startYMD: ymd, endYMD: ymd, rangeLabel: ymd, modeLabel: 'يومي (PDF)'};
+      } else if(kind === 'weekly'){ // EDIT: أسبوعي
+        const r = weekRangeFromYMD(ymd, 6); // السبت بداية الأسبوع
+        return {startYMD: r.start, endYMD: r.end, rangeLabel: `أسبوع ${r.label}`, modeLabel: 'أسبوعي (PDF)'};
       } else if(kind === 'monthly'){
         const r = monthRangeFromYMD(ymd);
         return {startYMD: r.start, endYMD: r.end, rangeLabel: `شهر ${r.label}`, modeLabel: 'شهري (PDF)'};
@@ -1250,8 +1266,8 @@
       return null;
     }
 
-    // القديم: وضع مباشر
-    if(['daily','monthly','yearly'].includes(mode)){
+    // اليومي/الأسبوعي/الشهري/السنوي
+    if(['daily','weekly','monthly','yearly'].includes(mode)){
       const r = rangeFrom(mode);
       if(!r){ alert('وضع التقرير غير معروف'); return; }
       try{
@@ -1275,23 +1291,18 @@
         if(mode === 'group'){
           // تجميع الكل في كتلة واحدة
           const group = {};
-          const baseUser = Object.keys(summary)[0];
-          // إنشاء قالب
           function cloneShape(s){ return JSON.parse(JSON.stringify(s)); }
-          // اجمالي
           let agg = null;
           for(const u of Object.keys(summary)){
             const s = summary[u];
             if(!agg){
               agg = cloneShape(s);
-              aggName = 'إجمالي المجموعة';
             }else{
               agg.totalPoints += s.totalPoints;
               agg.daysActive  += s.daysActive;
               agg.fastingCount+= s.fastingCount;
               agg.quranCount  += s.quranCount;
               Object.keys(s.fardCounts||{}).forEach(k => { agg.fardCounts[k] = (agg.fardCounts[k]||0) + (s.fardCounts[k]||0); });
-              // byHabit
               Object.keys(s.byHabit||{}).forEach(h => {
                 agg.byHabit[h].totalPoints += s.byHabit[h].totalPoints;
                 agg.byHabit[h].totalCount  += s.byHabit[h].totalCount;
@@ -1301,7 +1312,6 @@
                   });
                 }
               });
-              // topDays: نأخذ أفضل 5 عبر الجميع
               agg.days = (agg.days || []).concat(s.days || []);
             }
           }
@@ -1312,7 +1322,7 @@
           openReportWindow({modeLabel:`${r.modeLabel} — جماعي`, rangeLabel:r.rangeLabel, startYMD:r.startYMD, endYMD:r.endYMD, summary:group, dates});
         } else if(mode === 'user'){
           const u = opts.user;
-          if(!u){ alert('اختر مستخدمًا أولاً'); return; }
+          if(!u) { alert('اختر مستخدمًا أولاً'); return; }
           const only = {};
           only[u] = summary[u] || { totalPoints:0, daysActive:0, fastingCount:0, quranCount:0, fardCounts:{}, byHabit:{} };
           openReportWindow({modeLabel:`${r.modeLabel} — ${u}`, rangeLabel:r.rangeLabel, startYMD:r.startYMD, endYMD:r.endYMD, summary:only, dates});
@@ -1332,7 +1342,7 @@
   }
   async function refreshAll() { await applyCitySelection(); sync(); }
 
-  /* EDIT: لوحة التحكم بالرمز */
+  /* EDIT: لوحة التحكم بالرمز — تعمل على أي جهاز (التحقق محلي بالرمز فقط، دون تقييد جهاز) */
   (function adminPanelPinInit(){
     const GEAR = document.getElementById('admin-gear');
     const PANEL= document.getElementById('admin-panel');
@@ -1341,6 +1351,7 @@
     const OK   = document.getElementById('pin-confirm');
     const NO   = document.getElementById('pin-cancel');
     const ADMIN_PIN = '9090'; // لا يُعرض للمستخدم
+    const SESSION_KEY = 'admin_panel_ok_2026'; // جلسة التبويب فقط
 
     let panelVisible = false;
 
@@ -1363,6 +1374,9 @@
       if(pin === ADMIN_PIN){
         panelVisible = !panelVisible;
         PANEL.style.display = panelVisible ? 'flex' : 'none';
+        // حفظ حالة الجلسة في هذا التبويب فقط (لا يقيّد أجهزة أخرى)
+        if(panelVisible){ sessionStorage.setItem(SESSION_KEY,'1'); }
+        else{ sessionStorage.removeItem(SESSION_KEY); }
         toast(panelVisible ? 'تم فتح لوحة التحكم' : 'تم إخفاء لوحة التحكم');
         closeModal();
       } else {
@@ -1378,6 +1392,12 @@
     if(NO){ NO.onclick = closeModal; }
     if(BD){ BD.addEventListener('click', (e)=>{ if(e.target===BD) closeModal(); }); }
     if(INP){ INP.addEventListener('keydown', (e)=>{ if(e.key==='Enter') confirmPin(); }); }
+
+    // إن كانت الجلسة الحالية سبق وتم فتحها، أظهر اللوحة مباشرة (بدون تقييد جهاز)
+    if(sessionStorage.getItem(SESSION_KEY)==='1'){
+      panelVisible = true;
+      PANEL.style.display = 'flex';
+    }
   })();
 
   window.onload = () => {
@@ -1407,25 +1427,26 @@
     document.getElementById('btn-refresh').onclick = refreshAll;
     const btnSaveAll = document.getElementById('btn-save-all'); if (btnSaveAll) btnSaveAll.onclick = saveAllChanges;
 
-    // أزرار التقارير القديمة
+    // أزرار التقارير: يومي/أسبوعي/شهري/سنوي
     const btnDaily   = document.getElementById('btn-report-daily');
+    const btnWeekly  = document.getElementById('btn-report-weekly'); // EDIT: أسبوعي
     const btnMonthly = document.getElementById('btn-report-monthly');
     const btnYearly  = document.getElementById('btn-report-yearly');
     if(btnDaily)   btnDaily.onclick   = ()=> generateReport('daily');
+    if(btnWeekly)  btnWeekly.onclick  = ()=> generateReport('weekly'); // EDIT
     if(btnMonthly) btnMonthly.onclick = ()=> generateReport('monthly');
     if(btnYearly)  btnYearly.onclick  = ()=> generateReport('yearly');
 
     // EDIT: أزرار التقارير الجديدة (جماعي/مستخدم) + القوائم
     const rangeSel = document.getElementById('report-range-select');
     const userSel  = document.getElementById('report-user-select');
-    // تعبئة قائمة المستخدمين
     if(userSel){
       userSel.innerHTML = `<option value="">— مستخدم —</option>` + (users||[]).map(u => `<option value="${u}">${u}</option>`).join('');
     }
     const btnGroup = document.getElementById('btn-report-group');
     const btnUser  = document.getElementById('btn-report-user');
     if(btnGroup) btnGroup.onclick = ()=> generateReport('group', {range: (rangeSel?.value || 'daily')});
-    if(btnUser)  btnUser.onclick  = ()=> {
+    if(btnUser)  btnUser.onclick  = () => {
       const u = userSel?.value || '';
       if(!u) { alert('اختر مستخدمًا أولاً'); return; }
       generateReport('user', {range: (rangeSel?.value || 'daily'), user: u});
