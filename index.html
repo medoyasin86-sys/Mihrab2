@@ -6,11 +6,11 @@
   <title>ملتقى طاعاتنا 2026 | النسخة المطورة</title>
 
   <!-- Firebase (Compat) -->
-  https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js</script>
-  https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js</script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <!-- Google Fonts -->
-  https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet"/>
 
   <style>
     :root{
@@ -786,11 +786,6 @@
     const hijri = await getHijriForDateWithOverride(parseLocalYMD(selectedDateStr));
     if(hijri && isFastingDay(parseLocalYMD(selectedDateStr).getDay(), hijri.day, hijri.month.en)) if(!userData['fasting']?.done) rem.push("الصيام 🌙");
     curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
-
-    // ⭐ المتبقي لصيام رمضان (فرض) خلال رمضان فقط
-    const rDay = getRamadanDayFor(parseLocalYMD(selectedDateStr));
-    if (rDay && !userData['r_fasting']?.done) rem.push("صيام رمضان (فرض) 🌙");
-
     model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
     curExtra.forEach(e => { if(!userData[e.id]?.done) rem.push(e.n); });
     return rem.length ? rem.join('، ') : "✅ اكتملت الطاعة";
@@ -834,7 +829,6 @@
     let curFard = [...model.fard]; let curExtra = [...model.extra];
     if(isFriday){ curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f); curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'}); }
 
-    // بناء قائمة الفرائض الأساسية
     document.getElementById('fard-list').innerHTML = curFard.map(h => {
       const cur = userData[h.id]?.type;
       return `<div class="habit-row"><div><b>${h.n}</b><span class="pts-info">${h.d}</span></div>
@@ -847,26 +841,6 @@
         }</div></div>`;
     }).join('');
 
-    // ⭐ إضافة صيام رمضان (فرض) إلى الفرائض خلال رمضان فقط
-    const rDayForUI = getRamadanDayFor(selectedDate);
-    if (rDayForUI){
-      const doneRF = userData['r_fasting']?.done;
-      const rfRow = document.createElement('div');
-      rfRow.className = 'habit-row';
-      rfRow.innerHTML = `
-        <span><b>🌙 صيام رمضان (فرض)</b> <small>(+100ن)</small></span>
-        <input type="checkbox" ${doneRF?'checked':''}
-               data-habit="r_fasting" data-p="100"
-               onchange="save('r_fasting',{done:this.checked, p:this.checked?100:0})"
-               style="transform:scale(1.5); cursor:pointer;">
-      `;
-      document.getElementById('fard-list').appendChild(rfRow);
-
-      // إخفاء قسم الصيام التطوعي أثناء رمضان لتفادي التكرار
-      if (fastSection) fastSection.style.display = 'none';
-    }
-
-    // السنن + الأذكار
     const drawCheck = (list, tid) => {
       const rDay = getRamadanDayFor(selectedDate);
       document.getElementById(tid).innerHTML = list.map(h => {
@@ -874,7 +848,7 @@
         let url = h.l || null;
         if (h.id === 'quran' && rDay) url = `https://quran.com/juz/${rDay}`;
         const label = url
-          ? `${url}${h.n}</a>`
+          ? `<a class="habit-link" href="${url}" target="_blank" rel="noopener noreferrer">${h.n}</a>`
           : h.n;
         return `<div class="habit-row">
           <span>${label} <small>(+${h.p}ن)</small></span>
@@ -908,8 +882,6 @@
       [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
       if(isFriday && uData['kahf']) s += 40;
       if(uData['fasting']) s += 100;
-      // ⭐ احتساب صيام رمضان (فرض)
-      if(uData['r_fasting'] && uData['r_fasting'].done) s += 100;
       return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
     }));
 
@@ -1021,7 +993,6 @@
     if (!dateStr) { alert("اختر التاريخ أولاً"); return; }
     if(isUserBlocked(currentUser, dateStr)) { alert("لا يمكن الحفظ، المستخدم محظور."); return; }
 
-    // الفرائض: الأزرار المختارة
     const selectedFardBtns = document.querySelectorAll('#fard-list .opt-btn.selected[data-habit][data-type][data-p]');
     selectedFardBtns.forEach(btn => {
       const hid = btn.getAttribute('data-habit');
@@ -1030,15 +1001,13 @@
       save(hid, { type: typ, p: p });
     });
 
-    // ⭐ تضمين أي checkbox داخل الفرائض (مثل r_fasting) إضافةً للسنن/الأذكار/الصيام التطوعي
-    const checks = document.querySelectorAll('#fard-list input[type="checkbox"][data-habit], #sunan-list input[type="checkbox"][data-habit], #extra-list input[type="checkbox"][data-habit], #fasting-list input[type="checkbox"][data-habit]');
+    const checks = document.querySelectorAll('#sunan-list input[type="checkbox"][data-habit], #extra-list input[type="checkbox"][data-habit], #fasting-list input[type="checkbox"][data-habit]');
     checks.forEach(ch => {
       const hid = ch.getAttribute('data-habit');
       const p   = parseInt(ch.getAttribute('data-p'), 10) || 0;
       save(hid, { done: ch.checked, p: ch.checked ? p : 0 });
     });
 
-    // تنبيه لطيف
     const toast = document.createElement('div');
     toast.textContent = "تم حفظ التعديلات ✅";
     toast.style.cssText = 'position:fixed;top:12px;right:12px;background:#1a4d2e;color:#fff;border:2px solid #c5a059;border-radius:12px;padding:8px 12px;z-index:2500;';
@@ -1136,8 +1105,6 @@
     [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
     if(isFriday && uData['kahf']) s += 40;
     if(uData['fasting']) s += 100;
-    // ⭐ احتساب صيام رمضان (فرض) إن وُجد
-    if(uData['r_fasting'] && uData['r_fasting'].done) s += 100;
     return s;
   }
 
@@ -1243,7 +1210,7 @@
 <head>
 <meta charset="UTF-8">
 <title>تقرير ${modeLabel} | ${rangeLabel}</title>
-https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap">
 <style>
   :root{
     --primary:#1a4d2e; --gold:#c5a059; --gold-light:#e6cc92; --bg:#fff; --text:#1a4d2e;
