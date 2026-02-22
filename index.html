@@ -105,7 +105,7 @@
     }
     .comp-card.blocked .blocked-badge{ display:inline-block; }
 
-    /* ⭐ جعل بطاقة المحظور باهتة وغير مفعّلة */
+    /* ⭐ بطاقة المحظور باهتة وغير مفعَّلة */
     .comp-card.blocked{
       opacity:.45;
       filter:grayscale(.7);
@@ -531,7 +531,7 @@
     }catch(_){ const d=new Date(); return {h:d.getHours(), m:d.getMinutes(), s:d.getSeconds()}; }
   }
 
-  /* ========= شهور هجري (للاستخدام اليدوي) ========= */
+  /* ========= شهور هجري ========= */
   const HIJRI_MONTHS_AR = ["محرم","صفر","ربيع الأول","ربيع الآخر","جمادى الأولى","جمادى الآخرة","رجب","شعبان","رمضان","شوال","ذو القعدة","ذو الحجة"];
   const HIJRI_MONTHS_EN = ["Muharram","Safar","Rabi al Awwal","Rabi al Thani","Jumada al Awwal","Jumada al Thani","Rajab","Sha'ban","Ramadan","Shawwal","Dhu al-Qadah","Dhu al-Hijjah"];
 
@@ -581,7 +581,7 @@
     }
   }
 
-  /* ✅ عدّاد الصلاة القادمة (يدعم مناطق المدن الزمنية) */
+  /* ✅ عدّاد الصلاة القادمة */
   function updateNextPrayerCountdown(){
     let info=""; let showAlert=false; let alertName="";
     const labels={Fajr:"الفجر",Dhuhr:"الظهر",Asr:"العصر",Maghrib:"المغرب",Isha:"العشاء"};
@@ -635,10 +635,10 @@
     const c1 = CITY_OPTIONS.find(c => c.key === s1), c2 = CITY_OPTIONS.find(c => c.key === s2);
     if (c1) await fetchCityPrayers(c1.apiCity, c1.country, 'row-salalah', c1.label, 'slot1');
     if (c2) await fetchCityPrayers(c2.apiCity, c2.country, 'row-kafr',     c2.label, 'slot2');
-    updateNextPrayerCountdown(); // عرض العدّاد فورًا
+    updateNextPrayerCountdown();
   }
 
-  /* ========= عدّاد رمضان + عدّاد الصلاة كل ثانية ========= */
+  /* ========= عدّاد رمضان + عدّاد الصلاة ========= */
   function showRamadanToastOnce() {
     const key='ramadanToastShown_2026'; if(localStorage.getItem(key)==='1') return;
     const el=document.getElementById('toast-ramadan'); if(!el) return; el.classList.add('show');
@@ -658,8 +658,8 @@
       <div><b>مرجع التطبيق (Asia/Muscat):</b> ${todayMuscat}</div>`;
   }
   async function updateCountdowns() {
-    const ramadanYMD = "2026-02-19"; // 1 رمضان ثابت
-    const targetMs = muscatMidnightMsFromYMD(ramadanYMD); // منتصف الليل - مسقط
+    const ramadanYMD = "2026-02-19";
+    const targetMs = muscatMidnightMsFromYMD(ramadanYMD);
     if (todayYMDMuscat() === ramadanYMD) showRamadanToastOnce();
 
     const dayMs=86400000, hourMs=3600000, minMs=60000, secMs=1000;
@@ -681,10 +681,10 @@
     }, 1000);
   }
 
-  /* ========= إدارة التاريخ الهجري اليدوي (Firebase) ========= */
+  /* ========= إدارة التاريخ الهجري اليدوي ========= */
   let currentHijriOverrideRef = null;
-  let currentHijriOverride = null;   // {day, monthIndex, year, enabled, updatedAt}
-  let lastAllDataCache = {};         // أحدث بيانات osraty/{date}
+  let currentHijriOverride = null;
+  let lastAllDataCache = {};
   function monthOptionsHTML(){
     return HIJRI_MONTHS_AR.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
   }
@@ -783,7 +783,6 @@
     const hash = selectedDateStr.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
     document.getElementById('daily-hadith').innerText = ahadith[Math.abs(hash) % ahadith.length];
 
-    // تلميح أول رمضان وفق مسقط
     const hint = document.getElementById('ramadan-day-hint');
     hint.style.display = (ymdInTz(selectedDate, APP_TZ) === '2026-02-19') ? 'block' : 'none';
   }
@@ -893,13 +892,12 @@
       return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
     }));
 
-    // بطاقات المستخدمين + شارة الحظر (مع aria-disabled)
+    // بطاقات المستخدمين + شارة الحظر (باهت/غير مفعل)
     document.getElementById('cards-ui').innerHTML = stats.map(st => {
       const ymd = document.getElementById('date-picker').value;
       const blocked = isUserBlocked(st.n, ymd);
       return `
-      <div class="comp-card ${st.n === currentUser ? 'active' : ''} ${blocked ? 'blocked' : ''}"
-           onclick="selectUser('${st.n}')" aria-disabled="${blocked ? 'true' : 'false'}">
+      <div class="comp-card ${st.n === currentUser ? 'active' : ''} ${blocked ? 'blocked' : ''}" onclick="selectUser('${st.n}')" aria-disabled="${blocked ? 'true' : 'false'}">
         <span class="blocked-badge">محظور</span>
         <b style="font-size:1.1rem">${st.n}</b> <br> <span style="color:var(--gold)">${st.s} نقطة</span>
         <div class="user-status">⏳ المتبقي: ${st.rem}</div>
@@ -1025,15 +1023,15 @@
   }
 
   /* ⭐ زينة رمضان (المدى الزمني + التبديل + العنوان) */
-  const DECOR_START_YMD = "2026-02-18"; // من اليوم السابق لرمضان
-  const RAMADAN_YMD     = "2026-02-19"; // 1 رمضان ثابت
+  const DECOR_START_YMD = "2026-02-18";
+  const RAMADAN_YMD     = "2026-02-19";
   function addDaysYMD_Muscat(ymd, days){
     const [y,m,d] = ymd.split('-').map(Number);
-    const base = Date.UTC(y, m-1, d, 0,0,0) - 4*60*60*1000; // منتصف الليل - مسقط
+    const base = Date.UTC(y, m-1, d, 0,0,0) - 4*60*60*1000;
     const next = new Date(base + days * 86400000);
     return ymdInTz(next, APP_TZ);
   }
-  const EID_YMD = addDaysYMD_Muscat(RAMADAN_YMD, 30); // يغطي 29/30
+  const EID_YMD = addDaysYMD_Muscat(RAMADAN_YMD, 30);
 
   function seedConfetti(containerId, pieces=40){
     const c = document.getElementById(containerId);
@@ -1099,15 +1097,15 @@
   /* أسبوع (السبت ➜ الجمعة) */
   function weekRangeFromYMD(ymd){
     const d = parseLocalYMD(ymd);
-    const day = d.getDay(); // 0:أحد .. 6:سبت
-    const toSatOffset = (day + 1) % 7; // كم يوم أعود للسبت
+    const day = d.getDay();
+    const toSatOffset = (day + 1) % 7;
     const start = new Date(d); start.setDate(d.getDate() - toSatOffset);
     const end = new Date(start); end.setDate(start.getDate() + 6);
     return { start: ymdOfDate(start), end: ymdOfDate(end), label:`أسبوع ${ymdOfDate(start)} → ${ymdOfDate(end)}` };
   }
 
   /* ===================================== */
-  /*  حساب نقاط اليوم مستخدمًا نفس منطقك  */
+  /*  حساب نقاط اليوم (كما هو)             */
   /* ===================================== */
   function computeDayPointsForUser(uData, isFriday){
     let s = 0;
@@ -1118,18 +1116,36 @@
   }
 
   /* ===================================== */
-  /*  جلب بيانات مدى زمني وتجميعها للتقرير */
+  /*  جلب بيانات المدى وتجميعها بالتفصيل   */
   /* ===================================== */
   async function fetchRangeSummary(startYMD, endYMD){
     const snap = await db.ref('osraty').once('value');
     const all = snap.val() || {};
     const dates = Object.keys(all).filter(k => k >= startYMD && k <= endYMD).sort();
     const usersList = users || [];
+
+    // تجهيز قواميس العبادات
+    const FARD_IDS  = (model.fard||[]).map(h=>h.id);
+    const SUNAN_IDS = (model.sunan||[]).map(h=>h.id);
+    const EXTRA_IDS = (model.extra||[]).map(h=>h.id);
+
     const summary = {};
-    usersList.forEach(u => summary[u] = {
-      totalPoints:0, daysActive:0, fastingCount:0, quranCount:0,
-      fardCounts:{ m:0, g:0, f:0, q:0 },
-      days:[]
+    usersList.forEach(u => {
+      summary[u] = {
+        totalPoints:0, daysActive:0, fastingCount:0, quranCount:0,
+        fardCounts:{ m:0, g:0, f:0, q:0 },
+        days:[],
+        /* ⭐ تفصيل العبادات */
+        habitStats: {
+          fard:  Object.fromEntries(FARD_IDS.map(id => [id, { m:0, g:0, f:0, q:0, done:0 }])),
+          sunan: Object.fromEntries(SUNAN_IDS.map(id => [id, { done:0 }])),
+          extra: Object.fromEntries(EXTRA_IDS.map(id => [id, { done:0, applicable:dates.length }])),
+          special: {
+            fasting: { done:0 },      // صيام تطوع (تجميعي)
+            kahf:    { done:0, applicable: 0 } // سورة الكهف (الجمعة فقط)
+          }
+        }
+      };
     });
 
     dates.forEach(d => {
@@ -1146,13 +1162,43 @@
 
         if(uData['fasting']?.done) summary[u].fastingCount++;
         if(uData['quran']?.done) summary[u].quranCount++;
-        (model.fard || []).forEach(f => {
-          const typ = uData[f.id]?.type;
-          if(typ && summary[u].fardCounts[typ] != null) summary[u].fardCounts[typ]++;
+
+        /* ⭐ تفصيل الفرائض بحسب النوع */
+        FARD_IDS.forEach(fid => {
+          const typ = uData[fid]?.type;
+          if(typ && summary[u].habitStats.fard[fid][typ] != null){
+            summary[u].habitStats.fard[fid][typ]++;
+            summary[u].habitStats.fard[fid].done++;
+            // إجمالي فجر مسجد فقط للمؤشر القديم:
+            if(fid === 'fajr' && typ === 'm') summary[u].fardCounts.m++;
+          }
+          // مؤشراتك القديمة (g/f/q) تُحتسب من جميع الفرائض، وليس فقط الفجر:
+          if(typ && ['g','f','q'].includes(typ)) summary[u].fardCounts[typ]++;
         });
+
+        /* ⭐ السنن */
+        SUNAN_IDS.forEach(sid => {
+          if(uData[sid]?.done) summary[u].habitStats.sunan[sid].done++;
+        });
+
+        /* ⭐ الأذكار/الورد */
+        EXTRA_IDS.forEach(eid => {
+          if (eid === 'quran' && uData[eid]?.done) summary[u].habitStats.extra[eid].done++;
+          else if (uData[eid]?.done) summary[u].habitStats.extra[eid].done++;
+        });
+
+        /* ⭐ الكهف: تُحسب قابلية يوم الجمعة فقط */
+        if (isFriday) {
+          summary[u].habitStats.special.kahf.applicable++;
+          if (uData['kahf']?.done) summary[u].habitStats.special.kahf.done++;
+        }
+
+        /* ⭐ الصيام (تطوع) */
+        if (uData['fasting']?.done) summary[u].habitStats.special.fasting.done++;
       });
     });
 
+    // أفضل 5 أيام لكل مستخدم
     usersList.forEach(u => {
       summary[u].topDays = [...summary[u].days].sort((a,b)=> b.points - a.points).slice(0,5);
     });
@@ -1166,11 +1212,77 @@
   function openReportWindow({modeLabel, rangeLabel, startYMD, endYMD, summary, dates}){
     const nowStr = new Date().toLocaleString('ar-EG');
 
-    /* ⭐ حسابات عامة للنِسَب */
+    /* ⭐ حسابات عامة للنسب */
     const userNames = Object.keys(summary);
     const leaderTotal = Math.max(...userNames.map(u => summary[u].totalPoints), 1);
     const rangeDays = Math.max(1, (dates || []).length);
     const avgTotalAll = userNames.reduce((a,u)=>a+summary[u].totalPoints,0) / Math.max(1,userNames.length);
+
+    function pctStr(x){ return `${Math.round(x)}%`; }
+
+    /* ⭐ توليد جداول العبادات */
+    function fardTable(u, data){
+      const mapName = {
+        fajr:'الفجر', dhuhr:'الظهر', asr:'العصر', maghrib:'المغرب', isha:'العشاء'
+      };
+      const rows = Object.keys(data.habitStats.fard).map(fid=>{
+        const rec = data.habitStats.fard[fid];
+        return `
+          <div class="h-row">
+            <div class="h-cell name">🕋 ${mapName[fid]||fid}</div>
+            <div class="h-cell num">مسجد: <b>${rec.m}</b></div>
+            <div class="h-cell num">جماعة: <b>${rec.g}</b></div>
+            <div class="h-cell num">فرد: <b>${rec.f}</b></div>
+            <div class="h-cell num">قضاء: <b>${rec.q}</b></div>
+            <div class="h-cell num">مرات إنجاز: <b>${rec.done}</b> / ${rangeDays}</div>
+          </div>
+        `;
+      }).join('');
+      return `
+        <div class="block-title">🕋 الفرائض (تفصيل بحسب النمط)</div>
+        <div class="h-table h-cols-6">
+          <div class="h-head">العبادة</div>
+          <div class="h-head">مسجد</div>
+          <div class="h-head">جماعة</div>
+          <div class="h-head">فرد</div>
+          <div class="h-head">قضاء</div>
+          <div class="h-head">مرات الإنجاز</div>
+          ${rows}
+        </div>
+      `;
+    }
+
+    function genericTable(title, dict, idToName, denom){
+      const rows = Object.keys(dict).map(id=>{
+        const rec = dict[id];
+        const done = rec.done || 0;
+        const applicable = (rec.applicable != null) ? rec.applicable : denom;
+        const rate = applicable ? (done/applicable*100) : 0;
+        return `
+          <div class="h-row">
+            <div class="h-cell name">${idToName[id] || id}</div>
+            <div class="h-cell num">${done} / ${applicable}</div>
+            <div class="h-cell bar">
+              <div class="rate-bar"><div class="rate-fill" style="width:${Math.round(rate)}%"></div></div>
+              <div class="rate-val">${pctStr(rate)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      return `
+        <div class="block-title">${title}</div>
+        <div class="h-table h-cols-3">
+          <div class="h-head">العبادة</div>
+          <div class="h-head">مرات الإنجاز</div>
+          <div class="h-head">النسبة</div>
+          ${rows}
+        </div>
+      `;
+    }
+
+    const FARD_NAMES  = Object.fromEntries((model.fard||[]).map(h=>[h.id, `🕋 ${h.n.replace(/^[^ ]+ /,'')}`]));
+    const SUNAN_NAMES = Object.fromEntries((model.sunan||[]).map(h=>[h.id, `🌱 ${h.n}`]));
+    const EXTRA_NAMES = Object.fromEntries((model.extra||[]).map(h=>[h.id, `📿 ${h.n}`]));
 
     function userBlockHTML(u, data){
       const f = data.fardCounts || {m:0,g:0,f:0,q:0};
@@ -1182,7 +1294,7 @@
 
       const excellencePct  = Math.round((data.totalPoints / leaderTotal) * 100); // نسبة التميّز
       const deficiencyPct  = Math.max(0, 100 - excellencePct);                  // نسبة التقصير
-      const adherencePct   = Math.round((data.daysActive / rangeDays) * 100);   // المواظبة ضمن المدى
+      const adherencePct   = Math.round((data.daysActive / rangeDays) * 100);   // المواظبة
 
       function barsHTML(items){
         if(!items.length) return `<div class="nodata">لا توجد بيانات مميزة في هذا المدى.</div>`;
@@ -1201,10 +1313,15 @@
         }).join('');
       }
 
+      const fardBlock  = fardTable(u, data);
+      const sunanBlock = genericTable("🌱 السنن والرواتب", data.habitStats.sunan, SUNAN_NAMES, rangeDays);
+      const extraBlock = genericTable("📿 الأذكار والورد", data.habitStats.extra, EXTRA_NAMES, rangeDays);
+      const kahfBlock  = genericTable("🕌 سورة الكهف (الجمعة فقط)", { kahf: data.habitStats.special.kahf }, {kahf:'🕌 سورة الكهف'}, rangeDays);
+      const fastBlock  = genericTable("🌙 الصيام (مرات الإنجاز)", { fasting: data.habitStats.special.fasting }, {fasting:'🌙 صيام (تطوع/مدون)'}, rangeDays);
+
       return `
         <section class="user-card">
           <h3>👤 ${u}</h3>
-
           <div class="kpis">
             <div class="kpi"><span class="kpi-title">إجمالي النقاط</span><span class="kpi-val">${data.totalPoints}</span></div>
             <div class="kpi"><span class="kpi-title">أيام فعّالة</span><span class="kpi-val">${data.daysActive}/${rangeDays}</span></div>
@@ -1238,16 +1355,17 @@
             </div>
           </div>
 
-          <div class="micro-grid">
-            <div class="micro"><span class="micro-title">أفضل يوم</span><span class="micro-val">${bestDay.date} — ${bestDay.points} ن</span></div>
-            <div class="micro"><span class="micro-title">أضعف يوم</span><span class="micro-val">${worstDay.date} — ${worstDay.points} ن</span></div>
-            <div class="micro"><span class="micro-title">متوسط المجموعة</span><span class="micro-val">${Math.round(avgTotalAll)}</span></div>
-          </div>
-
           <div class="sub-title">📈 أفضل 5 أيام</div>
           <div class="bars">
             ${barsHTML(top)}
           </div>
+
+          <!-- ⭐ تفصيل العبادات بالكامل -->
+          ${fardBlock}
+          ${sunanBlock}
+          ${extraBlock}
+          ${kahfBlock}
+          ${fastBlock}
 
           <div class="fard-breakdown">
             <span>🕌 مسجد: <b>${f.m||0}</b></span>
@@ -1281,7 +1399,7 @@
   .tag{ background:#fff7d6; border:1px solid var(--gold); padding:2px 8px; border-radius:999px; }
   .small{ color:#7a7a7a; font-size:.9rem; }
 
-  .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:12px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(360px,1fr)); gap:12px; }
   .user-card{
     border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff;
     box-shadow:0 2px 8px rgba(0,0,0,.04);
@@ -1306,18 +1424,30 @@
   .rate-fill.danger{ background:linear-gradient(90deg,#b33a3a,#e26a6a); }
   .rate-fill.info{ background:linear-gradient(90deg,#2d6a4f,#5aa879); }
 
-  .micro-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:8px 0; }
-  .micro{ background:#fbfaf5; border:1px solid #efe7cf; border-radius:10px; padding:6px; text-align:center; }
-  .micro-title{ display:block; color:#7a6b4e; font-size:.85rem; }
-  .micro-val{ display:block; font-weight:800; font-size:.95rem; }
-
   .sub-title{ margin:6px 0; font-weight:800; color:#7a6b4e; }
-  .bars{ display:flex; flex-direction:column; gap:6px; }
+
+  /* أشرطة أفضل الأيام */
+  .bars{ display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
   .bar-row{ display:flex; align-items:center; gap:8px; }
   .bar-label{ width:120px; color:#6b6b6b; font-size:.9rem; }
   .bar{ position:relative; flex:1; height:18px; background:#f1ede0; border:1px solid #e0d6b8; border-radius:999px; overflow:hidden; }
   .bar-fill{ height:100%; background:linear-gradient(90deg,#1a4d2e,#2d6a4f); }
   .bar-val{ position:absolute; right:8px; top:-1px; font-size:.85rem; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); }
+
+  /* ⭐ جداول العبادات (بدون <table>) */
+  .block-title{ margin:8px 0 6px 0; font-weight:800; color:#634e1e; }
+  .h-table{ display:grid; gap:4px; border:1px solid #e6dec7; border-radius:10px; overflow:hidden; }
+  .h-cols-6{ grid-template-columns:1.2fr repeat(5, 1fr); }
+  .h-cols-3{ grid-template-columns:1.6fr .8fr 1.2fr; }
+  .h-head{ background:#fbf6e8; border-bottom:1px solid #e6dec7; padding:6px 8px; font-weight:800; }
+  .h-row{ display:contents; }
+  .h-cell{ padding:6px 8px; border-top:1px dashed #efe7cf; }
+  .h-cell.name{ font-weight:800; color:#0f3b22; }
+  .h-cell.num{ color:#534d3d; }
+  .h-cell.bar{ display:flex; align-items:center; gap:8px; }
+  .rate-bar{ flex:1; height:12px; background:#f1ede0; border:1px solid #e0d6b8; border-radius:999px; overflow:hidden; }
+  .rate-fill{ height:100%; background:linear-gradient(90deg,#1a4d2e,#2d6a4f); }
+  .rate-val{ width:52px; text-align:end; color:#534d3d; font-weight:800; }
 
   .fard-breakdown{ display:flex; gap:10px; margin-top:8px; color:#534d3d; font-size:.95rem; }
 
@@ -1325,8 +1455,7 @@
 
   @media print{
     body{ margin:12mm; }
-    .hdr{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .kpi, .bar, .rate-bar, .micro{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .hdr, .kpi, .bar, .rate-bar, .h-head{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .user-card{ box-shadow:none; }
   }
 </style>
@@ -1391,7 +1520,7 @@
       let finalSummary = summary;
       let mLabelPrefix = '';
       if(opts.scope === 'individual' && opts.user){
-        finalSummary = { [opts.user]: summary[opts.user] || { totalPoints:0, daysActive:0, fastingCount:0, quranCount:0, fardCounts:{m:0,g:0,f:0,q:0}, days:[], topDays:[] } };
+        finalSummary = { [opts.user]: summary[opts.user] || { totalPoints:0, daysActive:0, fastingCount:0, quranCount:0, fardCounts:{m:0,g:0,f:0,q:0}, days:[], topDays:[], habitStats:{fard:{},sunan:{},extra:{},special:{fasting:{done:0},kahf:{done:0,applicable:0}}} } };
         mLabelPrefix = `فردي (${opts.user}) — `;
       } else {
         mLabelPrefix = 'جماعي — ';
