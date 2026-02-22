@@ -32,7 +32,7 @@
     .dark-mode-toggle{ position:fixed; top:15px; left:15px; z-index:1000; background:var(--gold); border:none; border-radius:50%;
       width:40px; height:40px; cursor:pointer; font-size:1.2rem; box-shadow:0 2px 10px rgba(0,0,0,.2); }
 
-    /* EDIT: زر الترس لإظهار/إخفاء لوحة التحكم بالرمز */
+    /* زر الترس لإظهار/إخفاء لوحة التحكم بالرمز */
     .admin-gear{
       position:fixed; top:15px; right:15px; z-index:1000; background:var(--gold); border:none; border-radius:50%;
       width:40px; height:40px; cursor:pointer; font-size:1.2rem; box-shadow:0 2px 10px rgba(0,0,0,.2);
@@ -44,7 +44,7 @@
     .city-select{ border:1px solid var(--gold); border-radius:8px; padding:4px 8px; background:#fff; color:#1a1a1a; font-weight:700; }
     body.dark-mode .city-select{ background:#252525; color:#fff; }
 
-    /* EDIT: نافذة إدخال الرمز */
+    /* نافذة إدخال الرمز */
     .pin-backdrop{
       position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:1200;
     }
@@ -65,7 +65,7 @@
     #hijri-display{ display:block; color:var(--gold-light); font-size:1.2rem; font-weight:bold; margin-bottom:5px; }
     .ramadan-day-hint{ display:none; margin-top:6px; font-weight:bold; background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:6px 10px; border-radius:8px; }
 
-    /* === زر ولوحة ضبط الهجري (إضافة) === */
+    /* === زر ولوحة ضبط الهجري === */
     .hijri-adjust-wrap{ display:flex; gap:6px; align-items:center; justify-content:center; margin-top:6px; flex-wrap:wrap; }
     .hijri-adjust-btn{ background:#fff7d6; border:1px solid var(--gold); color:#634e1e; padding:4px 10px; border-radius:10px; cursor:pointer; font-weight:800; }
     .hijri-adjust-panel{
@@ -83,7 +83,7 @@
 
     .next-prayer-banner{ background:rgba(255,255,255,.1); margin-top:10px; padding:10px; border-radius:10px; font-size:.9rem; border:1px solid var(--gold-light); line-height:1.6; }
     .timer-span{ color:var(--gold-light); font-family:sans-serif; font-weight:bold; }
-    #prayer-wudu-alert{ display:none; background:linear-gradient(135deg,#fff9e6,#fffde7); border:2px solid var(--gold); color:#856404; padding:12px; border-radius:12px; margin-top:10px; text-align:center; font-weight:bold; box-shadow:0 0 15px rgba(197,160,89,.4); animation:lightPulse 2s infinite; }
+    #prayer-wudu-alert{ display:none; background:linear-gradient(135deg,#fff9e6,#fffde7); border:2px solid var(--gold); color:#856404; padding:12px; border-radius:12px; margin-top:10px; text-align:center; font-weight:bold; box-shadow:0 0 15px rgba(0,0,0,.4); animation:lightPulse 2s infinite; }
     @keyframes lightPulse{ 0%{box-shadow:0 0 5px rgba(197,160,89,.4); transform:scale(1);} 50%{box-shadow:0 0 20px rgba(197,160,89,.8); transform:scale(1.01);} 100%{box-shadow:0 0 5px rgba(197,160,89,.4); transform:scale(1);} }
 
     .hijri-ramadan-bar{ background:var(--gold); color:#1a4d2e; margin-top:10px; border-radius:10px; padding:10px; font-weight:bold; display:flex; flex-direction:column; align-items:center; font-size:1rem; border:1px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,.1); }
@@ -117,6 +117,8 @@
     .comp-card.active{ border-color:var(--primary); background:#f0f7f2; transform:scale(1.02); }
     body.dark-mode .comp-card.active{ background:#2d6a4f; color:#fff; }
     .user-status{ font-size:.7rem; color:#d35400; margin-top:5px; border-top:1px solid #eee; padding-top:5px; min-height:35px; }
+    /* EDIT: تمييز بطاقة المستخدم المحجوب */
+    .comp-card.blocked{ opacity:.55; filter:grayscale(.2); cursor:not-allowed; }
 
     .section-card{ background:#fff; border:1px solid var(--gold); border-radius:15px; margin-top:15px; overflow:hidden; }
     .section-title{ background:var(--primary); color:#fff; padding:10px; margin:0; font-size:1rem; }
@@ -196,7 +198,7 @@
     }
     @keyframes pulseGlow{ 0%{box-shadow:0 0 8px rgba(240,198,116,.25);} 50%{box-shadow:0 0 22px rgba(240,198,116,.6);} 100%{box-shadow:0 0 8px rgba(240,198,116,.25);} }
 
-    /* EDIT: جدول تفصيلي في التقرير */
+    /* جدول تفصيلي في التقرير */
     .habit-table{ width:100%; border-collapse:collapse; margin-top:8px; }
     .habit-table th, .habit-table td{ border:1px solid #e6dec7; padding:6px 8px; font-size:.9rem; }
     .habit-table th{ background:#fff7d6; color:#634e1e; }
@@ -207,10 +209,10 @@
 
 <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌓</button>
 
-<!-- EDIT: زر الترس -->
+<!-- زر الترس -->
 <button id="admin-gear" class="admin-gear" title="لوحة التحكم (رمز سري)">⚙️</button>
 
-<!-- EDIT: نافذة إدخال الرمز -->
+<!-- نافذة إدخال الرمز -->
 <div id="pin-backdrop" class="pin-backdrop" aria-hidden="true">
   <div class="pin-modal" role="dialog" aria-modal="true" aria-labelledby="pin-title">
     <h3 id="pin-title">🔐 إدخال الرمز السري</h3>
@@ -227,7 +229,7 @@
   <div class="header-bar">
     <h2 id="app-title" style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h2>
 
-    <!-- EDIT: اللوحة الإدارية أصبحت مخفية افتراضيًا وتُظهر بالرمز -->
+    <!-- اللوحة الإدارية -->
     <div class="header-actions" id="admin-panel" style="display:none">
       <button class="refresh-btn" id="btn-refresh" title="تحديث مواقيت الصلاة واللوحات">🔄 تحديث البيانات</button>
       <!-- زر حفظ التعديلات -->
@@ -239,21 +241,24 @@
       <label for="city-select-2"><b>مدينة 2:</b></label>
       <select id="city-select-2" class="city-select" title="اختر مدينة"></select>
 
-      <!-- تقارير PDF (كما هي) -->
+      <!-- تقارير PDF -->
       <button class="refresh-btn" id="btn-report-daily"   title="تقرير يومي (PDF)">📄 تقرير يومي</button>
-      <!-- EDIT: زر التقرير الأسبوعي -->
-      <button class="refresh-btn" id="btn-report-weekly"  title="تقرير أسبوعي (PDF)">📄 تقرير أسبوعي</button>
       <button class="refresh-btn" id="btn-report-monthly" title="تقرير شهري (PDF)">📄 تقرير شهري</button>
       <button class="refresh-btn" id="btn-report-yearly"  title="تقرير سنوي (PDF)">📄 تقرير سنوي</button>
 
-      <!-- EDIT: خيارات تقارير إضافية -->
+      <!-- EDIT: تقرير مخصّص بمدى تاريخ -->
+      <span style="font-weight:800; color:#634e1e;">مدى:</span>
+      <input type="date" id="custom-start" class="city-select" title="من تاريخ">
+      <input type="date" id="custom-end"   class="city-select" title="إلى تاريخ">
+      <button class="refresh-btn" id="btn-report-custom" title="تقرير مخصص (PDF)">📄 تقرير مخصص</button>
+
+      <!-- EDIT: نطاق تقارير جماعي/مستخدم (أضفنا مخصص) -->
       <span style="font-weight:800; color:#634e1e;">نطاق:</span>
       <select id="report-range-select" class="city-select" title="مدى التقرير">
         <option value="daily">يومي</option>
-        <!-- EDIT: خيار أسبوعي -->
-        <option value="weekly">أسبوعي</option>
         <option value="monthly">شهري</option>
         <option value="yearly">سنوي</option>
+        <option value="custom">مخصص</option> <!-- EDIT -->
       </select>
 
       <button class="refresh-btn" id="btn-report-group"   title="تقرير جماعي">👥 تقرير جماعي</button>
@@ -262,12 +267,20 @@
         <option value="">— مستخدم —</option>
       </select>
       <button class="refresh-btn" id="btn-report-user"    title="تقرير مستخدم محدد">👤 تقرير المستخدم</button>
+
+      <!-- EDIT: حجب/إلغاء حجب مستخدم -->
+      <span style="font-weight:800; color:#634e1e;">حجب:</span>
+      <select id="block-user-select" class="city-select" title="اختر مستخدم"></select>
+      <input type="date" id="block-from-date" class="city-select" title="اعتبارًا من">
+      <button class="refresh-btn" id="btn-block-user"   title="حجب اعتبارًا من التاريخ">🚫 حجب</button>
+      <button class="refresh-btn" id="btn-unblock-user" title="إلغاء الحجب">✅ إلغاء</button>
+      <!-- END EDIT -->
     </div>
 
     <div class="date-container">
       <span id="hijri-display">جاري تحديد التاريخ الهجري...</span>
 
-      <!-- === إضافة: زر ولوحة ضبط الهجري === -->
+      <!-- زر ولوحة ضبط الهجري -->
       <div class="hijri-adjust-wrap">
         <button id="btn-hijri-panel" class="hijri-adjust-btn" title="ضبط التاريخ الهجري يدويًا">⚙️ ضبط الهجري</button>
       </div>
@@ -284,7 +297,6 @@
           يُستخدم التعويض عند حساب التاريخ الهجري وعرضه فقط.
         </div>
       </div>
-      <!-- === نهاية الإضافة === -->
 
       <input type="date" id="date-picker" style="border-radius:5px; border:none; padding:5px; text-align:center; font-weight:bold;">
       <div id="ramadan-day-hint" class="ramadan-day-hint">🌙 اليوم هو <b>1 رمضان</b> — تقبّل الله منا ومنكم</div>
@@ -371,16 +383,14 @@
 <!-- توست إشعار رمضان -->
 <div id="toast-ramadan" class="toast">🌙 رمضان كريم! نسأل الله القبول</div>
 
-<!-- ⭐ زينة رمضان (كما طلبت) -->
+<!-- ⭐ زينة رمضان -->
 <div id="decor-container" class="decor-container" style="display:none" aria-hidden="true">
   <div class="decor-top">
     <div class="lantern">🏮</div>
     <div class="lantern">🟡</div>
     <div class="lantern">🏮</div>
   </div>
-  <!-- ⭐ NEW: حبل أضواء LED -->
   <div class="garland"></div>
-
   <div class="crescent">🌙</div>
   <div class="stars"></div>
 </div>
@@ -396,6 +406,9 @@
   /* ========= حالة عامة ========= */
   let currentUser = null;
   const users = ['محمد','شيماء','أحمد','ياسين'];
+
+  /* EDIT: خريطة الحجب من Firebase */
+  let blockMap = {}; // { 'محمد': {from:'2026-02-20', active:true}, ... }
 
   /* ========= مرجع التوقيت: مسقط ========= */
   const APP_TZ = 'Asia/Muscat';
@@ -495,7 +508,7 @@
     catch(e) { return null; }
   }
 
-  /* ==== (إضافة) تحكم يدوي للهجري ==== */
+  /* ==== تحكم يدوي للهجري ==== */
   const HIJRI_OFFSET_KEY = 'hijri_offset_days_2026';
   function getHijriOffset(){ return parseInt(localStorage.getItem(HIJRI_OFFSET_KEY) || '0', 10) || 0; }
   function setHijriOffset(v){ localStorage.setItem(HIJRI_OFFSET_KEY, String(v)); }
@@ -526,12 +539,7 @@
     setHijriOffset(__tmpHijriOffset);
     await refreshRenderOnly();
     const p = document.getElementById('hijri-adjust-panel'); if(p) p.style.display='none';
-    // توست صغير للتأكيد
-    const toast = document.createElement('div');
-    toast.textContent = "تم تطبيق ضبط الهجري ✅";
-    toast.style.cssText = 'position:fixed;top:12px;right:12px;background:#1a4d2e;color:#fff;border:2px solid #c5a059;border-radius:12px;padding:8px 12px;z-index:2500;';
-    document.body.appendChild(toast);
-    setTimeout(()=> toast.remove(), 1500);
+    showToast("تم تطبيق ضبط الهجري ✅");
   }
   async function resetHijriAdjust(){
     __tmpHijriOffset = 0;
@@ -589,7 +597,7 @@
     }
   }
 
-  /* ✅ عدّاد الصلاة القادمة (يدعم مناطق المدن الزمنية) */
+  /* ✅ عدّاد الصلاة القادمة */
   function updateNextPrayerCountdown(){
     let info=""; let showAlert=false; let alertName="";
     const labels={Fajr:"الفجر",Dhuhr:"الظهر",Asr:"العصر",Maghrib:"المغرب",Isha:"العشاء"};
@@ -643,10 +651,10 @@
     const c1 = CITY_OPTIONS.find(c => c.key === s1), c2 = CITY_OPTIONS.find(c => c.key === s2);
     if (c1) await fetchCityPrayers(c1.apiCity, c1.country, 'row-salalah', c1.label, 'slot1');
     if (c2) await fetchCityPrayers(c2.apiCity, c2.country, 'row-kafr',     c2.label, 'slot2');
-    updateNextPrayerCountdown(); // عرض العدّاد فورًا
+    updateNextPrayerCountdown();
   }
 
-  /* ========= عدّاد رمضان + عدّاد الصلاة كل ثانية ========= */
+  /* ========= عدّاد رمضان + عدّاد الصلاة ========= */
   function showRamadanToastOnce() {
     const key='ramadanToastShown_2026'; if(localStorage.getItem(key)==='1') return;
     const el=document.getElementById('toast-ramadan'); if(!el) return; el.classList.add('show');
@@ -667,7 +675,7 @@
   }
   async function updateCountdowns() {
     const ramadanYMD = "2026-02-19"; // 1 رمضان ثابت
-    const targetMs = muscatMidnightMsFromYMD(ramadanYMD); // منتصف الليل - مسقط
+    const targetMs = muscatMidnightMsFromYMD(ramadanYMD);
     if (todayYMDMuscat() === ramadanYMD) showRamadanToastOnce();
 
     const dayMs=86400000, hourMs=3600000, minMs=60000, secMs=1000;
@@ -695,7 +703,6 @@
     const selectedDate = parseLocalYMD(selectedDateStr);
     const tomorrow = new Date(selectedDate); tomorrow.setDate(selectedDate.getDate() + 1);
 
-    // (استبدال) استخدام الهجري المصحح
     const hijriTomorrow = await getHijriCorrected(tomorrow);
     if (hijriTomorrow) {
       const isTomorrowFasting = isFastingDay(tomorrow.getDay(), hijriTomorrow.day, hijriTomorrow.month.en);
@@ -704,7 +711,6 @@
     const hash = selectedDateStr.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
     document.getElementById('daily-hadith').innerText = ahadith[Math.abs(hash) % ahadith.length];
 
-    // تلميح أول رمضان وفق مسقط
     const hint = document.getElementById('ramadan-day-hint');
     hint.style.display = (ymdInTz(selectedDate, APP_TZ) === '2026-02-19') ? 'block' : 'none';
   }
@@ -712,7 +718,6 @@
   async function getRemaining(userData, isFriday, selectedDateStr) {
     let rem = []; let curFard = [...model.fard]; let curExtra = [...model.extra];
     if(isFriday) curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'});
-    // (استبدال) استخدام الهجري المصحح لليوم المحدد
     const hijri = await getHijriCorrected(parseLocalYMD(selectedDateStr));
     if(hijri && isFastingDay(parseLocalYMD(selectedDateStr).getDay(), hijri.day, hijri.month.en)) if(!userData['fasting']?.done) rem.push("الصيام 🌙");
     curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
@@ -731,12 +736,17 @@
     }).join('');
   }
 
-  /* ✅ رسم النماذج + تمييز العناصر بـ data-* لدعم زر الحفظ + روابط خارجية قابلة للنقر */
   const RAMADAN_START_YMD = '2026-02-19';
   function getRamadanDayFor(dateObj){
     const ymdSel = ymdInTz(dateObj, APP_TZ);
     const diff = Math.floor((muscatMidnightMsFromYMD(ymdSel) - muscatMidnightMsFromYMD(RAMADAN_START_YMD)) / 86400000) + 1;
     return (diff >= 1 && diff <= 30) ? diff : null;
+  }
+
+  /* EDIT: أدوات الحجب */
+  function isUserBlockedOn(u, ymd){
+    const b = blockMap?.[u];
+    return !!(b && (b.active !== false) && b.from && ymd >= b.from);
   }
 
   function renderForms(userData, isFriday, fastingDay, selectedDate) {
@@ -757,7 +767,8 @@
     } else { fastSection.style.display = 'none'; }
 
     let curFard = [...model.fard]; let curExtra = [...model.extra];
-    if(isFriday){ curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f); curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'}); }
+    const isFridayLocal = isFriday;
+    if(isFridayLocal){ curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f); curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'}); }
 
     document.getElementById('fard-list').innerHTML = curFard.map(h => {
       const cur = userData[h.id]?.type;
@@ -797,11 +808,9 @@
     const selectedDateStr = document.getElementById('date-picker').value;
     const selectedDate = parseLocalYMD(selectedDateStr);
 
-    // (استبدال) استخدام الهجري المصحح للعرض والمنطق
     const hijri = await getHijriCorrected(selectedDate);
     if(hijri) document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
 
-    // تصحيح ثابت: 19 فبراير 2026 = 1 رمضان، 18 فبراير = 30 شعبان (مرجع مسقط)
     const selectedYMD_Muscat = ymdInTz(selectedDate, APP_TZ);
     if (selectedYMD_Muscat === '2026-02-18') document.getElementById('hijri-display').innerText = `30 شعبان 1447هـ`;
     if (selectedYMD_Muscat === '2026-02-19') document.getElementById('hijri-display').innerText = `1 رمضان 1447هـ`;
@@ -817,13 +826,27 @@
       return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
     }));
 
-    drawPodium('daily-podium', stats);
-    document.getElementById('cards-ui').innerHTML = stats.map(st => `
-      <div class="comp-card ${st.n === currentUser ? 'active' : ''}" onclick="selectUser('${st.n}')">
-        <b style="font-size:1.1rem">${st.n}</b> <br> <span style="color:var(--gold)">${st.s} نقطة</span>
-        <div class="user-status">⏳ المتبقي: ${st.rem}</div>
-      </div>`).join('');
-    if(currentUser) renderForms(allData[currentUser] || {}, isFriday, fastingDay, selectedDate);
+    // بطاقات المستخدمين + تمييز الحجب
+    document.getElementById('cards-ui').innerHTML = stats.map(st => {
+      const blocked = isUserBlockedOn(st.n, selectedDateStr);
+      const note = blocked && blockMap[st.n]?.from ? `🚫 محجوب من ${blockMap[st.n].from}` : `⏳ المتبقي: ${st.rem}`;
+      const onclk = blocked ? '' : `onclick="selectUser('${st.n}')"`;
+      const cls   = `comp-card ${st.n === currentUser ? 'active' : ''} ${blocked ? 'blocked' : ''}`;
+      return `
+        <div class="${cls}" ${onclk}>
+          <b style="font-size:1.1rem">${st.n}</b> <br> <span style="color:var(--gold)">${st.s} نقطة</span>
+          <div class="user-status">${note}</div>
+        </div>`;
+    }).join('');
+
+    if(currentUser) {
+      // إن صار المستخدم الحالي محجوبًا على هذا التاريخ، أخفِ واجهته
+      if (isUserBlockedOn(currentUser, selectedDateStr)) {
+        document.getElementById('user-ui').style.display='none';
+      } else {
+        renderForms(allData[currentUser] || {}, isFriday, fastingDay, selectedDate);
+      }
+    }
 
     // 🎉 رسالة التهنئة
     const FEMININE_NAMES = new Set(['شيماء']);
@@ -834,12 +857,13 @@
         : `🌟 هنيئًا لك يا ${name}! لقد أكملت عبادات يومك كاملة. ✨ تقبّل الله منك وغفر لك.`;
     }
     const doneBadge = document.getElementById('all-done-badge');
-    if (currentUser) {
+    if (currentUser && !isUserBlockedOn(currentUser, selectedDateStr)) {
       const st = stats.find(x => x.n === currentUser);
       if (st && st.rem === "✅ اكتملت الطاعة") { doneBadge.innerHTML = getCongratsMessage(currentUser); doneBadge.style.display='block'; }
       else { doneBadge.style.display='none'; }
     } else { doneBadge.style.display='none'; }
 
+    drawPodium('daily-podium', stats);
     renderDateDebug();
     checkNiyaAlert();
     updateNextPrayerCountdown();
@@ -893,16 +917,25 @@
       drawPodium('annual-podium', annual);
     });
   }
-  function save(id, val) { if(!currentUser) return alert("اختر اسمك أولاً من البطاقات!"); db.ref(`osraty/${document.getElementById('date-picker').value}/${currentUser}/${id}`).set(val); }
-  function selectUser(u) { currentUser = u; document.getElementById('user-ui').style.display='block'; document.getElementById('current-user-title').innerText="سجل طاعاتك يا " + u; sync(); }
+  function save(id, val) {
+    if(!currentUser) return alert("اختر اسمك أولاً من البطاقات!");
+    const ymd = document.getElementById('date-picker').value;
+    if(isUserBlockedOn(currentUser, ymd)) { alert("هذا المستخدم محجوب اعتبارًا من هذا التاريخ"); return; }
+    db.ref(`osraty/${ymd}/${currentUser}/${id}`).set(val);
+  }
+  function selectUser(u) {
+    const ymd = document.getElementById('date-picker').value;
+    if(isUserBlockedOn(u, ymd)) { alert("هذا المستخدم محجوب اعتبارًا من هذا التاريخ"); return; }
+    currentUser = u; document.getElementById('user-ui').style.display='block'; document.getElementById('current-user-title').innerText="سجل طاعاتك يا " + u; sync();
+  }
 
   /* ✅ زر حفظ التعديلات دفعة واحدة */
   function saveAllChanges() {
     if (!currentUser) { alert("اختر اسمك أولاً من البطاقات!"); return; }
     const dateStr = document.getElementById('date-picker').value;
     if (!dateStr) { alert("اختر التاريخ أولاً"); return; }
+    if(isUserBlockedOn(currentUser, dateStr)) { alert("هذا المستخدم محجوب اعتبارًا من هذا التاريخ"); return; }
 
-    // الفرائض: الأزرار المختارة
     const selectedFardBtns = document.querySelectorAll('#fard-list .opt-btn.selected[data-habit][data-type][data-p]');
     selectedFardBtns.forEach(btn => {
       const hid = btn.getAttribute('data-habit');
@@ -911,7 +944,6 @@
       save(hid, { type: typ, p: p });
     });
 
-    // السنن/الأذكار/الصيام: كل الـ checkbox
     const checks = document.querySelectorAll('#sunan-list input[type="checkbox"][data-habit], #extra-list input[type="checkbox"][data-habit], #fasting-list input[type="checkbox"][data-habit]');
     checks.forEach(ch => {
       const hid = ch.getAttribute('data-habit');
@@ -919,24 +951,19 @@
       save(hid, { done: ch.checked, p: ch.checked ? p : 0 });
     });
 
-    // تنبيه لطيف
-    const toast = document.createElement('div');
-    toast.textContent = "تم حفظ التعديلات ✅";
-    toast.style.cssText = 'position:fixed;top:12px;right:12px;background:#1a4d2e;color:#fff;border:2px solid var(--gold);border-radius:12px;padding:8px 12px;z-index:2500;';
-    document.body.appendChild(toast);
-    setTimeout(()=> toast.remove(), 1800);
+    showToast("تم حفظ التعديلات ✅");
   }
 
-  /* ⭐ NEW: أدوات زينة رمضان (المدى الزمني + التبديل + العنوان) */
-  const DECOR_START_YMD = "2026-02-18"; // من اليوم السابق لرمضان
-  const RAMADAN_YMD     = "2026-02-19"; // 1 رمضان ثابت
+  /* ⭐ زينة رمضان (المدى الزمني + العنوان) */
+  const DECOR_START_YMD = "2026-02-18";
+  const RAMADAN_YMD     = "2026-02-19";
   function addDaysYMD_Muscat(ymd, days){
     const [y,m,d] = ymd.split('-').map(Number);
-    const base = Date.UTC(y, m-1, d, 0,0,0) - 4*60*60*1000; // منتصف الليل - مسقط
+    const base = Date.UTC(y, m-1, d, 0,0,0) - 4*60*60*1000;
     const next = new Date(base + days * 86400000);
     return ymdInTz(next, APP_TZ);
   }
-  const EID_YMD = addDaysYMD_Muscat(RAMADAN_YMD, 30); // يغطي 29/30
+  const EID_YMD = addDaysYMD_Muscat(RAMADAN_YMD, 30);
 
   function seedConfetti(containerId, pieces=40){
     const c = document.getElementById(containerId);
@@ -969,7 +996,6 @@
     }
   }
 
-  /* ✅ عنوان الهيدر في رمضان */
   function updateHeaderTitleForRamadan(){
     const today = todayYMDMuscat();
     const inRamadan = (today >= RAMADAN_YMD && today <= EID_YMD);
@@ -999,15 +1025,6 @@
     const [y] = ymd.split('-').map(Number);
     return {start:`${y}-01-01`, end:`${y}-12-31`, label:`${y}`};
   }
-  /* EDIT: مدى أسبوعي (السبت ← الجمعة) */
-  function weekRangeFromYMD(ymd, weekStart=6){ // 0=أحد .. 6=سبت
-    const d = new Date(ymd + 'T00:00:00');
-    const day = d.getDay();
-    const diffToStart = ((day - weekStart + 7) % 7);
-    const startDate = new Date(d); startDate.setDate(d.getDate() - diffToStart);
-    const endDate = new Date(startDate); endDate.setDate(startDate.getDate() + 6);
-    return { start: ymdOfDate(startDate), end: ymdOfDate(endDate), label: `${ymdOfDate(startDate)} → ${ymdOfDate(endDate)}` };
-  }
 
   /* ===================================== */
   /*  حساب نقاط اليوم مستخدمًا نفس منطقك  */
@@ -1021,7 +1038,7 @@
   }
 
   /* ===================================== */
-  /*  جلب بيانات مدى زمني وتجميعها للتقرير (تفصيلي لكل العبادات) */
+  /*  جلب بيانات مدى زمني وتجميعها للتقرير (مع احترام الحجب) */
   /* ===================================== */
   async function fetchRangeSummary(startYMD, endYMD){
     const snap = await db.ref('osraty').once('value');
@@ -1029,7 +1046,6 @@
     const dates = Object.keys(all).filter(k => k >= startYMD && k <= endYMD).sort();
     const usersList = users || [];
 
-    // مُهيّئ التفصيل لكل العبادات
     function initByHabit(){
       const by = {};
       model.fard.forEach(f => { by[f.id] = {name:f.n, totalPoints:0, totalCount:0, types:{m:0,g:0,f:0,q:0}}; });
@@ -1053,10 +1069,12 @@
       const isFriday = (dateObj.getDay() === 5);
 
       usersList.forEach(u => {
+        // EDIT: تجاهل بيانات المستخدم المحجوب لهذا التاريخ
+        if (isUserBlockedOn(u, d)) return;
+
         const uData = day[u] || {};
         let pts = 0;
 
-        // فرائض: تجميع بالنوع + النقاط
         (model.fard||[]).forEach(f => {
           const typ = uData[f.id]?.type;
           const p   = uData[f.id]?.p || 0;
@@ -1071,7 +1089,6 @@
           }
         });
 
-        // سنن/أذكار
         (model.sunan||[]).forEach(s => {
           if(uData[s.id]?.done){
             summary[u].byHabit[s.id].totalCount++;
@@ -1088,7 +1105,6 @@
           }
         });
 
-        // صيام التطوع
         if(uData['fasting']?.done){
           summary[u].fastingCount++;
           const p = uData['fasting'].p || 100;
@@ -1247,29 +1263,34 @@
   /*          مُولِّد التقرير العام         */
   /* ===================================== */
   async function generateReport(mode, opts = {}){
-    // supports: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'group' | 'user'
+    // supports: 'daily' | 'monthly' | 'yearly' | 'custom' | 'group' | 'user'
     const ymd = document.getElementById('date-picker').value || todayYMDMuscat();
+    const csEl = document.getElementById('custom-start');
+    const ceEl = document.getElementById('custom-end');
 
     function rangeFrom(kind){
       if(kind === 'daily'){
         return {startYMD: ymd, endYMD: ymd, rangeLabel: ymd, modeLabel: 'يومي (PDF)'};
-      } else if(kind === 'weekly'){ // EDIT: أسبوعي
-        const r = weekRangeFromYMD(ymd, 6); // السبت بداية الأسبوع
-        return {startYMD: r.start, endYMD: r.end, rangeLabel: `أسبوع ${r.label}`, modeLabel: 'أسبوعي (PDF)'};
       } else if(kind === 'monthly'){
         const r = monthRangeFromYMD(ymd);
         return {startYMD: r.start, endYMD: r.end, rangeLabel: `شهر ${r.label}`, modeLabel: 'شهري (PDF)'};
       } else if(kind === 'yearly'){
         const r = yearRangeFromYMD(ymd);
         return {startYMD: r.start, endYMD: r.end, rangeLabel: `سنة ${r.label}`, modeLabel: 'سنوي (PDF)'};
+      } else if(kind === 'custom'){ // EDIT: مدى مخصص
+        const start = csEl?.value || '';
+        const end   = ceEl?.value || '';
+        if(!start || !end){ alert('أدخل تاريخي البداية والنهاية'); return null; }
+        if(start > end){ alert('المدى غير صحيح: البداية بعد النهاية'); return null; }
+        return {startYMD: start, endYMD: end, rangeLabel: `${start} → ${end}`, modeLabel: 'مخصص (PDF)'};
       }
       return null;
     }
 
-    // اليومي/الأسبوعي/الشهري/السنوي
-    if(['daily','weekly','monthly','yearly'].includes(mode)){
+    // الأوضاع المباشرة: يومي/شهري/سنوي/مخصص
+    if(['daily','monthly','yearly','custom'].includes(mode)){
       const r = rangeFrom(mode);
-      if(!r){ alert('وضع التقرير غير معروف'); return; }
+      if(!r){ return; }
       try{
         const {dates, summary} = await fetchRangeSummary(r.startYMD, r.endYMD);
         openReportWindow({modeLabel:r.modeLabel, rangeLabel:r.rangeLabel, startYMD:r.startYMD, endYMD:r.endYMD, summary, dates});
@@ -1280,16 +1301,15 @@
       return;
     }
 
-    // الجديد: group/user مع نفس إمكانيات المدى
+    // الجديد: group/user يدعمان النطاق المخصص أيضًا
     if(mode === 'group' || mode === 'user'){
       const kind = opts.range || 'daily';
       const r = rangeFrom(kind);
-      if(!r){ alert('مدى التقرير غير معروف'); return; }
+      if(!r){ return; }
       try{
         const {dates, summary} = await fetchRangeSummary(r.startYMD, r.endYMD);
 
         if(mode === 'group'){
-          // تجميع الكل في كتلة واحدة
           const group = {};
           function cloneShape(s){ return JSON.parse(JSON.stringify(s)); }
           let agg = null;
@@ -1342,7 +1362,7 @@
   }
   async function refreshAll() { await applyCitySelection(); sync(); }
 
-  /* EDIT: لوحة التحكم بالرمز — تعمل على أي جهاز (التحقق محلي بالرمز فقط، دون تقييد جهاز) */
+  /* لوحة التحكم بالرمز */
   (function adminPanelPinInit(){
     const GEAR = document.getElementById('admin-gear');
     const PANEL= document.getElementById('admin-panel');
@@ -1351,7 +1371,6 @@
     const OK   = document.getElementById('pin-confirm');
     const NO   = document.getElementById('pin-cancel');
     const ADMIN_PIN = '9090'; // لا يُعرض للمستخدم
-    const SESSION_KEY = 'admin_panel_ok_2026'; // جلسة التبويب فقط
 
     let panelVisible = false;
 
@@ -1361,23 +1380,18 @@
     }
     function closeModal(){ BD.style.display='none'; }
 
-    function toast(msg){
-      const t = document.createElement('div');
-      t.textContent = msg;
-      t.style.cssText='position:fixed;top:12px;right:12px;background:#1a4d2e;color:#fff;border:2px solid var(--gold);border-radius:12px;padding:8px 12px;z-index:2500;';
-      document.body.appendChild(t);
-      setTimeout(()=> t.remove(), 1600);
-    }
+    if(GEAR){ GEAR.onclick = openModal; }
+    if(OK){ OK.onclick = confirmPin; }
+    if(NO){ NO.onclick = closeModal; }
+    if(BD){ BD.addEventListener('click', (e)=>{ if(e.target===BD) closeModal(); }); }
+    if(INP){ INP.addEventListener('keydown', (e)=>{ if(e.key==='Enter') confirmPin(); }); }
 
     function confirmPin(){
       const pin = (INP.value||'').trim();
       if(pin === ADMIN_PIN){
         panelVisible = !panelVisible;
         PANEL.style.display = panelVisible ? 'flex' : 'none';
-        // حفظ حالة الجلسة في هذا التبويب فقط (لا يقيّد أجهزة أخرى)
-        if(panelVisible){ sessionStorage.setItem(SESSION_KEY,'1'); }
-        else{ sessionStorage.removeItem(SESSION_KEY); }
-        toast(panelVisible ? 'تم فتح لوحة التحكم' : 'تم إخفاء لوحة التحكم');
+        showToast(panelVisible ? 'تم فتح لوحة التحكم' : 'تم إخفاء لوحة التحكم');
         closeModal();
       } else {
         INP.value = '';
@@ -1386,19 +1400,23 @@
         setTimeout(()=>{ INP.style.borderColor='var(--gold)'; INP.placeholder='••••'; }, 700);
       }
     }
-
-    if(GEAR){ GEAR.onclick = openModal; }
-    if(OK){ OK.onclick = confirmPin; }
-    if(NO){ NO.onclick = closeModal; }
-    if(BD){ BD.addEventListener('click', (e)=>{ if(e.target===BD) closeModal(); }); }
-    if(INP){ INP.addEventListener('keydown', (e)=>{ if(e.key==='Enter') confirmPin(); }); }
-
-    // إن كانت الجلسة الحالية سبق وتم فتحها، أظهر اللوحة مباشرة (بدون تقييد جهاز)
-    if(sessionStorage.getItem(SESSION_KEY)==='1'){
-      panelVisible = true;
-      PANEL.style.display = 'flex';
-    }
   })();
+
+  /* EDIT: توست عام قابل لإعادة الاستخدام */
+  function showToast(msg){
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText='position:fixed;top:12px;right:12px;background:#1a4d2e;color:#fff;border:2px solid var(--gold);border-radius:12px;padding:8px 12px;z-index:2500;';
+    document.body.appendChild(t);
+    setTimeout(()=> t.remove(), 1800);
+  }
+
+  /* EDIT: الاشتراك في قائمة الحجب من Firebase */
+  db.ref('osraty_block').on('value', async (snap) => {
+    blockMap = snap.val() || {};
+    // إعادة عرض بناءً على الحجب الحالي
+    await refreshRenderOnly();
+  });
 
   window.onload = () => {
     if(localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
@@ -1427,22 +1445,24 @@
     document.getElementById('btn-refresh').onclick = refreshAll;
     const btnSaveAll = document.getElementById('btn-save-all'); if (btnSaveAll) btnSaveAll.onclick = saveAllChanges;
 
-    // أزرار التقارير: يومي/أسبوعي/شهري/سنوي
+    // تقارير: يومي/شهري/سنوي/مخصص
     const btnDaily   = document.getElementById('btn-report-daily');
-    const btnWeekly  = document.getElementById('btn-report-weekly'); // EDIT: أسبوعي
     const btnMonthly = document.getElementById('btn-report-monthly');
     const btnYearly  = document.getElementById('btn-report-yearly');
+    const btnCustom  = document.getElementById('btn-report-custom'); // EDIT
     if(btnDaily)   btnDaily.onclick   = ()=> generateReport('daily');
-    if(btnWeekly)  btnWeekly.onclick  = ()=> generateReport('weekly'); // EDIT
     if(btnMonthly) btnMonthly.onclick = ()=> generateReport('monthly');
     if(btnYearly)  btnYearly.onclick  = ()=> generateReport('yearly');
+    if(btnCustom)  btnCustom.onclick  = ()=> generateReport('custom'); // EDIT
 
-    // EDIT: أزرار التقارير الجديدة (جماعي/مستخدم) + القوائم
-    const rangeSel = document.getElementById('report-range-select');
+    // تعبئة قائمة المستخدمين للتقارير والحجب
     const userSel  = document.getElementById('report-user-select');
-    if(userSel){
-      userSel.innerHTML = `<option value="">— مستخدم —</option>` + (users||[]).map(u => `<option value="${u}">${u}</option>`).join('');
-    }
+    const blockSel = document.getElementById('block-user-select'); // EDIT
+    if(userSel){ userSel.innerHTML = `<option value="">— مستخدم —</option>` + (users||[]).map(u => `<option value="${u}">${u}</option>`).join(''); }
+    if(blockSel){ blockSel.innerHTML = (users||[]).map(u => `<option value="${u}">${u}</option>`).join(''); } // EDIT
+
+    // تقارير جماعي/مستخدم مع النطاق (يشمل "مخصص")
+    const rangeSel = document.getElementById('report-range-select');
     const btnGroup = document.getElementById('btn-report-group');
     const btnUser  = document.getElementById('btn-report-user');
     if(btnGroup) btnGroup.onclick = ()=> generateReport('group', {range: (rangeSel?.value || 'daily')});
@@ -1450,6 +1470,24 @@
       const u = userSel?.value || '';
       if(!u) { alert('اختر مستخدمًا أولاً'); return; }
       generateReport('user', {range: (rangeSel?.value || 'daily'), user: u});
+    };
+
+    // EDIT: أزرار الحجب
+    const btnBlock   = document.getElementById('btn-block-user');
+    const btnUnblock = document.getElementById('btn-unblock-user');
+    const fromInput  = document.getElementById('block-from-date');
+    if(btnBlock) btnBlock.onclick = async () => {
+      const u = blockSel?.value || '';
+      const from = fromInput?.value || '';
+      if(!u || !from){ alert('اختر المستخدم وحدّد تاريخ البداية'); return; }
+      await db.ref('osraty_block/'+u).set({from, active:true});
+      showToast('تم الحجب ✅');
+    };
+    if(btnUnblock) btnUnblock.onclick = async () => {
+      const u = blockSel?.value || '';
+      if(!u){ alert('اختر مستخدمًا أولاً'); return; }
+      await db.ref('osraty_block/'+u).remove();
+      showToast('تم إلغاء الحجب ✅');
     };
 
     sync();
