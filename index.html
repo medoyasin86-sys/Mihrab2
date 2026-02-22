@@ -1,588 +1,176 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ملتقى طاعاتنا 2026 | النسخة المطورة</title>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet"/>
-
-  <style>
-    :root{
-      --primary:#1a4d2e; --gold:#c5a059; --gold-light:#e6cc92; --bg:#f9f6f0;
-      --card-bg:#ffffff; --text:#1a4d2e; --accent:#d35400; --crimson:#900c3f;
-    }
-    body.dark-mode{
-      --bg:#121212; --card-bg:#1e1e1e; --text:#e0e0e0; --primary:#2d6a4f;
-    }
-    body{
-      font-family:'Amiri',serif; background-color:var(--bg); margin:0; padding:10px; color:var(--text);
-      transition:background .3s;
-    }
-    .main-container{
-      max-width:900px; margin:auto; background:var(--card-bg); border:3px double var(--gold); border-radius:20px;
-      padding:15px; box-shadow:0 10px 30px rgba(0,0,0,.2); position:relative; z-index:1;
-    }
-
-    .dark-mode-toggle{ position:fixed; top:15px; left:15px; z-index:1000; background:var(--gold); border:none; border-radius:50%;
-      width:40px; height:40px; cursor:pointer; font-size:1.2rem; box-shadow:0 2px 10px rgba(0,0,0,.2); }
-    .header-bar{ background:linear-gradient(135deg,#1a4d2e,#0a2b1a); color:#fff; padding:15px; border-radius:15px; text-align:center; border:2px solid var(--gold); }
-    .header-actions{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:8px; align-items:center; }
-    .refresh-btn{ background:linear-gradient(180deg,#ffe9b9,#e7cb83); border:1px solid var(--gold); color:#1a1a1a; padding:6px 10px; border-radius:20px; cursor:pointer; font-weight:800; }
-    .city-select{ border:1px solid var(--gold); border-radius:8px; padding:4px 8px; background:#fff; color:#1a1a1a; font-weight:700; }
-    
-    .date-container{ background:rgba(255,255,255,.1); padding:10px; border-radius:12px; margin:10px 0; border:1px solid rgba(197,160,89,.3); }
-    #hijri-display{ display:block; color:var(--gold-light); font-size:1.2rem; font-weight:bold; margin-bottom:5px; }
-    .ramadan-day-hint{ display:none; margin-top:6px; font-weight:bold; background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:6px 10px; border-radius:8px; }
-
-    .prayer-times-table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:.8rem; background:rgba(0,0,0,.2); border-radius:10px; overflow:hidden; }
-    .prayer-times-table th, .prayer-times-table td{ padding:5px; border:1px solid rgba(255,255,255,.1); text-align:center; }
-
-    .next-prayer-banner{ background:rgba(255,255,255,.1); margin-top:10px; padding:10px; border-radius:10px; font-size:.9rem; border:1px solid var(--gold-light); line-height:1.6; }
-    .hijri-ramadan-bar{ background:var(--gold); color:#1a4d2e; margin-top:10px; border-radius:10px; padding:10px; font-weight:bold; display:flex; flex-direction:column; align-items:center; }
-    
-    .chat-section{ background:#fff; border:2px solid var(--primary); border-radius:15px; margin-top:20px; height:350px; display:flex; flex-direction:column; }
-    .chat-messages{ flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:5px; background: #fefefe; }
-    .chat-msg{ padding:8px; border-radius:10px; max-width:80%; font-size:.85rem; border: 1px solid #ddd; }
-    .chat-input-area{ padding:10px; display:flex; gap:5px; border-top:1px solid #eee; }
-    
-    .user-cards{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:20px; }
-    .comp-card{ padding:15px; text-align:center; border:2px solid var(--gold-light); border-radius:15px; cursor:pointer; background:#fff; }
-    .comp-card.active{ border-color:var(--primary); background: #eafff0; }
-    
-    .section-card{ background:#fff; border:1px solid var(--gold); border-radius:15px; margin-top:15px; overflow:hidden; }
-    .section-title{ background:var(--primary); color:#fff; padding:10px; margin:0; font-size:1rem; }
-    .habit-row{ display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px dashed #eee; }
-    
-    .all-done-badge{ margin:10px 0; padding:10px; background:green; color:white; text-align:center; border-radius:10px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ملتقى طاعاتنا 2026</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#1a4d2e; --gold:#c5a059; --bg:#f9f6f0; --card:#fff; --text:#1a4d2e; }
+        body.dark-mode { --bg:#121212; --card:#1e1e1e; --text:#e0e0e0; --primary:#2d6a4f; }
+        body { font-family:'Amiri', serif; background-color:var(--bg); color:var(--text); margin:0; padding:10px; transition: 0.3s; }
+        .main-container { max-width:800px; margin:auto; background:var(--card); border:3px double var(--gold); border-radius:20px; padding:15px; box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+        .header-bar { background:linear-gradient(135deg,#1a4d2e,#0a2b1a); color:#fff; padding:15px; border-radius:15px; text-align:center; border:2px solid var(--gold); }
+        .date-container { background:rgba(255,255,255,0.1); padding:10px; border-radius:12px; margin:10px 0; }
+        #hijri-display { font-size:1.3rem; font-weight:bold; color:var(--gold); display:block; margin-bottom:5px; }
+        .user-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-top:20px; }
+        .user-card { padding:15px; text-align:center; border:2px solid var(--gold); border-radius:15px; cursor:pointer; background:var(--card); font-weight:bold; }
+        .user-card.active { background:var(--gold); color:#fff; }
+        .section-card { background:var(--card); border:1px solid var(--gold); border-radius:15px; margin-top:15px; overflow:hidden; }
+        .section-title { background:var(--primary); color:#fff; padding:8px; margin:0; font-size:1.1rem; }
+        .habit-row { display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px dashed #ccc; }
+        .chat-area { height:200px; overflow-y:auto; border:1px solid var(--gold); margin-top:10px; padding:10px; background:#fff; color:#000; border-radius:10px; }
+        .input-group { display:flex; gap:5px; margin-top:10px; }
+        input[type="text"] { flex:1; padding:8px; border-radius:10px; border:1px solid var(--gold); }
+        .btn { background:var(--primary); color:#fff; border:none; padding:8px 15px; border-radius:10px; cursor:pointer; }
+        .dark-mode-toggle { position:fixed; top:10px; left:10px; background:var(--gold); border:none; border-radius:50%; width:40px; height:40px; cursor:pointer; }
+    </style>
 </head>
 <body>
 
-<button class="dark-mode-toggle" onclick="toggleDarkMode()">🌓</button>
+<button class="dark-mode-toggle" onclick="document.body.classList.toggle('dark-mode')">🌓</button>
 
 <div class="main-container">
-  <div class="header-bar">
-    <h2 id="app-title" style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h2>
-    
-    <div class="header-actions">
-      <button class="refresh-btn" onclick="location.reload()">🔄 تحديث الصفحة</button>
-      <button class="refresh-btn" id="btn-save-all">💾 حفظ التعديلات</button>
-    </div>
-
-    <div class="date-container">
-      <span id="hijri-display">جاري تحديد التاريخ الهجري...</span>
-      <input type="date" id="date-picker">
-      <div id="ramadan-day-hint" class="ramadan-day-hint"></div>
-    </div>
-
-    <div class="hijri-ramadan-bar">
-      <div id="ramadan-countdown">🌙 متبقي على رمضان: <span id="timer-vals">...</span></div>
-    </div>
-  </div>
-
-  <div id="cards-ui" class="user-cards"></div>
-
-  <div id="user-ui" style="display:none; margin-top: 20px;">
-    <h3 id="current-user-title" style="text-align:center; background: var(--gold); padding: 10px; border-radius: 10px;"></h3>
-    <div id="habits-container">
-        <div class="section-card"><h3 class="section-title">🕋 الفرائض</h3><div id="fard-list"></div></div>
-        <div class="section-card"><h3 class="section-title">🌱 السنن والرواتب</h3><div id="sunan-list"></div></div>
-        <div class="section-card"><h3 class="section-title">📿 الأذكار والورد</h3><div id="extra-list"></div></div>
-    </div>
-  </div>
-
-  <div class="chat-section">
-    <h4 style="margin:10px; text-align:center;">💬 مجلس الطاعة</h4>
-    <div id="chat-messages" class="chat-messages"></div>
-    <div class="chat-input-area">
-      <select id="chat-user-selector">
-        <option value="محمد">محمد</option>
-        <option value="شيماء">شيماء</option>
-        <option value="أحمد">أحمد</option>
-        <option value="ياسين">ياسين</option>
-      </select>
-      <input type="text" id="chat-input" style="flex:1;" placeholder="اكتب رسالة..."/>
-      <button onclick="sendMessage()">إرسال</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  // Configuration
-  const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1" };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  let currentUser = null;
-  const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
-  const habits = {
-    fard: ["الفجر", "الظهر", "العصر", "المغرب", "العشاء"],
-    sunan: ["سنة الفجر", "الضحى", "الرواتب", "الوتر"],
-    extra: ["أذكار الصباح", "أذكار المساء", "ورد القرآن"]
-  };
-
-  // 1. التاريخ الهجري (مع تصحيح لعام 2026)
-  async function updateHijri() {
-    const dateVal = document.getElementById('date-picker').value;
-    const res = await fetch(`https://api.aladhan.com/v1/gToH/${dateVal.split('-').reverse().join('-')}`);
-    const data = await res.json();
-    const hj = data.data.hijri;
-    
-    // تصحيح يدوي لعام 2026 (إضافة يوم إذا لزم الأمر حسب الرؤية)
-    document.getElementById('hijri-display').innerText = `${hj.day} ${hj.month.ar} ${hj.year}هـ`;
-    
-    const hint = document.getElementById('ramadan-day-hint');
-    if(hj.month.en === "Ramadan") {
-        hint.style.display = "block";
-        hint.innerHTML = `🌙 اليوم هو ${hj.day} رمضان - تقبل الله طاعتكم`;
-    } else {
-        hint.style.display = "none";
-    }
-  }
-
-  // 2. عداد رمضان
-  function startCountdown() {
-    const ramadanDate = new Date("February 18, 2026 18:00:00").getTime();
-    setInterval(() => {
-      const now = new Date().getTime();
-      const diff = ramadanDate - now;
-      if(diff < 0) {
-        document.getElementById('ramadan-countdown').innerHTML = "🌙 رمضان مبارك!";
-        return;
-      }
-      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      document.getElementById('timer-vals').innerText = `${d} يوم و ${h} ساعة`;
-    }, 1000);
-  }
-
-  // 3. عرض بطاقات المستخدمين
-  function renderUserCards() {
-    const container = document.getElementById('cards-ui');
-    container.innerHTML = users.map(u => `
-      <div class="comp-card" id="card-${u}" onclick="selectUser('${u}')">
-        <h3>${u}</h3>
-        <div id="status-${u}" style="font-size:0.8rem">اضغط للمتابعة</div>
-      </div>
-    `).join('');
-  }
-
-  function selectUser(name) {
-    currentUser = name;
-    document.querySelectorAll('.comp-card').forEach(c => c.classList.remove('active'));
-    document.getElementById(`card-${name}`).classList.add('active');
-    document.getElementById('user-ui').style.display = 'block';
-    document.getElementById('current-user-title').innerText = `لوحة طاعات: ${name}`;
-    loadUserData();
-  }
-
-  // 4. حفظ وتحميل البيانات
-  function loadUserData() {
-    const date = document.getElementById('date-picker').value;
-    db.ref(`data/${date}/${currentUser}`).once('value', snapshot => {
-      const data = snapshot.val() || {};
-      renderHabits(data);
-    });
-  }
-
-  function renderHabits(userData) {
-    for (let category in habits) {
-      const list = document.getElementById(`${category}-list`);
-      list.innerHTML = habits[category].map(h => `
-        <div class="habit-row">
-          <span>${h}</span>
-          <input type="checkbox" ${userData[h] ? 'checked' : ''} onchange="saveHabit('${h}', this.checked)">
+    <div class="header-bar">
+        <h2 style="margin:0;">🕌 ملتقى طاعاتنا 2026</h2>
+        <div class="date-container">
+            <span id="hijri-display">جاري التحميل...</span>
+            <input type="date" id="date-picker" onchange="updateHijri()">
         </div>
-      `).join('');
-    }
-  }
-
-  function saveHabit(habitName, value) {
-    const date = document.getElementById('date-picker').value;
-    db.ref(`data/${date}/${currentUser}/${habitName}`).set(value);
-  }
-
-  // 5. الدردشة
-  function sendMessage() {
-    const user = document.getElementById('chat-user-selector').value;
-    const msg = document.getElementById('chat-input').value;
-    if(!msg) return;
-    db.ref('chat').push({ user, msg, time: Date.now() });
-    document.getElementById('chat-input').value = '';
-  }
-
-  db.ref('chat').limitToLast(10).on('value', snapshot => {
-    const chatBox = document.getElementById('chat-messages');
-    chatBox.innerHTML = '';
-    snapshot.forEach(child => {
-      const data = child.val();
-      chatBox.innerHTML += `<div class="chat-msg"><b>${data.user}:</b> ${data.msg}</div>`;
-    });
-    chatBox.scrollTop = chatBox.scrollHeight;
-  });
-
-  // التشغيل الابتدائي
-  window.onload = () => {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('date-picker').value = today;
-    document.getElementById('date-picker').addEventListener('change', () => {
-        updateHijri();
-        if(currentUser) loadUserData();
-    });
-    
-    updateHijri();
-    startCountdown();
-    renderUserCards();
-  };
-
-  function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-  }
-</script>
-
-</body>
-</html><!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ملتقى طاعاتنا 2026 | النسخة المطورة</title>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet"/>
-
-  <style>
-    :root{
-      --primary:#1a4d2e; --gold:#c5a059; --gold-light:#e6cc92; --bg:#f9f6f0;
-      --card-bg:#ffffff; --text:#1a4d2e; --accent:#d35400; --crimson:#900c3f;
-    }
-    body.dark-mode{
-      --bg:#121212; --card-bg:#1e1e1e; --text:#e0e0e0; --primary:#2d6a4f;
-    }
-    body{
-      font-family:'Amiri',serif; background-color:var(--bg); margin:0; padding:10px; color:var(--text);
-      transition:background .3s;
-    }
-    .main-container{
-      max-width:900px; margin:auto; background:var(--card-bg); border:3px double var(--gold); border-radius:20px;
-      padding:15px; box-shadow:0 10px 30px rgba(0,0,0,.2); position:relative; z-index:1;
-    }
-
-    .dark-mode-toggle{ position:fixed; top:15px; left:15px; z-index:1000; background:var(--gold); border:none; border-radius:50%;
-      width:40px; height:40px; cursor:pointer; font-size:1.2rem; box-shadow:0 2px 10px rgba(0,0,0,.2); }
-    .header-bar{ background:linear-gradient(135deg,#1a4d2e,#0a2b1a); color:#fff; padding:15px; border-radius:15px; text-align:center; border:2px solid var(--gold); }
-    .header-actions{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:8px; align-items:center; }
-    .refresh-btn{ background:linear-gradient(180deg,#ffe9b9,#e7cb83); border:1px solid var(--gold); color:#1a1a1a; padding:6px 10px; border-radius:20px; cursor:pointer; font-weight:800; }
-    .city-select{ border:1px solid var(--gold); border-radius:8px; padding:4px 8px; background:#fff; color:#1a1a1a; font-weight:700; }
-    body.dark-mode .city-select{ background:#252525; color:#fff; }
-
-    .date-container{ background:rgba(255,255,255,.1); padding:10px; border-radius:12px; margin:10px 0; border:1px solid rgba(197,160,89,.3); }
-    #hijri-display{ display:block; color:var(--gold-light); font-size:1.2rem; font-weight:bold; margin-bottom:5px; }
-    .ramadan-day-hint{ display:none; margin-top:6px; font-weight:bold; background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:6px 10px; border-radius:8px; }
-
-    .prayer-times-table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:.8rem; background:rgba(0,0,0,.2); border-radius:10px; overflow:hidden; }
-    .prayer-times-table th, .prayer-times-table td{ padding:5px; border:1px solid rgba(255,255,255,.1); text-align:center; }
-
-    .next-prayer-banner{ background:rgba(255,255,255,.1); margin-top:10px; padding:10px; border-radius:10px; font-size:.9rem; border:1px solid var(--gold-light); line-height:1.6; }
-    .timer-span{ color:var(--gold-light); font-family:sans-serif; font-weight:bold; }
-    #prayer-wudu-alert{ display:none; background:linear-gradient(135deg,#fff9e6,#fffde7); border:2px solid var(--gold); color:#856404; padding:12px; border-radius:12px; margin-top:10px; text-align:center; font-weight:bold; box-shadow:0 0 15px rgba(197,160,89,.4); animation:lightPulse 2s infinite; }
-    @keyframes lightPulse{ 0%{box-shadow:0 0 5px rgba(197,160,89,.4); transform:scale(1);} 50%{box-shadow:0 0 20px rgba(197,160,89,.8); transform:scale(1.01);} 100%{box-shadow:0 0 5px rgba(197,160,89,.4); transform:scale(1);} }
-
-    .hijri-ramadan-bar{ background:var(--gold); color:#1a4d2e; margin-top:10px; border-radius:10px; padding:10px; font-weight:bold; display:flex; flex-direction:column; align-items:center; font-size:1rem; border:1px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,.1); }
-    .ramadan-timer{ color:#fff; background:var(--primary); padding:4px 15px; border-radius:20px; font-family:sans-serif; font-size:.9rem; margin-top:5px; direction:ltr; }
-    .niya-alert{ background:#fff3cd; color:#856404; padding:10px; border-radius:10px; margin-top:10px; border:1px solid #ffeeba; font-weight:bold; animation:pulse 2s infinite; display:none; text-align:center; width:100%; box-sizing:border-box; }
-    @keyframes pulse{ 0%{opacity:1;} 50%{opacity:.7;} 100%{opacity:1;} }
-
-    .hadith-marquee{ background:var(--accent); color:#fff; padding:12px 15px; border-radius:15px; font-size:1.1rem; border:2px solid var(--gold); margin:15px 0; box-shadow:0 4px 10px rgba(0,0,0,.1); text-align:center; display:flex; justify-content:center; align-items:center; min-height:40px; overflow:hidden; }
-    .hadith-text{ display:block; white-space:normal; animation:none; font-weight:bold; line-height:1.4; }
-
-    .podium-section{ display:grid; grid-template-columns:1fr 1fr; gap:15px; margin:20px 0; position:relative; z-index:1; }
-    .podium-container{ display:flex; justify-content:center; align-items:flex-end; height:130px; gap:5px; padding-bottom:25px; }
-    .podium-step{ width:45px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; color:#fff; border-radius:8px; position:relative; font-size:.75rem; transition:.5s; }
-    .p-1{ height:100px; background:linear-gradient(135deg,#ffd700,#b8860b); }
-    .p-2{ height:75px;  background:linear-gradient(135deg,#bdc3c7,#7f8c8d); }
-    .p-3{ height:55px;  background:linear-gradient(135deg,#cd7f32,#8b4513); }
-    .p-4{ height:40px;  background:linear-gradient(135deg,#95a5a6,#2c3e50); }
-    .p-name{ position:absolute; bottom:-25px; color:var(--text); font-weight:bold; font-size:.8rem; white-space:nowrap; }
-
-    .knights-section{ background:linear-gradient(135deg,#fff,#fdf8e6); border:2px solid var(--gold); border-radius:15px; padding:15px; margin:20px 0; box-shadow:0 5px 15px rgba(0,0,0,.1); }
-    body.dark-mode .knights-section{ background:linear-gradient(135deg,#252525,#1e1e1e); }
-    .knights-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-top:10px; }
-    .knight-card{ background:#fff; border:1px solid var(--gold-light); border-radius:12px; padding:10px; text-align:center; position:relative; overflow:hidden; transition:.3s; }
-    .knight-card:hover{ transform:translateY(-3px); box-shadow:0 4px 8px rgba(0,0,0,.1); }
-    .knight-title{ font-size:.75rem; font-weight:bold; color:var(--accent); margin-bottom:5px; display:block; border-bottom:1px solid #eee; padding-bottom:3px; }
-    .knight-name{ font-size:1rem; color:var(--primary); font-weight:bold; display:block; margin-top:5px; }
-    .knight-icon{ font-size:1.5rem; display:block; }
-
-    .user-cards{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:20px; }
-    .comp-card{ padding:10px; text-align:center; border:2px solid var(--gold-light); border-radius:15px; cursor:pointer; background:#fff; transition:.3s; }
-    .comp-card.active{ border-color:var(--primary); background:#f0f7f2; transform:scale(1.02); }
-    body.dark-mode .comp-card.active{ background:#2d6a4f; color:#fff; }
-    .user-status{ font-size:.7rem; color:#d35400; margin-top:5px; border-top:1px solid #eee; padding-top:5px; min-height:35px; }
-
-    .section-card{ background:#fff; border:1px solid var(--gold); border-radius:15px; margin-top:15px; overflow:hidden; }
-    .section-title{ background:var(--primary); color:#fff; padding:10px; margin:0; font-size:1rem; }
-    .habit-row{ display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px dashed var(--gold-light); }
-    .habit-link{ color:var(--primary); text-decoration:none; border-bottom:1px dashed var(--gold); }
-    .habit-link:hover{ text-decoration:underline; }
-    .pts-info{ font-size:.65rem; color:#666; display:block; }
-    .opt-btn{ font-size:.7rem; padding:6px 2px; border-radius:6px; border:1px solid var(--gold); cursor:pointer; flex:1; margin:0 1px; background:transparent; color:inherit; }
-    .opt-btn.selected{ background:var(--gold); color:#fff; }
-
-    .chat-section{ background:#fff; border:2px solid var(--primary); border-radius:15px; margin-top:20px; height:350px; display:flex; flex-direction:column; position:relative; }
-    .chat-messages{ flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:5px; }
-    .chat-msg{ padding:8px; border-radius:10px; max-width:80%; font-size:.85rem; position:relative; }
-    .chat-input-area{ padding:10px; display:flex; gap:5px; align-items:center; border-top:1px solid #eee; background:#fdfdfd; border-radius:0 0 15px 15px; }
-    .chat-input{ flex:1; padding:10px; border:1px solid var(--gold); border-radius:20px; outline:none; background:inherit; color:inherit; }
-    .chat-tools{ display:flex; gap:8px; align-items:center; }
-    .tool-btn{ background:none; border:none; font-size:1.3rem; cursor:pointer; color:var(--primary); padding:0; display:flex; align-items:center; }
-
-    .date-debug{ margin-top:8px; font-size:.78rem; line-height:1.4; background:#fff; color:#333; border:1px dashed var(--gold); border-radius:8px; padding:6px 8px; text-align:start; }
-    body.dark-mode .date-debug{ background:#252525; color:#eee; }
-    .toast{ position:fixed; top:12px; right:12px; z-index:2000; background:linear-gradient(135deg,#1a4d2e,#0a2b1a); color:#fff; border:2px solid var(--gold); border-radius:12px; padding:10px 14px; box-shadow:0 10px 24px rgba(0,0,0,.2); display:none; }
-    .toast.show{ display:block; animation:fadeInOut 6s ease forwards; }
-    @keyframes fadeInOut{ 0%{opacity:0; transform:translateY(-8px);} 10%{opacity:1; transform:translateY(0);} 80%{opacity:1;} 100%{opacity:0; transform:translateY(-8px);} }
-
-    .decor-container{ position:fixed; inset:0; pointer-events:none; z-index:0; }
-    .decor-top{
-      position:absolute; top:0; left:0; right:0; height:80px;
-      display:flex; align-items:flex-start; justify-content:center; gap:40px;
-      background:linear-gradient(180deg,rgba(197,160,89,.12),rgba(197,160,89,0));
-    }
-    .lantern{ font-size:30px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.2)); animation:swing 3.8s ease-in-out infinite; transform-origin:top center; margin-top:6px; }
-    .lantern:nth-child(2){ animation-duration:4.3s } .lantern:nth-child(3){ animation-duration:4.9s }
-    @keyframes swing{ 0%{transform:rotate(0) translateY(0);} 50%{transform:rotate(6deg) translateY(1px);} 100%{transform:rotate(0) translateY(0);} }
-    .crescent{ position:absolute; top:12px; right:16px; font-size:28px; filter:drop-shadow(0 0 6px rgba(255,255,180,.6)); }
-    .stars{
-      position:absolute; inset:0;
-      background-image:
-        radial-gradient(2px 2px at 10% 20%, rgba(255,255,200,.55) 50%, transparent 51%),
-        radial-gradient(1.5px 1.5px at 30% 35%, rgba(255,255,200,.5) 50%, transparent 51%),
-        radial-gradient(1.8px 1.8px at 65% 15%, rgba(255,255,200,.5) 50%, transparent 51%),
-        radial-gradient(1.6px 1.6px at 85% 30%, rgba(255,255,200,.5) 50%, transparent 51%),
-        radial-gradient(1.4px 1.4px at 55% 50%, rgba(255,255,200,.5) 50%, transparent 51%);
-      opacity:.5; animation: twinkle 6s ease-in-out infinite alternate;
-    }
-    @keyframes twinkle{ from{opacity:.35;} to{opacity:.75;} }
-
-    .garland{
-      position:absolute; top:78px; left:0; right:0; height:26px;
-      background:
-        radial-gradient(7px 7px at 6% 50%,   #ffd166 55%, transparent 56%),
-        radial-gradient(7px 7px at 16% 50%,  #ef476f 55%, transparent 56%),
-        radial-gradient(7px 7px at 26% 50%,  #06d6a0 55%, transparent 56%),
-        radial-gradient(7px 7px at 36% 50%,  #118ab2 55%, transparent 56%),
-        radial-gradient(7px 7px at 46% 50%,  #ffbe0b 55%, transparent 56%),
-        radial-gradient(7px 7px at 56% 50%,  #ffd166 55%, transparent 56%),
-        radial-gradient(7px 7px at 66% 50%,  #ef476f 55%, transparent 56%),
-        radial-gradient(7px 7px at 76% 50%,  #06d6a0 55%, transparent 56%),
-        radial-gradient(7px 7px at 86% 50%,  #118ab2 55%, transparent 56%),
-        radial-gradient(7px 7px at 96% 50%,  #ffbe0b 55%, transparent 56%);
-      filter: drop-shadow(0 0 6px rgba(255,229,140,.85));
-      opacity:.95; animation: garlandBlink 2.4s ease-in-out infinite alternate;
-      pointer-events:none;
-    }
-    @keyframes garlandBlink{
-      0%{ filter:drop-shadow(0 0 4px rgba(255,229,140,.6)); opacity:.9; }
-      50%{ filter:drop-shadow(0 0 10px rgba(255,229,140,1)); opacity:1; }
-      100%{ filter:drop-shadow(0 0 4px rgba(255,229,140,.6)); opacity:.92; }
-    }
-
-    .all-done-badge{
-      margin:10px 0; padding:10px 14px; border:2px solid var(--gold); border-radius:14px;
-      background:linear-gradient(135deg,#1a4d2e,#0a2b1a); color:#fff; font-weight:800; text-align:center;
-      box-shadow:0 0 14px rgba(240,198,116,.45); animation:pulseGlow 2.8s ease-in-out infinite;
-    }
-    @keyframes pulseGlow{ 0%{box-shadow:0 0 8px rgba(240,198,116,.25);} 50%{box-shadow:0 0 22px rgba(240,198,116,.6);} 100%{box-shadow:0 0 8px rgba(240,198,116,.25);} }
-  </style>
-</head>
-<body>
-
-<button class="dark-mode-toggle" onclick="toggleDarkMode()">🌓</button>
-
-<div class="main-container">
-  <div class="header-bar">
-    <h2 id="app-title" style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h2>
-
-    <div class="header-actions">
-      <button class="refresh-btn" id="btn-refresh">🔄 تحديث البيانات</button>
-      <button class="refresh-btn" id="btn-save-all">💾 حفظ التعديلات</button>
-
-      <label for="city-select-1"><b>مدينة 1:</b></label>
-      <select id="city-select-1" class="city-select"></select>
-      <label for="city-select-2"><b>مدينة 2:</b></label>
-      <select id="city-select-2" class="city-select"></select>
-
-      <button class="refresh-btn" id="btn-report-daily">📄 تقرير يومي</button>
-      <button class="refresh-btn" id="btn-report-monthly">📄 تقرير شهري</button>
-      <button class="refresh-btn" id="btn-report-yearly">📄 تقرير سنوي</button>
+        <div id="ramadan-timer" style="font-size: 0.9rem; color: #e6cc92;"></div>
     </div>
 
-    <div class="date-container">
-      <span id="hijri-display">جاري تحديد التاريخ الهجري...</span>
-      <input type="date" id="date-picker" style="border-radius:5px; border:none; padding:5px; text-align:center; font-weight:bold;">
-      <div id="ramadan-day-hint" class="ramadan-day-hint"></div>
-      <div id="date-debug" class="date-debug"></div>
+    <div class="user-grid" id="user-selector">
+        <div class="user-card" onclick="selectUser('محمد')">محمد</div>
+        <div class="user-card" onclick="selectUser('شيماء')">شيماء</div>
+        <div class="user-card" onclick="selectUser('أحمد')">أحمد</div>
+        <div class="user-card" onclick="selectUser('ياسين')">ياسين</div>
     </div>
 
-    <table class="prayer-times-table">
-      <thead><tr><th>المدينة</th><th>الفجر</th><th>الظهر</th><th>العصر</th><th>المغرب</th><th>العشاء</th></tr></thead>
-      <tbody id="prayer-table-body">
-        <tr id="row-salalah"><td>صلالة</td><td colspan="5">جاري التحميل...</td></tr>
-        <tr id="row-kafr"><td>كفر الشيخ</td><td colspan="5">جاري التحميل...</td></tr>
-      </tbody>
-    </table>
-
-    <div id="next-prayer-info" class="next-prayer-banner">حساب المواعيد...</div>
-    <div id="prayer-wudu-alert">
-      🌊 حان وقت الاستعداد! <br>
-      <span id="alert-msg"></span>، هيا للوضوء لتدرك الصف الأول.
+    <div id="habits-section" style="display:none;">
+        <h3 id="current-user-name" style="text-align:center; color:var(--gold);"></h3>
+        <div class="section-card">
+            <h3 class="section-title">🕋 الفرائض والسنن</h3>
+            <div id="habits-list"></div>
+        </div>
+        <button class="btn" style="width:100%; margin-top:10px; background:var(--gold);" onclick="saveToFirebase()">💾 حفظ التغييرات لليوم</button>
     </div>
 
-    <div class="hijri-ramadan-bar">
-      <div id="ramadan-countdown">🌙 متبقي على رمضان: <span class="ramadan-timer" id="timer-vals">...</span></div>
-      <div id="niya-reminder" class="niya-alert">💡 تنبيه النية: غداً صيام، لا تنسَ عقد النية وسحوراً هنيئاً!</div>
+    <div class="section-card" style="padding:10px;">
+        <h3 style="margin:0 0 10px 0; color:var(--primary);">💬 مجلس الطاعة</h3>
+        <div id="chat-box" class="chat-area"></div>
+        <div class="input-group">
+            <input type="text" id="chat-msg" placeholder="اكتب رسالة تشجيعية...">
+            <button class="btn" onclick="sendChatMessage()">إرسال</button>
+        </div>
     </div>
-  </div>
-
-  <div class="podium-section">
-    <div><h4 style="text-align:center; margin:2px;">🏆 توب اليوم</h4><div id="daily-podium" class="podium-container"></div></div>
-    <div><h4 style="text-align:center; margin:2px;">✨ الترتيب السنوي</h4><div id="annual-podium" class="podium-container"></div></div>
-  </div>
-
-  <div class="knights-section">
-    <h3 style="text-align:center; margin:0 0 15px 0; color:var(--primary); font-family:'Reem Kufi';">⚔️ فرسان الأسبوع</h3>
-    <div class="knights-grid" id="knights-display"></div>
-  </div>
-
-  <div class="hadith-marquee">
-    <div class="hadith-text" id="daily-hadith">جاري تحميل حديث اليوم...</div>
-  </div>
-
-  <div id="cards-ui" class="user-cards"></div>
-
-  <div id="user-ui" style="display:none;">
-    <h3 id="current-user-title" style="text-align:center; color:var(--primary); background: var(--gold-light); padding: 5px; border-radius: 10px;"></h3>
-    <div id="all-done-badge" class="all-done-badge" style="display:none"></div>
-    <div id="fasting-section" class="section-card" style="display:none; border:2px solid var(--accent);">
-      <h3 class="section-title" style="background:var(--accent);">🌟 قسم الاجتهاد (صيام التطوع)</h3>
-      <div id="fasting-list"></div>
-    </div>
-    <div class="section-card"><h3 class="section-title">🕋 الفرائض (المسجد | جماعة | فردي)</h3><div id="fard-list"></div></div>
-    <div class="section-card"><h3 class="section-title">🌱 السنن والرواتب</h3><div id="sunan-list"></div></div>
-    <div class="section-card"><h3 class="section-title">📿 الأذكار والورد</h3><div id="extra-list"></div></div>
-  </div>
-
-  <div class="chat-section">
-    <h4 style="margin:10px; text-align:center; color:var(--primary);">💬 مجلس الطاعة</h4>
-    <div id="chat-messages" class="chat-messages"></div>
-    <div class="chat-input-area">
-      <select id="chat-user-selector" style="border-radius:10px; border:1px solid var(--gold); padding:5px; background:inherit; color:inherit;">
-        <option value="">من أنت؟</option>
-        <option value="محمد">محمد</option>
-        <option value="شيماء">شيماء</option>
-        <option value="أحمد">أحمد</option>
-        <option value="ياسين">ياسين</option>
-      </select>
-      <input type="text" id="chat-input" class="chat-input" placeholder="اكتب رسالة تشجيعية..."/>
-      <button onclick="sendMessage()" style="border-radius:50%; width:40px; height:40px; border:none; background:var(--primary); color:#fff; cursor:pointer;">➤</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast-ramadan" class="toast">🌙 رمضان كريم! نسأل الله القبول</div>
-<div id="decor-container" class="decor-container" style="display:none">
-  <div class="decor-top"><div class="lantern">🏮</div><div class="lantern">🟡</div><div class="lantern">🏮</div></div>
-  <div class="garland"></div>
-  <div class="crescent">🌙</div><div class="stars"></div>
 </div>
 
 <script>
-  /* ========= Firebase ========= */
-  const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1" };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+    // 1. Config Firebase
+    const firebaseConfig = { 
+        apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", 
+        authDomain: "ebada-656e1.firebaseapp.com", 
+        databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", 
+        projectId: "ebada-656e1" 
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-  /* ========= حالة عامة ========= */
-  let currentUser = null;
-  const users = ['محمد','شيماء','أحمد','ياسين'];
+    // 2. Variables
+    let currentUser = "";
+    const habits = ["الفجر", "الظهر", "العصر", "المغرب", "العشاء", "الضحى", "الوتر", "أذكار الصباح", "أذكار المساء", "ورد القرآن"];
 
-  /* ========= دالة التاريخ الهجري المحدثة لعام 2026 ========= */
-  async function updateHijriFor2026() {
-    const picker = document.getElementById('date-picker');
-    const display = document.getElementById('hijri-display');
-    const hint = document.getElementById('ramadan-day-hint');
-    
-    const selectedDate = new Date(picker.value);
-    // تعديل اليوم الهجري بإزاحة يوم واحد ليوافق رؤية 2026 المتوقعة
-    const adjustedDate = new Date(selectedDate);
-    adjustedDate.setDate(adjustedDate.getDate());
-
-    try {
-      const res = await fetch(`https://api.aladhan.com/v1/gToH/${adjustedDate.getDate()}-${adjustedDate.getMonth()+1}-${adjustedDate.getFullYear()}`);
-      const data = await res.json();
-      const hj = data.data.hijri;
-      
-      display.innerText = `${hj.day} ${hj.month.ar} ${hj.year}هـ`;
-      
-      // منطق إظهار زينة رمضان وتنبيه أيام الصيام
-      if(hj.month.en === "Ramadan") {
-        document.getElementById('decor-container').style.display = 'block';
-        hint.style.display = 'block';
-        hint.innerHTML = `🌙 اليوم هو <b>${hj.day} رمضان</b> — تقبّل الله منا ومنكم`;
-      } else {
-        document.getElementById('decor-container').style.display = 'none';
-        hint.style.display = 'none';
-      }
-    } catch(e) {
-      display.innerText = "تعذر جلب التاريخ الهجري";
+    // 3. التاريخ الهجري (API Aladhan)
+    async function updateHijri() {
+        const dateInput = document.getElementById('date-picker').value;
+        const [y, m, d] = dateInput.split('-');
+        try {
+            const response = await fetch(`https://api.aladhan.com/v1/gToH/${d}-${m}-${y}`);
+            const data = await response.json();
+            const hj = data.data.hijri;
+            document.getElementById('hijri-display').innerText = `${hj.day} ${hj.month.ar} ${hj.year} هـ`;
+            if (currentUser) loadUserData(); 
+        } catch (e) {
+            document.getElementById('hijri-display').innerText = "خطأ في الاتصال";
+        }
     }
-  }
 
-  /* ✅ عدّاد رمضان 2026 الدقيق */
-  function startRamadanCountdown() {
-    const ramadanStart = new Date("2026-02-19T00:00:00").getTime();
-    
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const diff = ramadanStart - now;
+    // 4. اختيار المستخدم
+    function selectUser(name) {
+        currentUser = name;
+        document.querySelectorAll('.user-card').forEach(c => {
+            c.classList.remove('active');
+            if(c.innerText === name) c.classList.add('active');
+        });
+        document.getElementById('habits-section').style.display = 'block';
+        document.getElementById('current-user-name').innerText = "طاعات " + name;
+        loadUserData();
+    }
 
-      if (diff <= 0) {
-        document.getElementById('ramadan-countdown').innerHTML = "🌙 <b>رمضان كريم!</b>";
-        clearInterval(timer);
-      } else {
-        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const s = Math.floor((diff % (1000 * 60)) / 1000);
-        document.getElementById('timer-vals').innerText = `${d}ي ${h}س ${m}د ${s}ث`;
-      }
-    }, 1000);
-  }
+    // 5. تحميل وحفظ البيانات
+    function loadUserData() {
+        const date = document.getElementById('date-picker').value;
+        const container = document.getElementById('habits-list');
+        container.innerHTML = "جاري التحميل...";
 
-  // ربط التحديث عند تغيير التاريخ
-  document.getElementById('date-picker').addEventListener('change', updateHijriFor2026);
+        db.ref(`data/${date}/${currentUser}`).once('value', snapshot => {
+            const data = snapshot.val() || {};
+            container.innerHTML = habits.map(h => `
+                <div class="habit-row">
+                    <span>${h}</span>
+                    <input type="checkbox" id="chk-${h}" ${data[h] ? 'checked' : ''}>
+                </div>
+            `).join('');
+        });
+    }
 
-  window.onload = () => {
-    // ضبط التاريخ الافتراضي لليوم
-    const dp = document.getElementById('date-picker');
-    const today = new Date();
-    dp.value = today.toISOString().split('T')[0];
-    
-    updateHijriFor2026();
-    startRamadanCountdown();
-    
-    // باقي الوظائف الأصلية لمدينتك وصلاتك كما هي...
-  };
+    function saveToFirebase() {
+        const date = document.getElementById('date-picker').value;
+        const saveData = {};
+        habits.forEach(h => {
+            saveData[h] = document.getElementById(`chk-${h}`).checked;
+        });
+        db.ref(`data/${date}/${currentUser}`).set(saveData)
+            .then(() => alert("تم الحفظ بنجاح!"))
+            .catch(err => alert("خطأ في الحفظ"));
+    }
 
-  /* الإبقاء على الوظائف الأصلية لحفظ البيانات والمدن كما هي في كودك دون أدنى تغيير */
+    // 6. الدردشة
+    function sendChatMessage() {
+        const msg = document.getElementById('chat-msg').value;
+        if (!currentUser) { alert("اختر اسمك أولاً"); return; }
+        if (!msg) return;
+        db.ref('chat').push({ user: currentUser, text: msg, time: Date.now() });
+        document.getElementById('chat-msg').value = "";
+    }
+
+    db.ref('chat').limitToLast(15).on('value', snapshot => {
+        const box = document.getElementById('chat-box');
+        box.innerHTML = "";
+        snapshot.forEach(child => {
+            const v = child.val();
+            box.innerHTML += `<div><strong>${v.user}:</strong> ${v.text}</div>`;
+        });
+        box.scrollTop = box.scrollHeight;
+    });
+
+    // 7. تشغيل أولي
+    window.onload = () => {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date-picker').value = today;
+        updateHijri();
+        
+        // عداد رمضان 2026
+        const ramadan = new Date("February 18, 2026 18:00:00").getTime();
+        setInterval(() => {
+            const diff = ramadan - new Date().getTime();
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            document.getElementById('ramadan-timer').innerText = days > 0 ? `متبقي على رمضان ${days} يوم` : "رمضان كريم";
+        }, 1000);
+    };
 </script>
 </body>
 </html>
