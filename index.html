@@ -41,7 +41,7 @@
     #hijri-display{ display:block; color:var(--gold-light); font-size:1.2rem; font-weight:bold; margin-bottom:5px; }
     .ramadan-day-hint{ display:none; margin-top:6px; font-weight:bold; background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:6px 10px; border-radius:8px; }
 
-    /* === زر ولوحة ضبط الهجري === */
+    /* === زر ولوحة ضبط الهجري (إضافة) === */
     .hijri-adjust-wrap{ display:flex; gap:6px; align-items:center; justify-content:center; margin-top:6px; flex-wrap:wrap; }
     .hijri-adjust-btn{ background:#fff7d6; border:1px solid var(--gold); color:#634e1e; padding:4px 10px; border-radius:10px; cursor:pointer; font-weight:800; }
     .hijri-adjust-panel{
@@ -112,8 +112,8 @@
 
     .date-debug{ margin-top:8px; font-size:.78rem; line-height:1.4; background:#fff; color:#333; border:1px dashed var(--gold); border-radius:8px; padding:6px 8px; text-align:start; }
     body.dark-mode .date-debug{ background:#252525; color:#eee; }
-
     .toast{ position:fixed; top:12px; right:12px; z-index:2000; background:linear-gradient(135deg,#1a4d2e,#0a2b1a); color:#fff; border:2px solid var(--gold); border-radius:12px; padding:10px 14px; box-shadow:0 10px 24px rgba(0,0,0,.2); display:none; }
+    .toast.show{ display:block; animation:fadeInOut 6s ease forwards; }
     @keyframes fadeInOut{ 0%{opacity:0; transform:translateY(-8px);} 10%{opacity:1; transform:translateY(0);} 80%{opacity:1;} 100%{opacity:0; transform:translateY(-8px);} }
 
     /* ⭐ زينة رمضان – تبقى خلف المحتوى */
@@ -127,6 +127,41 @@
     .lantern:nth-child(2){ animation-duration:4.3s } .lantern:nth-child(3){ animation-duration:4.9s }
     @keyframes swing{ 0%{transform:rotate(0) translateY(0);} 50%{transform:rotate(6deg) translateY(1px);} 100%{transform:rotate(0) translateY(0);} }
     .crescent{ position:absolute; top:12px; right:16px; font-size:28px; filter:drop-shadow(0 0 6px rgba(255,255,180,.6)); }
+    .stars{
+      position:absolute; inset:0;
+      background-image:
+        radial-gradient(2px 2px at 10% 20%, rgba(255,255,200,.55) 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 30% 35%, rgba(255,255,200,.5) 50%, transparent 51%),
+        radial-gradient(1.8px 1.8px at 65% 15%, rgba(255,255,200,.5) 50%, transparent 51%),
+        radial-gradient(1.6px 1.6px at 85% 30%, rgba(255,255,200,.5) 50%, transparent 51%),
+        radial-gradient(1.4px 1.4px at 55% 50%, rgba(255,255,200,.5) 50%, transparent 51%);
+      opacity:.5; animation: twinkle 6s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle{ from{opacity:.35;} to{opacity:.75;} }
+
+    /* ⭐ حبل LED */
+    .garland{
+      position:absolute; top:78px; left:0; right:0; height:26px;
+      background:
+        radial-gradient(7px 7px at 6% 50%,   #ffd166 55%, transparent 56%),
+        radial-gradient(7px 7px at 16% 50%,  #ef476f 55%, transparent 56%),
+        radial-gradient(7px 7px at 26% 50%,  #06d6a0 55%, transparent 56%),
+        radial-gradient(7px 7px at 36% 50%,  #118ab2 55%, transparent 56%),
+        radial-gradient(7px 7px at 46% 50%,  #ffbe0b 55%, transparent 56%),
+        radial-gradient(7px 7px at 56% 50%,  #ffd166 55%, transparent 56%),
+        radial-gradient(7px 7px at 66% 50%,  #ef476f 55%, transparent 56%),
+        radial-gradient(7px 7px at 76% 50%,  #06d6a0 55%, transparent 56%),
+        radial-gradient(7px 7px at 86% 50%,  #118ab2 55%, transparent 56%),
+        radial-gradient(7px 7px at 96% 50%,  #ffbe0b 55%, transparent 56%);
+      filter: drop-shadow(0 0 6px rgba(255,229,140,.85));
+      opacity:.95; animation: garlandBlink 2.4s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes garlandBlink{
+      0%{ filter:drop-shadow(0 0 4px rgba(255,229,140,.6)); opacity:.9; }
+      50%{ filter:drop-shadow(0 0 10px rgba(255,229,140,1)); opacity:1; }
+      100%{ filter:drop-shadow(0 0 4px rgba(255,229,140,.6)); opacity:.92; }
+    }
 
     /* 🎉 تهنئة الإكمال */
     .all-done-badge{
@@ -170,7 +205,7 @@
         <button id="btn-hijri-panel" class="hijri-adjust-btn" title="ضبط التاريخ الهجري يدويًا">⚙️ ضبط الهجري</button>
       </div>
       <div id="hijri-adjust-panel" class="hijri-adjust-panel" aria-hidden="true">
-        <div style="text-align:center; font-weight:800; margin-bottom:6px; color:#7a6b4e;">تعويض الهجري (بالأيام)</div>
+        <div style="text-align:center; font-weight:800; margin-bottom:6px; color:#7a6ب4e;">تعويض الهجري (بالأيام)</div>
         <div class="hijri-ctrls">
           <button class="btn-sm" id="btn-hijri-minus">− يوم</button>
           <span class="badge-offset" id="hijri-offset-badge">0</span>
@@ -315,91 +350,13 @@
   function parseLocalYMD(ymd){ const [y,m,d]=ymd.split('-').map(Number); return new Date(y, m-1, d); }
   function muscatMidnightMsFromYMD(ymd){ const [y,m,d]=ymd.split('-').map(Number); return Date.UTC(y, m-1, d, 0,0,0) - 4*60*60*1000; }
 
-  /* === نقاط صيام رمضان (مجزية) === */
-  const RAMADAN_FASTING_POINTS = 200;
-
-  /* ========= نموذج العبادات ========= */
-  const model = {
-    fard: [
-      /* ✅ صيام رمضان كفريضة ضمن الفرائض – سيُعرض فقط داخل رمضان */
-      {id:'ramadan_sawm', n:'🌙 صيام رمضان (فريضة)', pts: {f: RAMADAN_FASTING_POINTS}, d: `فريضة: +${RAMADAN_FASTING_POINTS}`},
-
-      {id:'fajr', n:'🌄 الفجر', pts: {m:100, g:30, f:15, q:5}, d: 'م:100|ج:30|ف:15'},
-      {id:'dhuhr', n:'☀️ الظهر', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
-      {id:'asr', n:'🌤️ العصر', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
-      {id:'maghrib', n:'🌅 المغرب', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
-      {id:'isha', n:'🌃 العشاء', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'}
-    ],
-    sunan: [
-      {id:'s_fajr', n:'✨ سنة الفجر', p:20},
-      {id:'s_duha', n:'☀️ صلاة الضحى', p:25},
-      {id:'s_dhuhr_b', n:'✨ الظهر قبل', p:20},
-      {id:'s_dhuhr_a', n:'✨ الظهر بعد', p:15},
-      {id:'s_maghrib', n:'✨ سنة المغرب', p:15},
-      {id:'s_isha', n:'✨ سنة العشاء', p:15},
-      {id:'s_shaf', n:'🕯️ الشفع', p:15},
-      {id:'s_witr', n:'🌌 الوتر', p:20},
-      {id:'s_qyam', n:'🌙 قيام الليل', p:40}
-    ],
-    extra: [
-      {id:'azkar_s', n:'☀️ أذكار الصباح', p:30, l:'https://alazkar.today/'},
-      {id:'azkar_e', n:'🌙 أذكار المساء', p:30, l:'https://alazkar.today/'},
-      {id:'azkar_n', n:'😴 أذكار النوم', p:30, l:'https://alazkar.today/'},
-      {id:'mulk', n:'📖 سورة الملك', p:30, l:'https://quran.com/67'},
-      {id:'baqarah_end', n:'📖 خواتيم سورة البقرة', p:20, l:'https://quran.com/2/285-286'},
-      {id:'quran', n:'📖 الورد القرآني', p:50, l:'https://quran.com'}
-    ]
-  };
-
-  /* ========= إيموجي للشات ========= */
-  const emojiData = { "وجوه": ["😊","😂","😇","😍","🤩","😎","🤔","😴","🤲","🙌","👏","👍"], "إسلاميات": ["🕋","🕌","🌙","⭐","📖","📿","🌅","🌆","🍃","🌸","🕊️"] };
-  function initEmojis() {
-    const tabs = document.getElementById('emoji-tabs'); if(!tabs) return;
-    Object.keys(emojiData).forEach((category, index) => {
-      const span = document.createElement('span'); span.style.cursor='pointer'; span.innerText = category;
-      span.onclick = () => showEmojiCategory(category); tabs.appendChild(span); if(index === 0) showEmojiCategory(category);
-    });
-  }
-  function showEmojiCategory(cat) {
-    const list = document.getElementById('emoji-list');
-    list.innerHTML = emojiData[cat].map(e => `<span class="emoji-item" style="cursor:pointer" onclick="addEmoji('${e}')">${e}</span>`).join('');
-  }
-  function toggleEmojiPicker() { const p = document.getElementById('emoji-picker'); p.style.display = p.style.display === 'flex' ? 'none' : 'flex'; }
-  function addEmoji(emoji){ document.getElementById('chat-input').value += emoji; document.getElementById('emoji-picker').style.display='none'; document.getElementById('chat-input').focus(); }
-  function handleFile(input){ if(input.files && input.files[0]){ alert("تم اختيار ملف: " + input.files[0].name); document.getElementById('chat-input').value += ` [ملف: ${input.files[0].name}] `; } }
-
-  /* ========= أدوات الوقت/التواريخ ========= */
-  function normalizeDigits(str){
-    const map={'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};
-    return String(str||'').replace(/[٠-٩۰-۹]/g, d=>map[d]||d);
-  }
-  function format12h(timeStr) {
-    if(!timeStr) return "";
-    const clean = normalizeDigits(timeStr).trim().match(/(\d{1,2}):(\d{2})/);
-    if(!clean) return String(timeStr);
-    let h = parseInt(clean[1],10), m = clean[2];
-    const suffix = h >= 12 ? "م" : "ص"; h = h % 12 || 12;
-    return `${h}:${m} ${suffix}`;
-  }
-  function hhmmToMinutes(hhmm){
-    const m = normalizeDigits(hhmm).match(/(\d{1,2}):(\d{2})/);
-    if(!m) return null; let H=+m[1], M=+m[2]; if(H===24) H=0; return H*60+M;
-  }
-  function nowPartsInTz(tz){
-    try{
-      const parts = new Intl.DateTimeFormat('en-GB',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).formatToParts(new Date());
-      const get = t => parts.find(p=>p.type===t)?.value ?? '00';
-      return { h:+get('hour'), m:+get('minute'), s:+get('second') };
-    }catch(_){ const d=new Date(); return {h:d.getHours(), m:d.getMinutes(), s:d.getSeconds()}; }
-  }
-
   /* ========= API الهجري ========= */
   async function getHijriData(date) {
     try { const res = await fetch(`https://api.aladhan.com/v1/gToH/${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`); const data = await res.json(); return data.data.hijri; }
     catch(e) { return null; }
   }
 
-  /* ==== (إضافة) تحكم يدوي للهجري ==== */
+  /* ==== تحكم يدوي للهجري ==== */
   const HIJRI_OFFSET_KEY = 'hijri_offset_days_2026';
   function getHijriOffset(){ return parseInt(localStorage.getItem(HIJRI_OFFSET_KEY) || '0', 10) || 0; }
   function setHijriOffset(v){ localStorage.setItem(HIJRI_OFFSET_KEY, String(v)); }
@@ -430,6 +387,7 @@
     setHijriOffset(__tmpHijriOffset);
     await refreshRenderOnly();
     const p = document.getElementById('hijri-adjust-panel'); if(p) p.style.display='none';
+    // توست صغير للتأكيد
     const toast = document.createElement('div');
     toast.textContent = "تم تطبيق ضبط الهجري ✅";
     toast.style.cssText = 'position:fixed;top:12px;right:12px;background:#1a4d2e;color:#fff;border:2px solid #c5a059;border-radius:12px;padding:8px 12px;z-index:2500;';
@@ -492,7 +450,7 @@
     }
   }
 
-  /* ✅ عدّاد الصلاة القادمة */
+  /* ✅ عدّاد الصلاة القادمة (يدعم مناطق المدن الزمنية) */
   function updateNextPrayerCountdown(){
     let info=""; let showAlert=false; let alertName="";
     const labels={Fajr:"الفجر",Dhuhr:"الظهر",Asr:"العصر",Maghrib:"المغرب",Isha:"العشاء"};
@@ -546,7 +504,7 @@
     const c1 = CITY_OPTIONS.find(c => c.key === s1), c2 = CITY_OPTIONS.find(c => c.key === s2);
     if (c1) await fetchCityPrayers(c1.apiCity, c1.country, 'row-salalah', c1.label, 'slot1');
     if (c2) await fetchCityPrayers(c2.apiCity, c2.country, 'row-kafr',     c2.label, 'slot2');
-    updateNextPrayerCountdown();
+    updateNextPrayerCountdown(); // عرض العدّاد فورًا
   }
 
   /* ========= عدّاد رمضان + عدّاد الصلاة كل ثانية ========= */
@@ -570,7 +528,7 @@
   }
   async function updateCountdowns() {
     const ramadanYMD = "2026-02-19"; // 1 رمضان ثابت
-    const targetMs = muscatMidnightMsFromYMD(ramadanYMD);
+    const targetMs = muscatMidnightMsFromYMD(ramadanYMD); // منتصف الليل - مسقط
     if (todayYMDMuscat() === ramadanYMD) showRamadanToastOnce();
 
     const dayMs=86400000, hourMs=3600000, minMs=60000, secMs=1000;
@@ -598,6 +556,7 @@
     const selectedDate = parseLocalYMD(selectedDateStr);
     const tomorrow = new Date(selectedDate); tomorrow.setDate(selectedDate.getDate() + 1);
 
+    // (استبدال) استخدام الهجري المصحح
     const hijriTomorrow = await getHijriCorrected(tomorrow);
     if (hijriTomorrow) {
       const isTomorrowFasting = isFastingDay(tomorrow.getDay(), hijriTomorrow.day, hijriTomorrow.month.en);
@@ -606,24 +565,29 @@
     const hash = selectedDateStr.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0);
     document.getElementById('daily-hadith').innerText = ahadith[Math.abs(hash) % ahadith.length];
 
+    // تلميح أول رمضان وفق مسقط
     const hint = document.getElementById('ramadan-day-hint');
     hint.style.display = (ymdInTz(selectedDate, APP_TZ) === '2026-02-19') ? 'block' : 'none';
   }
 
   async function getRemaining(userData, isFriday, selectedDateStr) {
-    let rem = []; let curFard = [...model.fard]; let curExtra = [...model.extra];
+    let rem = []; 
+    let curFard = [...model.fard]; 
+    let curExtra = [...model.extra];
 
-    // 🔒 إظهار فريضة صيام رمضان داخل رمضان فقط
     const selDate = parseLocalYMD(selectedDateStr);
     const hijri = await getHijriCorrected(selDate);
     const isRamadan = !!(hijri && (hijri.month?.en === 'Ramadan'));
+
+    // داخل رمضان: إبقاء فريضة صيام رمضان، خارج رمضان: إزالتها
     if (!isRamadan) curFard = curFard.filter(f => f.id !== 'ramadan_sawm');
 
     if(isFriday) curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'});
 
-    // صيام التطوع خارج رمضان فقط
-    const fastingDay = hijri && isFastingDay(selDate.getDay(), hijri.day, hijri.month.en);
-    if(!isRamadan && fastingDay && !userData['fasting']?.done) rem.push("الصيام 🌙");
+    // صيام التطوع خارج رمضان فقط وفي أيام الصيام
+    if(!isRamadan && hijri && isFastingDay(selDate.getDay(), hijri.day, hijri.month.en)) {
+      if(!userData['fasting']?.done) rem.push("الصيام 🌙");
+    }
 
     curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
     model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
@@ -641,288 +605,47 @@
     }).join('');
   }
 
-  const RAMADAN_START_YMD = '2026-02-19';
+  /* === نقاط صيام رمضان (مجزية) === */
+  const RAMADAN_FASTING_POINTS = 200;
+
+  /* ========= نموذج العبادات ========= */
+  const model = {
+    fard: [
+      /* ✅ صيام رمضان كفريضة ضمن الفرائض – سيُعرض فقط داخل رمضان */
+      {id:'ramadan_sawm', n:'🌙 صيام رمضان (فريضة)', pts: {f: RAMADAN_FASTING_POINTS}, d: `فريضة: +${RAMADAN_FASTING_POINTS}`},
+
+      {id:'fajr', n:'🌄 الفجر', pts: {m:100, g:30, f:15, q:5}, d: 'م:100|ج:30|ف:15'},
+      {id:'dhuhr', n:'☀️ الظهر', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
+      {id:'asr', n:'🌤️ العصر', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
+      {id:'maghrib', n:'🌅 المغرب', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'},
+      {id:'isha', n:'🌃 العشاء', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'}
+    ],
+    sunan: [
+      {id:'s_fajr', n:'✨ سنة الفجر', p:20},
+      {id:'s_duha', n:'☀️ صلاة الضحى', p:25},
+      {id:'s_dhuhr_b', n:'✨ الظهر قبل', p:20},
+      {id:'s_dhuhr_a', n:'✨ الظهر بعد', p:15},
+      {id:'s_maghrib', n:'✨ سنة المغرب', p:15},
+      {id:'s_isha', n:'✨ سنة العشاء', p:15},
+      {id:'s_shaf', n:'🕯️ الشفع', p:15},
+      {id:'s_witr', n:'🌌 الوتر', p:20},
+      {id:'s_qyam', n:'🌙 قيام الليل', p:40}
+    ],
+    extra: [
+      {id:'azkar_s', n:'☀️ أذكار الصباح', p:30, l:'https://alazkar.today/'},
+      {id:'azkar_e', n:'🌙 أذكار المساء', p:30, l:'https://alazkar.today/'},
+      {id:'azkar_n', n:'😴 أذكار النوم', p:30, l:'https://alazkar.today/'},
+      {id:'mulk', n:'📖 سورة الملك', p:30, l:'https://quran.com/67'},
+      {id:'baqarah_end', n:'📖 خواتيم سورة البقرة', p:20, l:'https://quran.com/2/285-286'},
+      {id:'quran', n:'📖 الورد القرآني', p:50, l:'https://quran.com'}
+    ]
+  };
+
   function getRamadanDayFor(dateObj){
+    const RAMADAN_START_YMD = '2026-02-19';
     const ymdSel = ymdInTz(dateObj, APP_TZ);
     const diff = Math.floor((muscatMidnightMsFromYMD(ymdSel) - muscatMidnightMsFromYMD(RAMADAN_START_YMD)) / 86400000) + 1;
     return (diff >= 1 && diff <= 30) ? diff : null;
-  }
-
-  function renderForms(userData, isFriday, fastingDay, selectedDate, hijri) {
-    const fastSection = document.getElementById('fasting-section');
-
-    // ✅ رمضان من كائن الهجري مباشرة
-    const isRamadan = !!(hijri && (hijri.month?.en === 'Ramadan'));
-
-    // 🔒 الفرائض: نُظهر بند صيام رمضان داخل رمضان فقط
-    let curFard = [...model.fard];
-    if (!isRamadan) curFard = curFard.filter(f => f.id !== 'ramadan_sawm');
-
-    document.getElementById('fard-list').innerHTML = curFard.map(h => {
-      const cur = userData[h.id]?.type;
-      return `<div class="habit-row"><div><b>${h.n}</b><span class="pts-info">${h.d || ''}</span></div>
-        <div style="display:flex; gap:2px;">${
-          Object.entries(h.pts).map(([k,v]) =>
-            `<button class="opt-btn ${cur===k?'selected':''}"
-                     data-habit="${h.id}" data-type="${k}" data-p="${v}"
-                     onclick="save('${h.id}',{type:'${k}', p:${v}})">${k=='m'?'مسجد':k=='g'?'جماعة':k=='f'?'فرد':'قضاء'}</button>`
-          ).join('')
-        }</div></div>`;
-    }).join('');
-
-    // 🔒 صيام التطوع: مخفي تمامًا داخل رمضان – ويظهر خارجه إن كان اليوم من أيام الصيام
-    if (isRamadan) {
-      fastSection.style.display = 'none';
-    } else if (fastingDay) {
-      fastSection.style.display = 'block';
-      const fastingPoints = 100;
-      document.getElementById('fasting-list').innerHTML = `
-        <div class="habit-row">
-          <span>🌙 صيام تطوع (الاثنين/الخميس/البيض) <small>(+${fastingPoints}ن)</small></span>
-          <input type="checkbox"
-                 ${userData['fasting']?.done?'checked':''}
-                 data-habit="fasting" data-p="${fastingPoints}"
-                 onchange="save('fasting',{done:this.checked, p:this.checked?${fastingPoints}:0})"
-                 style="transform:scale(1.5);">
-        </div>`;
-    } else {
-      fastSection.style.display = 'none';
-    }
-
-    let curExtra = [...model.extra];
-    if(isFriday){ curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f); curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'}); }
-
-    const drawCheck = (list, tid) => {
-      const rDay = getRamadanDayFor(selectedDate);
-      document.getElementById(tid).innerHTML = list.map(h => {
-        const done = userData[h.id]?.done;
-        let url = h.l || null;
-        if (h.id === 'quran' && rDay) url = `https://quran.com/juz/${rDay}`;
-        const label = url
-          ? `<a class="habit-link" href="${url}" target="_blank" rel="noopener noreferrer">${h.n}</a>`
-          : h.n;
-        return `<div class="habit-row">
-          <span>${label} <small>(+${h.p}ن)</small></span>
-          <input type="checkbox" ${done?'checked':''}
-                 data-habit="${h.id}" data-p="${h.p}"
-                 onchange="save('${h.id}',{done:this.checked, p:this.checked?${h.p}:0})"
-                 style="transform:scale(1.5); cursor:pointer;">
-        </div>`;
-      }).join('');
-    };
-    drawCheck(model.sunan, 'sunan-list');
-    drawCheck(curExtra, 'extra-list');
-  }
-
-  async function render(allData) {
-    const selectedDateStr = document.getElementById('date-picker').value;
-    const selectedDate = parseLocalYMD(selectedDateStr);
-
-    // الهجري المصحح
-    const hijri = await getHijriCorrected(selectedDate);
-    if(hijri) document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
-
-    // تصحيح ثابت لمسقط
-    const selectedYMD_Muscat = ymdInTz(selectedDate, APP_TZ);
-    if (selectedYMD_Muscat === '2026-02-18') document.getElementById('hijri-display').innerText = `30 شعبان 1447هـ`;
-    if (selectedYMD_Muscat === '2026-02-19') document.getElementById('hijri-display').innerText = `1 رمضان 1447هـ`;
-
-    const isFriday = selectedDate.getDay() === 5;
-    const fastingDay = hijri ? isFastingDay(selectedDate.getDay(), hijri.day, hijri.month.en) : false;
-
-    let stats = await Promise.all(users.map(async u => {
-      let s = 0; let uData = allData[u] || {};
-      [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
-      if(isFriday && uData['kahf']) s += 40;
-      return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
-    }));
-
-    drawPodium('daily-podium', stats);
-    document.getElementById('cards-ui').innerHTML = stats.map(st => `
-      <div class="comp-card ${st.n === currentUser ? 'active' : ''}" onclick="selectUser('${st.n}')">
-        <b style="font-size:1.1rem">${st.n}</b> <br> <span style="color:var(--gold)">${st.s} نقطة</span>
-        <div class="user-status">⏳ المتبقي: ${st.rem}</div>
-      </div>`).join('');
-    if(currentUser) renderForms(allData[currentUser] || {}, isFriday, fastingDay, selectedDate, hijri);
-
-    // تهنئة الإكمال
-    const FEMININE_NAMES = new Set(['شيماء']);
-    function getCongratsMessage(name){
-      const isFem = FEMININE_NAMES.has(name);
-      return isFem
-        ? `🌟 هنيئًا لكِ يا ${name}! لقد أكملتِ عبادات يومك كاملة. ✨ تقبّل الله منكِ وغفر لكِ.`
-        : `🌟 هنيئًا لك يا ${name}! لقد أكملت عبادات يومك كاملة. ✨ تقبّل الله منك وغفر لك.`;
-    }
-    const doneBadge = document.getElementById('all-done-badge');
-    if (currentUser) {
-      const st = stats.find(x => x.n === currentUser);
-      if (st && st.rem === "✅ اكتملت الطاعة") { doneBadge.innerHTML = getCongratsMessage(currentUser); doneBadge.style.display='block'; }
-      else { doneBadge.style.display='none'; }
-    } else { doneBadge.style.display='none'; }
-
-    renderDateDebug();
-    checkNiyaAlert();
-    updateNextPrayerCountdown();
-    updateHeaderTitleForRamadan();
-  }
-
-  function toggleDarkMode() { document.body.classList.toggle('dark-mode'); localStorage.setItem('darkMode', document.body.classList.contains('dark-mode')); }
-
-  function sendMessage() {
-    const inp = document.getElementById('chat-input'); const user = document.getElementById('chat-user-selector').value || currentUser;
-    if(inp.value && user) { db.ref('osraty_chat').push({ u: user, m: inp.value, t: Date.now() }); inp.value = ''; }
-    else { alert("يرجى اختيار اسمك وكتابة رسالة"); }
-  }
-  function renderChat(msgs) {
-    const div = document.getElementById('chat-messages');
-    div.innerHTML = Object.values(msgs).map(m => `
-      <div class="chat-msg" style="align-self: ${m.u === currentUser ? 'flex-end' : 'flex-start'}; background: ${m.u === currentUser ? '#dcf8c6' : '#f0f0f0'}; color:#333; border: 1px solid #ddd;">
-        <small><b style="color:var(--primary)">${m.u}</b></small><br>${m.m}
-      </div>`).join('');
-    div.scrollTop = div.scrollHeight;
-  }
-
-  function updateAnnual() {
-    db.ref('osraty').once('value', snap => {
-      const data = snap.val() || {};
-      let annual = users.map(u => ({n:u, s:0}));
-      let knightStats = users.reduce((acc, u) => { acc[u] = { fajr:0, fasting:0, quran:0, sunan:0, azkar:0 }; return acc; }, {});
-      const dates = Object.keys(data || {}).sort().reverse().slice(0, 7);
-      dates.forEach(d => {
-        const day = data[d]; if(!day) return;
-        users.forEach(u => {
-          const ud = day[u] || {};
-          if(ud.fajr && ud.fajr.type === 'm') knightStats[u].fajr++;
-          if(ud.fasting && ud.fasting.done) knightStats[u].fasting++;
-          // (لا حاجة لغير ذلك؛ صيام رمضان يُحفظ كفريضة ramadan_sawm ضمن الفرائض ويُجمع تلقائيًا في النقاط)
-          if(ud.quran && ud.quran.done) knightStats[u].quran++;
-          (model.sunan||[]).forEach(s => { if(ud[s.id] && ud[s.id].done) knightStats[u].sunan++; });
-          ['azkar_s','azkar_e','azkar_n'].forEach(a => { if(ud[a] && ud[a].done) knightStats[u].azkar++; });
-        });
-      });
-      const getBest = (key) => users.reduce((a, b) => knightStats[a][key] >= knightStats[b][key] ? a : b);
-      document.getElementById('knights-display').innerHTML = `
-        <div class="knight-card"><span class="knight-icon">🕌</span><span class="knight-title">فارس الفجر</span><span class="knight-name">${getBest('fajr')}</span></div>
-        <div class="knight-card"><span class="knight-icon">🌙</span><span class="knight-title">فارس الصيام</span><span class="knight-name">${getBest('fasting')}</span></div>
-        <div class="knight-card"><span class="knight-icon">📖</span><span class="knight-title">فارس الورد</span><span class="knight-name">${getBest('quran')}</span></div>
-        <div class="knight-card"><span class="knight-icon">🌱</span><span class="knight-title">فارس السنن</span><span class="knight-name">${getBest('sunan')}</span></div>
-        <div class="knight-card"><span class="knight-icon">📿</span><span class="knight-title">فارس الأذكار</span><span class="knight-name">${getBest('azkar')}</span></div>
-      `;
-      Object.values(data).forEach(day => {
-        if(!day) return;
-        users.forEach((u, i) => { const ud = day[u] || {}; Object.values(ud).forEach(t => { annual[i].s += (t && t.p) ? t.p : 0; }); });
-      });
-      drawPodium('annual-podium', annual);
-    });
-  }
-
-  function save(id, val) {
-    if(!currentUser) return alert("اختر اسمك أولاً من البطاقات!");
-    db.ref(`osraty/${document.getElementById('date-picker').value}/${currentUser}/${id}`).set(val);
-  }
-  function selectUser(u) { currentUser = u; document.getElementById('user-ui').style.display='block'; document.getElementById('current-user-title').innerText="سجل طاعاتك يا " + u; sync(); }
-
-  /* ✅ زر حفظ التعديلات دفعة واحدة */
-  function saveAllChanges() {
-    if (!currentUser) { alert("اختر اسمك أولاً من البطاقات!"); return; }
-    const dateStr = document.getElementById('date-picker').value;
-    if (!dateStr) { alert("اختر التاريخ أولاً"); return; }
-
-    // الفرائض: الأزرار المختارة
-    const selectedFardBtns = document.querySelectorAll('#fard-list .opt-btn.selected[data-habit][data-type][data-p]');
-    selectedFardBtns.forEach(btn => {
-      const hid = btn.getAttribute('data-habit');
-      const typ = btn.getAttribute('data-type');
-      const p   = parseInt(btn.getAttribute('data-p'), 10) || 0;
-      save(hid, { type: typ, p: p });
-    });
-
-    // السنن/الأذكار/الصيام: كل الـ checkbox (خارج رمضان فقط)
-    const checks = document.querySelectorAll('#sunan-list input[type="checkbox"][data-habit], #extra-list input[type="checkbox"][data-habit], #fasting-list input[type="checkbox"][data-habit]');
-    checks.forEach(ch => {
-      const hid = ch.getAttribute('data-habit');
-      const p   = parseInt(ch.getAttribute('data-p'), 10) || 0;
-      save(hid, { done: ch.checked, p: ch.checked ? p : 0 });
-    });
-
-    const toast = document.createElement('div');
-    toast.textContent = "تم حفظ التعديلات ✅";
-    toast.style.cssText = 'position:fixed;top:12px;right:12px;background:#1a4d2e;color:#fff;border:2px solid var(--gold);border-radius:12px;padding:8px 12px;z-index:2500;';
-    document.body.appendChild(toast);
-    setTimeout(()=> toast.remove(), 1800);
-  }
-
-  /* ⭐ NEW: أدوات زينة رمضان */
-  const DECOR_START_YMD = "2026-02-18";
-  const RAMADAN_YMD     = "2026-02-19";
-  function addDaysYMD_Muscat(ymd, days){
-    const [y,m,d] = ymd.split('-').map(Number);
-    const base = Date.UTC(y, m-1, d, 0,0,0) - 4*60*60*1000;
-    const next = new Date(base + days * 86400000);
-    return ymdInTz(next, APP_TZ);
-  }
-  const EID_YMD = addDaysYMD_Muscat(RAMADAN_YMD, 30);
-
-  function seedConfetti(containerId, pieces=40){
-    const c = document.getElementById(containerId);
-    c.innerHTML = '';
-    const colors = ['#ffd166','#ef476f','#06d6a0','#118ab2','#8338ec','#ffbe0b'];
-    for(let i=0;i<pieces;i++){
-      const el = document.createElement('i');
-      el.style.left = Math.floor(Math.random()*100)+'%';
-      el.style.animationDelay = (Math.random()*2)+'s';
-      el.style.background = colors[i % colors.length];
-      c.appendChild(el);
-    }
-  }
-  function toggleRamadanDecorations(){
-    const today = todayYMDMuscat();
-    const decor = document.getElementById('decor-container');
-    const eidBanner = document.getElementById('eid-banner');
-    const confetti = document.getElementById('confetti');
-    const inRange = (today >= DECOR_START_YMD && today <= EID_YMD);
-    if (decor) decor.style.display = inRange ? 'block' : 'none';
-    if (eidBanner && confetti){
-      if (today === EID_YMD){
-        eidBanner.style.display = 'block';
-        confetti.style.display = 'block';
-        if(!confetti.dataset.seeded){ seedConfetti('confetti', 60); confetti.dataset.seeded = '1'; }
-      } else {
-        eidBanner.style.display = 'none';
-        confetti.style.display = 'none';
-      }
-    }
-  }
-
-  /* ✅ عنوان الهيدر في رمضان */
-  function updateHeaderTitleForRamadan(){
-    const today = todayYMDMuscat();
-    const inRamadan = (today >= RAMADAN_YMD && today <= EID_YMD);
-    const h2 = document.getElementById('app-title');
-    if (inRamadan) {
-      document.title = "رمضان يقربنا";
-      if (h2) h2.textContent = "رمضان يقربنا";
-    } else {
-      document.title = "ملتقى طاعاتنا 2026 | النسخة المطورة";
-      if (h2) h2.textContent = "🕌 ملتقى طاعاتنا 2026";
-    }
-  }
-
-  /* ============================= */
-  /*     أدوات مدى التاريخ (ميلادي) */
-  /* ============================= */
-  function pad2(n){ return String(n).padStart(2,'0'); }
-  function ymdOfDate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
-  function monthRangeFromYMD(ymd){
-    const [y,m] = ymd.split('-').map(Number);
-    const start = `${y}-${pad2(m)}-01`;
-    const lastDay = new Date(y, m, 0).getDate();
-    const end = `${y}-${pad2(m)}-${pad2(lastDay)}`;
-    return {start, end, label:`${y}-${pad2(m)}`};
-  }
-  function yearRangeFromYMD(ymd){
-    const [y] = ymd.split('-').map(Number);
-    return {start:`${y}-01-01`, end:`${y}-12-31`, label:`${y}`};
   }
 
   /* ===================================== */
@@ -932,6 +655,8 @@
     let s = 0;
     [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
     if(isFriday && uData['kahf']) s += 40;
+    // ✅ نقاط صيام التطوع خارج رمضان تبقى محسوبة كما كانت
+    if(uData['fasting']) s += (uData['fasting'].p || 0);
     return s;
   }
 
@@ -962,7 +687,7 @@
         summary[u].totalPoints += pts;
         summary[u].days.push({date:d, points:pts});
 
-        if(uData['fasting']?.done) summary[u].fastingCount++; // صيام التطوع فقط
+        if(uData['fasting']?.done) summary[u].fastingCount++;
         if(uData['quran']?.done) summary[u].quranCount++;
         (model.fard || []).forEach(f => {
           const typ = uData[f.id]?.type;
@@ -1075,13 +800,6 @@
   .bar-val{ position:absolute; right:8px; top:-1px; font-size:.85rem; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); }
 
   .fard-breakdown{ display:flex; gap:10px; margin-top:8px; color:#534d3d; font-size:.95rem; }
-
-  @media print{
-    body{ margin:12mm; }
-    .hdr{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .kpi, .bar{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .user-card{ box-shadow:none; }
-  }
 </style>
 </head>
 <body>
@@ -1137,6 +855,284 @@
     }
   }
 
+  function toggleDarkMode() { document.body.classList.toggle('dark-mode'); localStorage.setItem('darkMode', document.body.classList.contains('dark-mode')); }
+
+  function sendMessage() {
+    const inp = document.getElementById('chat-input'); const user = document.getElementById('chat-user-selector').value || currentUser;
+    if(inp.value && user) { db.ref('osraty_chat').push({ u: user, m: inp.value, t: Date.now() }); inp.value = ''; }
+    else { alert("يرجى اختيار اسمك وكتابة رسالة"); }
+  }
+  function renderChat(msgs) {
+    const div = document.getElementById('chat-messages');
+    div.innerHTML = Object.values(msgs).map(m => `
+      <div class="chat-msg" style="align-self: ${m.u === currentUser ? 'flex-end' : 'flex-start'}; background: ${m.u === currentUser ? '#dcf8c6' : '#f0f0f0'}; color:#333; border: 1px solid #ddd;">
+        <small><b style="color:var(--primary)">${m.u}</b></small><br>${m.m}
+      </div>`).join('');
+    div.scrollTop = div.scrollHeight;
+  }
+
+  function updateAnnual() {
+    db.ref('osraty').once('value', snap => {
+      const data = snap.val() || {};
+      let annual = users.map(u => ({n:u, s:0}));
+      let knightStats = users.reduce((acc, u) => { acc[u] = { fajr:0, fasting:0, quran:0, sunan:0, azkar:0 }; return acc; }, {});
+      const dates = Object.keys(data || {}).sort().reverse().slice(0, 7);
+      dates.forEach(d => {
+        const day = data[d]; if(!day) return;
+        users.forEach(u => {
+          const ud = day[u] || {};
+          if(ud.fajr && ud.fajr.type === 'm') knightStats[u].fajr++;
+          if(ud.fasting && ud.fasting.done) knightStats[u].fasting++;
+          if(ud.quran && ud.quran.done) knightStats[u].quran++;
+          (model.sunan||[]).forEach(s => { if(ud[s.id] && ud[s.id].done) knightStats[u].sunan++; });
+          ['azkar_s','azkar_e','azkar_n'].forEach(a => { if(ud[a] && ud[a].done) knightStats[u].azkar++; });
+        });
+      });
+      const getBest = (key) => users.reduce((a, b) => knightStats[a][key] >= knightStats[b][key] ? a : b);
+      document.getElementById('knights-display').innerHTML = `
+        <div class="knight-card"><span class="knight-icon">🕌</span><span class="knight-title">فارس الفجر</span><span class="knight-name">${getBest('fajr')}</span></div>
+        <div class="knight-card"><span class="knight-icon">🌙</span><span class="knight-title">فارس الصيام</span><span class="knight-name">${getBest('fasting')}</span></div>
+        <div class="knight-card"><span class="knight-icon">📖</span><span class="knight-title">فارس الورد</span><span class="knight-name">${getBest('quran')}</span></div>
+        <div class="knight-card"><span class="knight-icon">🌱</span><span class="knight-title">فارس السنن</span><span class="knight-name">${getBest('sunan')}</span></div>
+        <div class="knight-card"><span class="knight-icon">📿</span><span class="knight-title">فارس الأذكار</span><span class="knight-name">${getBest('azkar')}</span></div>
+      `;
+      Object.values(data).forEach(day => {
+        if(!day) return;
+        users.forEach((u, i) => { const ud = day[u] || {}; Object.values(ud).forEach(t => { annual[i].s += (t && t.p) ? t.p : 0; }); });
+      });
+      drawPodium('annual-podium', annual);
+    });
+  }
+
+  function save(id, val) { if(!currentUser) return alert("اختر اسمك أولاً من البطاقات!"); db.ref(`osraty/${document.getElementById('date-picker').value}/${currentUser}/${id}`).set(val); }
+  function selectUser(u) { currentUser = u; document.getElementById('user-ui').style.display='block'; document.getElementById('current-user-title').innerText="سجل طاعاتك يا " + u; sync(); }
+
+  /* ✅ زر حفظ التعديلات دفعة واحدة */
+  function saveAllChanges() {
+    if (!currentUser) { alert("اختر اسمك أولاً من البطاقات!"); return; }
+    const dateStr = document.getElementById('date-picker').value;
+    if (!dateStr) { alert("اختر التاريخ أولاً"); return; }
+
+    // الفرائض: الأزرار المختارة
+    const selectedFardBtns = document.querySelectorAll('#fard-list .opt-btn.selected[data-habit][data-type][data-p]');
+    selectedFardBtns.forEach(btn => {
+      const hid = btn.getAttribute('data-habit');
+      const typ = btn.getAttribute('data-type');
+      const p   = parseInt(btn.getAttribute('data-p'), 10) || 0;
+      save(hid, { type: typ, p: p });
+    });
+
+    // السنن/الأذكار/الصيام: كل الـ checkbox
+    const checks = document.querySelectorAll('#sunan-list input[type="checkbox"][data-habit], #extra-list input[type="checkbox"][data-habit], #fasting-list input[type="checkbox"][data-habit]');
+    checks.forEach(ch => {
+      const hid = ch.getAttribute('data-habit');
+      const p   = parseInt(ch.getAttribute('data-p'), 10) || 0;
+      save(hid, { done: ch.checked, p: ch.checked ? p : 0 });
+    });
+
+    // تنبيه لطيف
+    const toast = document.createElement('div');
+    toast.textContent = "تم حفظ التعديلات ✅";
+    toast.style.cssText = 'position:fixed;top:12px;right:12px;background:#1a4d2e;color:#fff;border:2px solid var(--gold);border-radius:12px;padding:8px 12px;z-index:2500;';
+    document.body.appendChild(toast);
+    setTimeout(()=> toast.remove(), 1800);
+  }
+
+  /* ⭐ NEW: أدوات زينة رمضان (المدى الزمني + التبديل + العنوان) */
+  const DECOR_START_YMD = "2026-02-18"; // من اليوم السابق لرمضان
+  const RAMADAN_YMD     = "2026-02-19"; // 1 رمضان ثابت
+  function addDaysYMD_Muscat(ymd, days){
+    const [y,m,d] = ymd.split('-').map(Number);
+    const base = Date.UTC(y, m-1, d, 0,0,0) - 4*60*60*1000; // منتصف الليل - مسقط
+    const next = new Date(base + days * 86400000);
+    return ymdInTz(next, APP_TZ);
+  }
+  const EID_YMD = addDaysYMD_Muscat(RAMADAN_YMD, 30); // يغطي 29/30
+
+  function seedConfetti(containerId, pieces=40){
+    const c = document.getElementById(containerId);
+    c.innerHTML = '';
+    const colors = ['#ffd166','#ef476f','#06d6a0','#118ab2','#8338ec','#ffbe0b'];
+    for(let i=0;i<pieces;i++){
+      const el = document.createElement('i');
+      el.style.left = Math.floor(Math.random()*100)+'%';
+      el.style.animationDelay = (Math.random()*2)+'s';
+      el.style.background = colors[i % colors.length];
+      c.appendChild(el);
+    }
+  }
+  function toggleRamadanDecorations(){
+    const today = todayYMDMuscat();
+    const decor = document.getElementById('decor-container');
+    const eidBanner = document.getElementById('eid-banner');
+    const confetti = document.getElementById('confetti');
+    const inRange = (today >= DECOR_START_YMD && today <= EID_YMD);
+    if (decor) decor.style.display = inRange ? 'block' : 'none';
+    if (eidBanner && confetti){
+      if (today === EID_YMD){
+        eidBanner.style.display = 'block';
+        confetti.style.display = 'block';
+        if(!confetti.dataset.seeded){ seedConfetti('confetti', 60); confetti.dataset.seeded = '1'; }
+      } else {
+        eidBanner.style.display = 'none';
+        confetti.style.display = 'none';
+      }
+    }
+  }
+
+  /* ✅ عنوان الهيدر في رمضان */
+  function updateHeaderTitleForRamadan(){
+    const today = todayYMDMuscat();
+    const inRamadan = (today >= RAMADAN_YMD && today <= EID_YMD);
+    const h2 = document.getElementById('app-title');
+    if (inRamadan) {
+      document.title = "رمضان يقربنا";
+      if (h2) h2.textContent = "رمضان يقربنا";
+    } else {
+      document.title = "ملتقى طاعاتنا 2026 | النسخة المطورة";
+      if (h2) h2.textContent = "🕌 ملتقى طاعاتنا 2026";
+    }
+  }
+
+  /* ============================= */
+  /*     أدوات مدى التاريخ (ميلادي) */
+  /* ============================= */
+  function pad2(n){ return String(n).padStart(2,'0'); }
+  function ymdOfDate(d){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+  function monthRangeFromYMD(ymd){
+    const [y,m] = ymd.split('-').map(Number);
+    const start = `${y}-${pad2(m)}-01`;
+    const lastDay = new Date(y, m, 0).getDate();
+    const end = `${y}-${pad2(m)}-${pad2(lastDay)}`;
+    return {start, end, label:`${y}-${pad2(m)}`};
+  }
+  function yearRangeFromYMD(ymd){
+    const [y] = ymd.split('-').map(Number);
+    return {start:`${y}-01-01`, end:`${y}-12-31`, label:`${y}`};
+  }
+
+  function renderForms(userData, isFriday, fastingDay, selectedDate, hijri) {
+    const fastSection = document.getElementById('fasting-section');
+
+    // ✅ رمضان من كائن الهجري مباشرة
+    const isRamadan = !!(hijri && (hijri.month?.en === 'Ramadan'));
+
+    /* 1) تجهيز الفرائض: إبقاء فريضة صيام رمضان داخل رمضان، وإزالتها خارجه */
+    let curFard = [...model.fard];
+    if (!isRamadan) curFard = curFard.filter(f => f.id !== 'ramadan_sawm');
+    if(isFriday){ curFard = curFard.map(f => f.id === 'dhuhr' ? {...f, n:'🕌 صلاة الجمعة'} : f); }
+
+    document.getElementById('fard-list').innerHTML = curFard.map(h => {
+      const cur = userData[h.id]?.type;
+      return `<div class="habit-row"><div><b>${h.n}</b><span class="pts-info">${h.d || ''}</span></div>
+        <div style="display:flex; gap:2px;">${
+          Object.entries(h.pts).map(([k,v]) =>
+            `<button class="opt-btn ${cur===k?'selected':''}"
+                     data-habit="${h.id}" data-type="${k}" data-p="${v}"
+                     onclick="save('${h.id}',{type:'${k}', p:${v}})">${k=='m'?'مسجد':k=='g'?'جماعة':k=='f'?'فرد':'قضاء'}</button>`
+          ).join('')
+        }</div></div>`;
+    }).join('');
+
+    /* 2) صيام التطوع: مخفي داخل رمضان، ظاهر خارجه في أيام الصيام */
+    if (isRamadan) {
+      fastSection.style.display = 'none';
+    } else if (fastingDay) {
+      fastSection.style.display = 'block';
+      const fastingPoints = 100;
+      document.getElementById('fasting-list').innerHTML = `
+        <div class="habit-row">
+          <span>🌙 صيام تطوع (الاثنين/الخميس/البيض) <small>(+${fastingPoints}ن)</small></span>
+          <input type="checkbox"
+                 ${userData['fasting']?.done?'checked':''}
+                 data-habit="fasting" data-p="${fastingPoints}"
+                 onchange="save('fasting',{done:this.checked, p:this.checked?${fastingPoints}:0})"
+                 style="transform:scale(1.5);">
+        </div>`;
+    } else {
+      fastSection.style.display = 'none';
+    }
+
+    /* 3) السنن والأذكار */
+    let curExtra = [...model.extra];
+    if(isFriday){ curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'}); }
+
+    const drawCheck = (list, tid) => {
+      const rDay = getRamadanDayFor(selectedDate);
+      document.getElementById(tid).innerHTML = list.map(h => {
+        const done = userData[h.id]?.done;
+        let url = h.l || null;
+        if (h.id === 'quran' && rDay) url = `https://quran.com/juz/${rDay}`;
+        const label = url
+          ? `<a class="habit-link" href="${url}" target="_blank" rel="noopener noreferrer">${h.n}</a>`
+          : h.n;
+        return `<div class="habit-row">
+          <span>${label} <small>(+${h.p}ن)</small></span>
+          <input type="checkbox" ${done?'checked':''}
+                 data-habit="${h.id}" data-p="${h.p}"
+                 onchange="save('${h.id}',{done:this.checked, p:this.checked?${h.p}:0})"
+                 style="transform:scale(1.5); cursor:pointer;">
+        </div>`;
+      }).join('');
+    };
+    drawCheck(model.sunan, 'sunan-list');
+    drawCheck(curExtra, 'extra-list');
+  }
+
+  async function render(allData) {
+    const selectedDateStr = document.getElementById('date-picker').value;
+    const selectedDate = parseLocalYMD(selectedDateStr);
+
+    // (استبدال) استخدام الهجري المصحح للعرض والمنطق
+    const hijri = await getHijriCorrected(selectedDate);
+    if(hijri) document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
+
+    // تصحيح ثابت: 19 فبراير 2026 = 1 رمضان، 18 فبراير = 30 شعبان (مرجع مسقط)
+    const selectedYMD_Muscat = ymdInTz(selectedDate, APP_TZ);
+    if (selectedYMD_Muscat === '2026-02-18') document.getElementById('hijri-display').innerText = `30 شعبان 1447هـ`;
+    if (selectedYMD_Muscat === '2026-02-19') document.getElementById('hijri-display').innerText = `1 رمضان 1447هـ`;
+
+    const isFriday = selectedDate.getDay() === 5;
+    const fastingDay = hijri ? isFastingDay(selectedDate.getDay(), hijri.day, hijri.month.en) : false;
+
+    let stats = await Promise.all(users.map(async u => {
+      let s = 0; let uData = allData[u] || {};
+      [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
+      if(isFriday && uData['kahf']) s += 40;
+      // نقاط صيام التطوع خارج رمضان كما هي
+      if(uData['fasting']) s += (uData['fasting'].p || 0);
+      return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
+    }));
+
+    drawPodium('daily-podium', stats);
+    document.getElementById('cards-ui').innerHTML = stats.map(st => `
+      <div class="comp-card ${st.n === currentUser ? 'active' : ''}" onclick="selectUser('${st.n}')">
+        <b style="font-size:1.1rem">${st.n}</b> <br> <span style="color:var(--gold)">${st.s} نقطة</span>
+        <div class="user-status">⏳ المتبقي: ${st.rem}</div>
+      </div>`).join('');
+    if(currentUser) renderForms(allData[currentUser] || {}, isFriday, fastingDay, selectedDate, hijri);
+
+    // 🎉 رسالة التهنئة
+    const FEMININE_NAMES = new Set(['شيماء']);
+    function getCongratsMessage(name){
+      const isFem = FEMININE_NAMES.has(name);
+      return isFem
+        ? `🌟 هنيئًا لكِ يا ${name}! لقد أكملتِ عبادات يومك كاملة. ✨ تقبّل الله منكِ وغفر لكِ.`
+        : `🌟 هنيئًا لك يا ${name}! لقد أكملت عبادات يومك كاملة. ✨ تقبّل الله منك وغفر لك.`;
+    }
+    const doneBadge = document.getElementById('all-done-badge');
+    if (currentUser) {
+      const st = stats.find(x => x.n === currentUser);
+      if (st && st.rem === "✅ اكتملت الطاعة") { doneBadge.innerHTML = getCongratsMessage(currentUser); doneBadge.style.display='block'; }
+      else { doneBadge.style.display='none'; }
+    } else { doneBadge.style.display='none'; }
+
+    renderDateDebug();
+    checkNiyaAlert();
+    updateNextPrayerCountdown();
+    updateHeaderTitleForRamadan();
+  }
+
   function sync() {
     const d = document.getElementById('date-picker').value;
     db.ref('osraty/' + d).on('value', snap => render(snap.val() || {}));
@@ -1166,7 +1162,6 @@
     applyCitySelection();
 
     updateCountdowns();
-    initEmojis();
 
     document.getElementById('date-picker').onchange = () => { sync(); updateHeaderTitleForRamadan(); };
     document.getElementById('btn-refresh').onclick = refreshAll;
