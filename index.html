@@ -3,99 +3,90 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ملتقى طاعاتنا 2026 | النسخة الإدارية الشاملة</title>
+  <title>ملتقى طاعاتنا 2026 | النسخة الإدارية النهائية</title>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet"/>
 
   <style>
-    :root{
-      --primary:#1a4d2e; --gold:#c5a059; --gold-light:#e6cc92; --bg:#f9f6f0;
-      --card-bg:#ffffff; --text:#1a4d2e; --accent:#d35400; --crimson:#900c3f;
-    }
+    :root{ --primary:#1a4d2e; --gold:#c5a059; --gold-light:#e6cc92; --bg:#f9f6f0; --card-bg:#ffffff; --text:#1a4d2e; --accent:#d35400; }
     body.dark-mode{ --bg:#121212; --card-bg:#1e1e1e; --text:#e0e0e0; --primary:#2d6a4f; }
     body{ font-family:'Amiri',serif; background-color:var(--bg); margin:0; padding:10px; color:var(--text); transition:background .3s; }
-    .main-container{ max-width:900px; margin:auto; background:var(--card-bg); border:3px double var(--gold); border-radius:20px; padding:15px; box-shadow:0 10px 30px rgba(0,0,0,.2); position:relative; }
-
-    /* Admin Styles */
-    #admin-lock { position: absolute; top: 15px; right: 15px; cursor: pointer; opacity: 0.3; border: none; background: none; font-size: 1.2rem; }
-    .admin-section { display: none; background: #fff; border: 3px solid var(--accent); border-radius: 15px; margin: 20px 0; padding: 15px; }
-    .report-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
-    .report-table th, .report-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-    .report-table th { background: var(--primary); color: white; }
-    .active-day { color: green; font-weight: bold; }
-    .inactive-day { color: red; }
+    .main-container{ max-width:900px; margin:auto; background:var(--card-bg); border:3px double var(--gold); border-radius:20px; padding:15px; box-shadow:0 10px 30px rgba(0,0,0,.2); position:relative; z-index:1; }
+    
+    /* الإدارة */
+    #admin-lock { position: absolute; top: 15px; right: 15px; cursor: pointer; border: none; background: none; font-size: 1.2rem; z-index: 10; opacity: 0.5; }
+    .admin-section { display: none; background: #fff; border: 3px solid var(--accent); border-radius: 15px; margin: 20px 0; padding: 15px; animation: slideDown 0.4s; }
+    @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
     .header-bar{ background:linear-gradient(135deg,#1a4d2e,#0a2b1a); color:#fff; padding:15px; border-radius:15px; text-align:center; border:2px solid var(--gold); }
-    .date-container{ background:rgba(255,255,255,.1); padding:10px; border-radius:12px; margin:10px 0; border:1px solid rgba(197,160,89,.3); }
-    
-    .podium-container{ display:flex; justify-content:center; align-items:flex-end; height:120px; gap:5px; padding-bottom:25px; }
-    .podium-step{ width:45px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; color:#fff; border-radius:8px; position:relative; font-size:.7rem; }
-    .p-1{ height:100px; background:linear-gradient(135deg,#ffd700,#b8860b); }
-    .p-2{ height:75px;  background:linear-gradient(135deg,#bdc3c7,#7f8c8d); }
-    .p-3{ height:55px;  background:linear-gradient(135deg,#cd7f32,#8b4513); }
-    .p-name{ position:absolute; bottom:-25px; color:var(--text); font-weight:bold; font-size:.75rem; white-space:nowrap; }
+    .podium-container{ display:flex; justify-content:center; align-items:flex-end; height:130px; gap:8px; padding-bottom:25px; }
+    .podium-step{ width:50px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; color:#fff; border-radius:8px; position:relative; font-size:.75rem; transition:.5s; }
+    .p-1{ height:110px; background:linear-gradient(135deg,#ffd700,#b8860b); }
+    .p-2{ height:85px;  background:linear-gradient(135deg,#bdc3c7,#7f8c8d); }
+    .p-3{ height:65px;  background:linear-gradient(135deg,#cd7f32,#8b4513); }
+    .p-4{ height:45px;  background:linear-gradient(135deg,#95a5a6,#2c3e50); }
+    .p-name{ position:absolute; bottom:-25px; color:var(--text); font-weight:bold; font-size:.8rem; white-space:nowrap; }
 
     .user-cards{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:20px; }
-    .comp-card{ padding:10px; text-align:center; border:2px solid var(--gold-light); border-radius:15px; cursor:pointer; background:#fff; position: relative; }
-    .comp-card.active{ border-color:var(--primary); background:#f0f7f2; }
-    .remaining-box { font-size: 0.7rem; color: #d35400; background: #fff5f0; border-radius: 8px; padding: 5px; margin-top: 5px; text-align: right; border: 1px solid #ffe0d0; }
+    .comp-card{ padding:10px; text-align:center; border:2px solid var(--gold-light); border-radius:15px; cursor:pointer; background:#fff; transition:.3s; }
+    .comp-card.active{ border-color:var(--primary); background:#f0f7f2; transform:scale(1.02); }
+    .user-status{ font-size:.7rem; color:#d35400; margin-top:5px; border-top:1px solid #eee; padding-top:5px; text-align: right; }
 
     .section-card{ background:#fff; border:1px solid var(--gold); border-radius:15px; margin-top:15px; overflow:hidden; }
     .section-title{ background:var(--primary); color:#fff; padding:10px; margin:0; font-size:1rem; display: flex; justify-content: space-between; }
     .habit-row{ display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px dashed var(--gold-light); }
-    .opt-btn{ font-size:.65rem; padding:5px 4px; border-radius:6px; border:1px solid var(--gold); cursor:pointer; flex:1; margin:0 1px; background:#fff; }
+    .opt-btn{ font-size:.7rem; padding:6px 2px; border-radius:6px; border:1px solid var(--gold); cursor:pointer; flex:1; margin:0 1px; background:#fff; }
     .opt-btn.selected{ background:var(--gold); color:#fff; }
     .external-link { color: #2980b9; text-decoration: none; font-weight: bold; }
 
-    .chat-section{ background:#fff; border:2px solid var(--primary); border-radius:15px; margin-top:20px; height:300px; display:flex; flex-direction:column; }
-    .chat-messages{ flex:1; overflow-y:auto; padding:10px; }
-    .chat-msg { background: #f1f1f1; padding: 5px 10px; border-radius: 10px; margin-bottom: 5px; width: fit-content; font-size: 0.85rem; }
+    .chat-section{ background:#fff; border:2px solid var(--primary); border-radius:15px; margin-top:20px; height:350px; display:flex; flex-direction:column; }
+    .chat-messages{ flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:5px; }
+    .chat-msg { background: #f1f1f1; padding: 8px; border-radius: 10px; max-width: 85%; font-size: 0.85rem; }
+    .report-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 10px; }
+    .report-table th, .report-table td { border: 1px solid #ddd; padding: 5px; text-align: center; }
+    .active-day { color: green; font-weight: bold; }
+    .inactive-day { color: red; }
   </style>
 </head>
 <body>
 
-<button class="dark-mode-toggle" onclick="toggleDarkMode()" style="position:fixed; top:10px; left:10px; z-index:100; border-radius:50%; width:40px; height:40px;">🌓</button>
+<button class="dark-mode-toggle" onclick="document.body.classList.toggle('dark-mode')" style="position:fixed; top:10px; left:10px; z-index:100; border-radius:50%; width:40px; height:40px; cursor:pointer;">🌓</button>
 
 <div class="main-container">
   <button id="admin-lock" onclick="toggleAdmin()">⚙️</button>
-  
+
   <div class="header-bar">
     <h2 style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h2>
-    <div class="date-container">
-      <span id="hijri-display">جاري التحميل...</span> <br>
-      <input type="date" id="date-picker" style="border-radius:5px; border:none; padding:5px; font-weight:bold; margin-top:5px;">
+    <div style="background:rgba(255,255,255,0.1); padding:10px; border-radius:12px; margin-top:10px;">
+      <span id="hijri-display" style="font-weight:bold; font-size:1.2rem; color:var(--gold-light);">...</span> <br>
+      <input type="date" id="date-picker" style="border-radius:5px; border:none; padding:5px; text-align:center; font-weight:bold; margin-top:5px;">
     </div>
   </div>
 
   <div id="admin-panel" class="admin-section">
-    <h3 style="text-align:center; color:var(--accent);">📊 لوحة التحكم والتقارير</h3>
-    <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; justify-content:center;">
+    <h3 style="text-align:center; color:var(--accent);">📊 مركز التقارير والتحليل</h3>
+    <div style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-bottom:10px;">
         <button class="opt-btn" onclick="generateReport('daily')">اليوم</button>
         <button class="opt-btn" onclick="generateReport('monthly')">الشهر</button>
         <button class="opt-btn" onclick="generateReport('annual')">السنة</button>
-        <input type="date" id="report-start" class="opt-btn" style="flex:none; width:110px;">
-        <input type="date" id="report-end" class="opt-btn" style="flex:none; width:110px;">
-        <button class="opt-btn" style="background:var(--accent); color:#fff;" onclick="generateRangeReport()">تقرير مخصص</button>
+        <div style="display:flex; gap:2px; align-items:center;">
+            <input type="date" id="start-date" class="opt-btn" style="width:105px">
+            <input type="date" id="end-date" class="opt-btn" style="width:105px">
+            <button class="opt-btn" style="background:var(--accent); color:#fff;" onclick="generateRangeReport()">بحث</button>
+        </div>
     </div>
-    <canvas id="reportChart" style="max-height: 200px; margin-bottom:15px;"></canvas>
+    <canvas id="reportChart" style="max-height: 180px;"></canvas>
     <div id="report-output"></div>
-    <button class="opt-btn" style="background:var(--primary); color:#fff; width:100%; margin-top:10px;" onclick="exportPDF()">تصدير التقرير PDF</button>
+    <button class="opt-btn" style="background:var(--primary); color:#fff; width:100%; margin-top:10px;" onclick="exportPDF()">حفظ التقرير PDF 📥</button>
   </div>
 
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:15px 0;">
-    <div id="daily-podium-box">
-        <h4 style="text-align:center; margin:2px;">🏆 توب اليوم</h4>
-        <div id="daily-podium" class="podium-container"></div>
-    </div>
-    <div id="annual-podium-box">
-        <h4 style="text-align:center; margin:2px;">✨ السنوي</h4>
-        <div id="annual-podium" class="podium-container"></div>
-    </div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin:20px 0;">
+    <div><h4 style="text-align:center; margin:2px;">🏆 توب اليوم</h4><div id="daily-podium" class="podium-container"></div></div>
+    <div><h4 style="text-align:center; margin:2px;">✨ الترتيب السنوي</h4><div id="annual-podium" class="podium-container"></div></div>
   </div>
 
   <div id="cards-ui" class="user-cards"></div>
@@ -103,8 +94,8 @@
   <div id="user-ui" style="display:none;">
     <h3 id="current-user-title" style="text-align:center; color:var(--primary); background: var(--gold-light); padding: 8px; border-radius: 10px;"></h3>
     
-    <div id="fast-section" class="section-card" style="border: 2px solid var(--accent);">
-      <h3 class="section-title" id="fast-title" style="background:var(--accent);">🌙 صيام</h3>
+    <div class="section-card" style="border: 2px solid var(--accent);">
+      <h3 class="section-title" id="fast-header" style="background:var(--accent);">🌙 ركن الصيام</h3>
       <div class="habit-row">
         <span id="fast-label">جارِ التحقق...</span>
         <input type="checkbox" id="fast-check" style="transform: scale(1.6);">
@@ -117,26 +108,25 @@
     </div>
 
     <div class="section-card"><h3 class="section-title">🌱 السنن والرواتب</h3><div id="sunan-list"></div></div>
-    
+
     <div class="section-card">
-      <h3 class="section-title">📿 الأذكار والورد (alazkar.today)</h3>
+      <h3 class="section-title">📿 الأذكار والورد <span>(alazkar.today)</span></h3>
       <div id="extra-list"></div>
     </div>
   </div>
 
   <div class="chat-section">
-    <h4 style="margin:5px; text-align:center;">💬 مجلس الطاعة</h4>
+    <h4 style="margin:10px; text-align:center; color:var(--primary);">💬 مجلس الطاعة</h4>
     <div id="chat-messages" class="chat-messages"></div>
     <div style="padding:10px; display:flex; gap:5px; background:#f9f9f9; border-radius:0 0 15px 15px;">
-      <select id="chat-user-selector" style="border-radius:10px; border:1px solid var(--gold); padding:5px;"><option value="محمد">محمد</option><option value="شيماء">شيماء</option><option value="أحمد">أحمد</option><option value="ياسين">ياسين</option></select>
-      <input type="text" id="chat-input" style="flex:1; border-radius:20px; border:1px solid var(--gold); padding:0 10px;" placeholder="رسالة تشجيعية...">
+      <select id="chat-user" style="border-radius:10px; border:1px solid var(--gold); padding:5px;"><option value="محمد">محمد</option><option value="شيماء">شيماء</option><option value="أحمد">أحمد</option><option value="ياسين">ياسين</option></select>
+      <input type="text" id="chat-input" style="flex:1; border-radius:20px; border:1px solid var(--gold); padding:0 10px;" placeholder="اكتب رسالة...">
       <button onclick="sendMessage()" style="background:var(--primary); color:#fff; border:none; border-radius:50%; width:35px; height:35px;">➤</button>
     </div>
   </div>
 </div>
 
 <script>
-  // تهيئة Firebase بنفس بياناتك الأصلية
   const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1" };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
@@ -145,7 +135,6 @@
   let currentUser = null;
   let myChart = null;
 
-  // نموذج العبادات المطور
   const model = {
     fard: [
       {id:'fajr', n:'الفجر', pts: {m:100, g:30, f:15, q:5}},
@@ -156,7 +145,7 @@
     ],
     sunan: [
       {id:'s_fajr', n:'سنة الفجر', p:20}, {id:'s_duha', n:'الضحى', p:25},
-      {id:'s_dhuhr_b', n:'الظهر (قبل)', p:20}, {id:'s_dhuhr_a', n:'الظهر (بعد)', p:15},
+      {id:'s_dhuhr_b', n:'الظهر قبل', p:20}, {id:'s_dhuhr_a', n:'الظهر بعد', p:15},
       {id:'s_maghrib', n:'سنة المغرب', p:15}, {id:'s_isha', n:'سنة العشاء', p:15},
       {id:'s_shaf', n:'الشفع والوتر', p:25}, {id:'s_qyam', n:'قيام الليل', p:40}
     ],
@@ -182,8 +171,7 @@
     }
   }
 
-  // حساب النقاط والمتبقي ليوم معين
-  function calcPoints(ud, isRamadan, isFriday) {
+  function calcDayPoints(ud, isRamadan, isFriday) {
     let pts = 0; let rem = [];
     if(ud?.fast) pts += isRamadan ? 150 : 50; else rem.push("الصيام");
     model.fard.forEach(f => { if(ud?.[f.id]) pts += ud[f.id].p; else rem.push(f.n); });
@@ -198,39 +186,32 @@
     const hj = await getHijri(new Date(selDate));
     const isRamadan = hj.month.en === "Ramadan";
     const isFriday = new Date(selDate).getDay() === 5;
-
     document.getElementById('hijri-display').innerText = `${hj.day} ${hj.month.ar} ${hj.year}هـ`;
 
-    // بطاقات المتسابقين
     let stats = users.map(u => {
-      const res = calcPoints(allData[selDate]?.[u], isRamadan, isFriday);
+      const res = calcDayPoints(allData[selDate]?.[u], isRamadan, isFriday);
       return { n: u, s: res.pts, rem: res.rem };
     });
-
     drawPodium('daily-podium', stats);
     
-    // السنوي
     let annual = users.map(u => {
       let total = 0;
-      Object.keys(allData).forEach(d => {
-          total += calcPoints(allData[d][u], false, false).pts; // تبسيط للسنوي
-      });
+      Object.keys(allData).forEach(d => total += calcDayPoints(allData[d][u], false, false).pts);
       return { n: u, s: total };
     });
     drawPodium('annual-podium', annual);
 
     document.getElementById('cards-ui').innerHTML = stats.map(st => `
       <div class="comp-card ${st.n === currentUser ? 'active' : ''}" onclick="selectUser('${st.n}')">
-        <b>${st.n}</b> <br> <span style="color:var(--gold); font-weight:bold;">${st.s} نقطة</span>
-        <div class="remaining-box">⏳ المتبقي: ${st.rem.length > 0 ? st.rem.join(' • ') : '🏆 كامل!'}</div>
+        <b>${st.n}</b> <br> <span style="color:var(--gold); font-weight:bold;">${st.s}ن</span>
+        <div class="user-status">⏳ المتبقي: ${st.rem.length > 0 ? st.rem.join(' • ') : '🏆 اكتمل!'}</div>
       </div>`).join('');
 
     if(currentUser) renderTasks(allData[selDate]?.[currentUser] || {}, isRamadan, isFriday);
   }
 
   function renderTasks(ud, isRamadan, isFriday) {
-    const label = isRamadan ? "فريضة صيام رمضان (+150ن)" : "صيام تطوع (+50ن)";
-    document.getElementById('fast-label').innerText = label;
+    document.getElementById('fast-label').innerText = isRamadan ? "فريضة صيام اليوم (+150ن)" : "صيام تطوع (+50ن)";
     document.getElementById('fast-check').checked = !!ud.fast;
     document.getElementById('fast-check').onclick = (e) => save('fast', e.target.checked);
 
@@ -248,9 +229,8 @@
         </div>`).join('');
     };
     drawCheck(model.sunan, 'sunan-list');
-    let extras = [...model.extra];
-    if(isFriday) extras.push({id:'kahf', n:'📖 سورة الكهف', p:40, url:'https://alazkar.today/surah-al-kahf'});
-    drawCheck(extras, 'extra-list');
+    let ex = [...model.extra]; if(isFriday) ex.push({id:'kahf', n:'📖 سورة الكهف', p:40, url:'https://alazkar.today/surah-al-kahf'});
+    drawCheck(ex, 'extra-list');
   }
 
   function save(id, val) {
@@ -261,85 +241,70 @@
   function selectUser(n) {
     currentUser = n;
     document.getElementById('user-ui').style.display = 'block';
-    document.getElementById('current-user-title').innerText = `لوحة تسجيل ${n}`;
+    document.getElementById('current-user-title').innerText = `بوابة ${n}`;
     db.ref('osraty').once('value', s => updateUI(s.val()||{}));
   }
 
   function drawPodium(el, data) {
     const sorted = [...data].sort((a,b) => b.s - a.s);
-    const steps = ['p-2', 'p-1', 'p-3'];
-    document.getElementById(el).innerHTML = [1,0,2].map((idx, i) => {
+    const steps = ['p-2', 'p-1', 'p-3', 'p-4'];
+    document.getElementById(el).innerHTML = [1,0,2,3].map((idx, i) => {
       const u = sorted[idx] || {n:'-', s:0};
       return `<div class="podium-step ${steps[i]}"><span>${u.s}</span><div class="p-name">${u.n}</div></div>`;
     }).join('');
-  }
-
-  // التقارير المتطورة
-  function displayReport(data, range, title) {
-    let scores = users.map(u => {
-        let total = 0, active = 0, inactive = 0;
-        let details = [];
-        range.forEach(d => {
-            let p = calcPoints(data[d]?.[u], false, false).pts;
-            total += p;
-            if(p > 0) active++; else inactive++;
-            details.push({date: d, points: p});
-        });
-        return { u, total, active, inactive, details };
-    });
-
-    if(myChart) myChart.destroy();
-    myChart = new Chart(document.getElementById('reportChart'), {
-        type: 'bar',
-        data: { labels: users, datasets: [{ label: 'النقاط الكلية', data: scores.map(s=>s.total), backgroundColor: '#1a4d2e' }] }
-    });
-
-    let html = `<h4>${title}</h4><table class="report-table"><tr><th>المتسابق</th><th>النقاط</th><th>أيام فعالة</th><th>أيام غياب</th></tr>`;
-    scores.forEach(s => {
-        html += `<tr><td><b>${s.u}</b></td><td>${s.total}</td><td class="active-day">${s.active}</td><td class="inactive-day">${s.inactive}</td></tr>`;
-    });
-    document.getElementById('report-output').innerHTML = html + `</table>`;
   }
 
   function generateReport(type) {
     db.ref('osraty').once('value', snap => {
         const data = snap.val() || {};
         const sel = document.getElementById('date-picker').value;
-        let range = [];
-        if(type === 'daily') range = [sel];
-        else if(type === 'monthly') range = Object.keys(data).filter(d => d.startsWith(sel.substring(0,7)));
-        else range = Object.keys(data);
+        let range = (type==='daily') ? [sel] : (type==='monthly') ? Object.keys(data).filter(d => d.startsWith(sel.substring(0,7))) : Object.keys(data);
         displayReport(data, range, `تقرير ${type}`);
     });
   }
 
   function generateRangeReport() {
-    const start = document.getElementById('report-start').value;
-    const end = document.getElementById('report-end').value;
+    const start = document.getElementById('start-date').value, end = document.getElementById('end-date').value;
     db.ref('osraty').once('value', snap => {
         const data = snap.val() || {};
         const range = Object.keys(data).filter(d => d >= start && d <= end);
-        displayReport(data, range, `تقرير من ${start} إلى ${end}`);
+        displayReport(data, range, `تقرير مخصص`);
     });
+  }
+
+  function displayReport(data, range, title) {
+    let scores = users.map(u => {
+        let total = 0, active = 0, activeDates = [];
+        range.forEach(d => {
+            let p = calcDayPoints(data[d]?.[u], false, false).pts;
+            total += p; if(p > 0) { active++; activeDates.push(d); }
+        });
+        return { u, total, active, inactive: range.length - active, activeDates };
+    });
+
+    if(myChart) myChart.destroy();
+    myChart = new Chart(document.getElementById('reportChart'), {
+        type: 'bar', data: { labels: users, datasets: [{ label: 'النقاط الكلية', data: scores.map(s=>s.total), backgroundColor: '#1a4d2e' }] }
+    });
+
+    let html = `<h4>${title}</h4><table class="report-table"><tr><th>المتسابق</th><th>النقاط</th><th>فعال</th><th>غائب</th></tr>`;
+    scores.forEach(s => html += `<tr><td><b>${s.u}</b></td><td>${s.total}</td><td class="active-day">${s.active}</td><td class="inactive-day">${s.inactive}</td></tr>`);
+    document.getElementById('report-output').innerHTML = html + `</table>`;
   }
 
   function exportPDF() { html2pdf().from(document.getElementById('report-output')).save('تقرير_التميز.pdf'); }
 
   function sendMessage() {
-    const u = document.getElementById('chat-user-selector').value;
-    const m = document.getElementById('chat-input').value;
+    const u = document.getElementById('chat-user').value, m = document.getElementById('chat-input').value;
     if(m) { db.ref('chat').push({ u, m, t: Date.now() }); document.getElementById('chat-input').value = ''; }
   }
-
-  function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
 
   window.onload = () => {
     const dp = document.getElementById('date-picker');
     dp.value = new Date().toISOString().split('T')[0];
     dp.onchange = () => db.ref('osraty').once('value', s => updateUI(s.val()||{}));
-    
     db.ref('osraty').on('value', s => updateUI(s.val()||{}));
-    db.ref('chat').limitToLast(20).on('value', s => {
+    db.ref('chat').on('value', s => {
       document.getElementById('chat-messages').innerHTML = Object.values(s.val()||{}).map(m => `<div class="chat-msg"><b>${m.u}:</b> ${m.m}</div>`).join('');
       const d = document.getElementById('chat-messages'); d.scrollTop = d.scrollHeight;
     });
