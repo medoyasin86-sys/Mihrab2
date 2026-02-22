@@ -6,11 +6,11 @@
   <title>ملتقى طاعاتنا 2026 | النسخة المطورة</title>
 
   <!-- Firebase (Compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js</script>
+  https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js</script>
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet"/>
+  https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap
 
   <style>
     :root{
@@ -768,7 +768,7 @@
         const done = userData[h.id]?.done;
         let url = h.l || null;
         if (h.id === 'quran' && rDay) url = `https://quran.com/juz/${rDay}`;
-        const label = url ? `<a class="habit-link" href="${url}" target="_blank" rel="noopener noreferrer">${h.n}</a>` : h.n;
+        const label = url ? `${url}${h.n}</a>` : h.n;
         return `<div class="habit-row">
           <span>${label} <small>(+${h.p}ن)</small></span>
           <input type="checkbox" ${done?'checked':''}
@@ -1189,7 +1189,7 @@
 <head>
 <meta charset="UTF-8">
 <title>تقرير ${modeLabel} | ${rangeLabel}</title>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet"/>
+https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap
 <style>
   :root{ --primary:#1a4d2e; --gold:#c5a059; --gold-light:#e6cc92; --bg:#fff; --text:#1a4d2e; --muted:#6b6b6b; --border:#e6dec7; }
   body{ font-family:'Amiri',serif; margin:24px; background:#fff; color:var(--text); }
