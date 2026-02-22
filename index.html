@@ -3,87 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ملتقى طاعاتنا 2026 | النسخة الإدارية</title>
+    <title>ملتقى طاعاتنا 2026 | النسخة الشاملة</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --primary: #1a4d2e; --gold: #c5a059; --gold-light: #e6cc92; --bg: #f9f6f0; 
-            --card-bg: #ffffff; --text: #1a4d2e; --accent: #d35400; 
-        }
+        :root { --primary: #1a4d2e; --gold: #c5a059; --gold-light: #e6cc92; --bg: #f9f6f0; --card-bg: #ffffff; --text: #1a4d2e; --accent: #d35400; }
         body.dark-mode { --bg: #121212; --card-bg: #1e1e1e; --text: #e0e0e0; --primary: #2d6a4f; }
         body { font-family: 'Amiri', serif; background-color: var(--bg); margin: 0; padding: 10px; color: var(--text); transition: background 0.3s; }
         .main-container { max-width: 950px; margin: auto; background: var(--card-bg); border: 3px double var(--gold); border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .header-bar { background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid var(--gold); position: relative; }
         
-        .header-bar { background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid var(--gold); }
-        .date-container { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; margin: 10px 0; }
-        #hijri-display { display: block; color: var(--gold-light); font-size: 1.2rem; font-weight: bold; }
-        
-        /* Admin Section Styles */
-        .admin-section { background: #fff5e6; border: 2px solid var(--accent); border-radius: 15px; margin: 20px 0; padding: 15px; display: none; }
-        body.dark-mode .admin-section { background: #2c1a0a; border-color: var(--gold); }
-        .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; color: #333; }
-        .report-table th, .report-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        /* Admin Section */
+        #admin-auth-btn { position: absolute; top: 10px; right: 10px; opacity: 0.3; cursor: pointer; background: none; border: none; font-size: 1.2rem; }
+        .admin-section { background: #fff; border: 2px solid var(--accent); border-radius: 15px; margin: 20px 0; padding: 15px; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .report-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        .report-table th, .report-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
         .report-table th { background: var(--primary); color: white; }
-        .tab-btn { padding: 8px 15px; cursor: pointer; border: 1px solid var(--gold); background: white; margin-left: 5px; border-radius: 5px; }
-        .tab-btn.active { background: var(--gold); color: white; }
 
-        /* Existing Styles */
+        /* General UI */
         .podium-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 120px; gap: 5px; padding-bottom: 25px; }
-        .podium-step { width: 40px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: white; border-radius: 8px; position: relative; font-size: 0.7rem; }
-        .p-1 { height: 90px; background: linear-gradient(135deg, #ffd700, #b8860b); }
-        .p-2 { height: 65px; background: linear-gradient(135deg, #bdc3c7, #7f8c8d); }
-        .p-3 { height: 45px; background: linear-gradient(135deg, #cd7f32, #8b4513); }
-        .p-name { position: absolute; bottom: -22px; color: var(--text); font-weight: bold; font-size: 0.8rem; }
+        .podium-step { width: 45px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: white; border-radius: 8px; position: relative; font-size: 0.75rem; transition: 0.5s; }
+        .p-1 { height: 100px; background: linear-gradient(135deg, #ffd700, #b8860b); }
+        .p-2 { height: 75px; background: linear-gradient(135deg, #bdc3c7, #7f8c8d); }
+        .p-3 { height: 55px; background: linear-gradient(135deg, #cd7f32, #8b4513); }
+        .p-name { position: absolute; bottom: -25px; color: var(--text); font-weight: bold; font-size: 0.8rem; white-space: nowrap; }
         
         .knights-section { background: linear-gradient(135deg, #fff, #fdf8e6); border: 2px solid var(--gold); border-radius: 15px; padding: 15px; margin: 20px 0; }
-        .knights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
-        .knight-card { background: white; border: 1px solid var(--gold-light); border-radius: 10px; padding: 8px; text-align: center; }
-        
+        .knights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; text-align: center; }
+        .knight-card { background: white; border: 1px solid var(--gold-light); border-radius: 12px; padding: 10px; }
+
         .user-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
         .comp-card { padding: 10px; text-align: center; border: 2px solid var(--gold-light); border-radius: 15px; cursor: pointer; background: #fff; }
-        .comp-card.active { border-color: var(--primary); background: #f0f7f2; }
-        
+        .comp-card.active { border-color: var(--primary); background: #f0f7f2; transform: scale(1.02); }
+
         .section-card { background: white; border: 1px solid var(--gold); border-radius: 15px; margin-top: 15px; overflow: hidden; }
-        .section-title { background: var(--primary); color: white; padding: 8px; margin: 0; font-size: 1rem; }
-        .habit-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px dashed #eee; }
-        
+        .section-title { background: var(--primary); color: white; padding: 10px; margin: 0; font-size: 1rem; }
+        .habit-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px dashed #eee; }
+        .opt-btn { font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--gold); cursor: pointer; background: transparent; }
+        .opt-btn.selected { background: var(--gold); color: white; }
+
         .chat-section { background: white; border: 2px solid var(--primary); border-radius: 15px; margin-top: 20px; height: 350px; display: flex; flex-direction: column; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
         .chat-msg { padding: 8px; border-radius: 10px; max-width: 80%; font-size: 0.85rem; }
         .chat-input-area { padding: 10px; display: flex; gap: 5px; background: #f9f9f9; border-radius: 0 0 15px 15px; }
-        
-        #emoji-picker { position: absolute; bottom: 65px; left: 10px; background: white; border: 2px solid var(--gold); width: 250px; height: 180px; display: none; flex-direction: column; z-index: 100; }
-        .emoji-list { display: grid; grid-template-columns: repeat(6, 1fr); overflow-y: auto; padding: 5px; }
-        .niya-alert { background: #fff3cd; color: #856404; padding: 10px; border-radius: 10px; margin-top: 10px; display: none; font-weight: bold; }
-        .dark-mode-toggle { position: fixed; top: 15px; left: 15px; z-index: 1000; cursor: pointer; font-size: 1.5rem; background:none; border:none; }
+        .niya-alert { background: #fff3cd; color: #856404; padding: 10px; border-radius: 10px; margin: 10px 0; display: none; text-align: center; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<button class="dark-mode-toggle" onclick="toggleDarkMode()">🌓</button>
-
 <div class="main-container">
     <div class="header-bar">
+        <button id="admin-auth-btn" onclick="authAdmin()">⚙️</button>
         <h2 style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h2>
         <div class="date-container">
-            <span id="hijri-display">جاري التحقق من الهلال...</span>
-            <input type="date" id="date-picker" style="border-radius:5px; border:none; padding:5px; margin-top:5px;">
+            <span id="hijri-display" style="font-weight:bold; font-size:1.3rem; color:var(--gold-light);">...</span> <br>
+            <input type="date" id="date-picker" style="border-radius:5px; padding:5px; border:none; margin-top:5px;">
         </div>
         <div id="niya-reminder" class="niya-alert"></div>
-        <div style="margin-top:10px;"><button class="tab-btn" onclick="toggleAdmin()">⚙️ الإدارة والتقارير</button></div>
     </div>
 
     <div id="admin-panel" class="admin-section">
-        <h3 style="text-align:center; color:var(--accent);">📈 مركز التقارير الإدارية</h3>
-        <div style="display:flex; justify-content:center; gap:5px; margin-bottom:15px;">
-            <button class="tab-btn active" id="btn-daily" onclick="showReport('daily')">يومي</button>
-            <button class="tab-btn" id="btn-monthly" onclick="showReport('monthly')">شهري</button>
-            <button class="tab-btn" id="btn-annual" onclick="showReport('annual')">سنوي</button>
+        <h3 style="text-align:center; color:var(--accent);">📈 مركز التقارير السرية (9090)</h3>
+        <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px;">
+            <button class="opt-btn" onclick="generateReport('daily')">تقرير يومي</button>
+            <button class="opt-btn" onclick="generateReport('monthly')">تقرير شهري</button>
+            <button class="opt-btn" onclick="generateReport('annual')">تقرير سنوي</button>
+            <button class="opt-btn" style="background:var(--primary); color:#fff;" onclick="exportPDF()">تحميل PDF 📥</button>
         </div>
-        <div id="report-content" style="overflow-x:auto;"></div>
+        <div id="report-output"></div>
     </div>
 
     <div class="podium-section">
@@ -100,20 +90,17 @@
 
     <div id="user-ui" style="display:none;">
         <h3 id="current-user-title" style="text-align:center; color:var(--primary); background: var(--gold-light); padding: 5px; border-radius: 10px;"></h3>
-        <div id="fasting-section" class="section-card" style="display:none; border: 2px solid var(--accent);"><h3 class="section-title" style="background: var(--accent);">🌙 قسم الصيام</h3><div id="fasting-list"></div></div>
-        <div class="section-card"><h3 class="section-title">🕋 الفرائض</h3><div id="fard-list"></div></div>
-        <div class="section-card"><h3 class="section-title">🌱 السنن</h3><div id="sunan-list"></div></div>
-        <div class="section-card"><h3 class="section-title">📿 الأذكار</h3><div id="extra-list"></div></div>
+        <div id="fasting-section" class="section-card" style="display:none; border:2px solid var(--accent);"><h3 class="section-title" style="background:var(--accent);">🌙 قسم الصيام</h3><div id="fasting-list"></div></div>
+        <div class="section-card"><h3 class="section-title">🕋 الفرائض (المسجد | جماعة | فردي)</h3><div id="fard-list"></div></div>
+        <div class="section-card"><h3 class="section-title">🌱 السنن الرواتب والقيام</h3><div id="sunan-list"></div></div>
+        <div class="section-card"><h3 class="section-title">📿 الأذكار والورد والقرآن</h3><div id="extra-list"></div></div>
     </div>
 
     <div class="chat-section">
-        <h4 style="margin:10px; text-align:center;">💬 مجلس الطاعة</h4>
         <div id="chat-messages" class="chat-messages"></div>
-        <div id="emoji-picker"><div class="emoji-list" id="emoji-list"></div></div>
         <div class="chat-input-area">
             <select id="chat-user-selector" style="border-radius:10px; padding:5px;"><option value="">من أنت؟</option><option value="محمد">محمد</option><option value="شيماء">شيماء</option><option value="أحمد">أحمد</option><option value="ياسين">ياسين</option></select>
-            <button onclick="toggleEmojiPicker()" style="background:none; border:none; font-size:1.2rem;">😊</button>
-            <input type="text" id="chat-input" style="flex:1; border-radius:20px; border:1px solid #ddd; padding:0 10px;" placeholder="رسالة تشجيعية...">
+            <input type="text" id="chat-input" style="flex:1; border-radius:20px; border:1px solid #ddd; padding:0 10px;" placeholder="اكتب رسالة...">
             <button onclick="sendMessage()" style="background:var(--primary); color:white; border:none; border-radius:50%; width:35px; height:35px;">➤</button>
         </div>
     </div>
@@ -126,90 +113,118 @@
     
     let currentUser = null;
     const users = ['محمد', 'شيماء', 'أحمد', 'ياسين'];
+
     const model = {
         fard: [
-            {id:'fajr', n:'🌄 الفجر', pts: {m:100, g:30, f:15}, d:'م:100|ج:30'},
-            {id:'dhuhr', n:'☀️ الظهر', pts: {m:50, g:30, f:15}, d:'م:50|ج:30'},
-            {id:'asr', n:'🌤️ العصر', pts: {m:50, g:30, f:15}, d:'م:50|ج:30'},
-            {id:'maghrib', n:'🌅 المغرب', pts: {m:50, g:30, f:15}, d:'م:50|ج:30'},
-            {id:'isha', n:'🌃 العشاء', pts: {m:50, g:30, f:15}, d:'م:50|ج:30'}
+            {id:'fajr', n:'🌄 الفجر', pts: {m:100, g:30, f:15}},
+            {id:'dhuhr', n:'☀️ الظهر', pts: {m:50, g:30, f:15}},
+            {id:'asr', n:'🌤️ العصر', pts: {m:50, g:30, f:15}},
+            {id:'maghrib', n:'🌅 المغرب', pts: {m:50, g:30, f:15}},
+            {id:'isha', n:'🌃 العشاء', pts: {m:50, g:30, f:15}}
         ],
         sunan: [
-            {id:'s_fajr', n:'✨ سنة الفجر', p:20}, {id:'s_duha', n:'☀️ الضحى', p:25},
-            {id:'s_qyam', n:'🌙 قيام الليل', p:40}, {id:'s_witr', n:'🌌 الوتر', p:20}
+            {id:'s_fajr', n:'✨ سنة الفجر', p:20},
+            {id:'s_dhuhr_b', n:'✨ سنة الظهر (قبل)', p:20},
+            {id:'s_dhuhr_a', n:'✨ سنة الظهر (بعد)', p:15},
+            {id:'s_maghrib', n:'✨ سنة المغرب', p:15},
+            {id:'s_isha', n:'✨ سنة العشاء', p:15},
+            {id:'s_duha', n:'☀️ صلاة الضحى', p:25},
+            {id:'s_shaf', n:'🕯️ الشفع', p:15},
+            {id:'s_witr', n:'🌌 الوتر', p:20},
+            {id:'s_qyam', n:'🌙 قيام الليل', p:40}
         ],
         extra: [
-            {id:'azkar_s', n:'☀️ أذكار الصباح', p:30}, {id:'azkar_e', n:'🌙 أذكار المساء', p:30},
+            {id:'azkar_s', n:'☀️ أذكار الصباح', p:30},
+            {id:'azkar_e', n:'🌙 أذكار المساء', p:30},
+            {id:'azkar_n', n:'😴 أذكار النوم', p:30},
+            {id:'mulk', n:'📖 سورة الملك', p:30},
+            {id:'baqarah', n:'📖 خواتيم البقرة', p:20},
             {id:'quran', n:'📖 الورد القرآني', p:50}
         ]
     };
 
-    function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
-    function toggleAdmin() { const p = document.getElementById('admin-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; if(p.style.display === 'block') showReport('daily'); }
+    function authAdmin() {
+        const pass = prompt("أدخل الرقم السري للدخول لقسم التقارير:");
+        if(pass === "9090") {
+            document.getElementById('admin-panel').style.display = 'block';
+            alert("تم تفعيل صلاحيات الإدارة");
+        } else { alert("عذراً، الرقم السري خاطئ"); }
+    }
 
-    // ضبط التاريخ الهجري لسلطنة عمان: 22 فبراير = 4 رمضان
     async function getHijriData(date) {
         try {
-            let adjustedDate = new Date(date);
-            adjustedDate.setDate(adjustedDate.getDate() - 1); // طرح يوم ليتوافق مع عمان
-            const d = adjustedDate.getDate(), m = adjustedDate.getMonth()+1, y = adjustedDate.getFullYear();
+            let adj = new Date(date);
+            adj.setDate(adj.getDate() - 1); // ضبط عُمان (22 فبراير = 4 رمضان)
+            const d = adj.getDate(), m = adj.getMonth()+1, y = adj.getFullYear();
             const res = await fetch(`https://api.aladhan.com/v1/gToH/${d}-${m}-${y}`);
             const data = await res.json();
             return data.data.hijri;
         } catch(e) { return null; }
     }
 
-    async function checkNiyaAlert(date) {
-        let tom = new Date(date); tom.setDate(date.getDate()+1);
-        const hj = await getHijriData(tom);
-        const alertBox = document.getElementById('niya-reminder');
-        if(hj && (hj.month.en === "Ramadan" || [1, 4].includes(tom.getDay()))) {
-            alertBox.style.display = 'block';
-            alertBox.innerHTML = `💡 تنبيه النية: غداً صيام (${hj.day} ${hj.month.ar})، سحوراً هنيئاً!`;
-        } else { alertBox.style.display = 'none'; }
-    }
-
     async function render(allData) {
         const selDate = document.getElementById('date-picker').value;
-        const hijri = await getHijriData(new Date(selDate));
-        if(hijri) document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
+        const dObj = new Date(selDate);
+        const hj = await getHijriData(dObj);
         
-        const isFasting = hijri && hijri.month.en === "Ramadan";
-        checkNiyaAlert(new Date(selDate));
+        if(hj) document.getElementById('hijri-display').innerText = `${hj.day} ${hj.month.ar} ${hj.year}هـ`;
+        
+        const isFriday = dObj.getDay() === 5;
+        const isRamadan = hj && hj.month.en === "Ramadan";
 
+        // التنبيه للنية
+        let tom = new Date(dObj); tom.setDate(tom.getDate()+1);
+        const hjTom = await getHijriData(tom);
+        const alertBox = document.getElementById('niya-reminder');
+        if(hjTom && (hjTom.month.en === "Ramadan" || [1,4].includes(tom.getDay()))) {
+            alertBox.style.display = 'block';
+            alertBox.innerHTML = `💡 نية الصيام: غداً ${hjTom.day} ${hjTom.month.ar}، لا تنسَ السحور.`;
+        } else { alertBox.style.display = 'none'; }
+
+        // حساب النقاط
         let stats = users.map(u => {
-            let s = 0; let uData = (allData[selDate] && allData[selDate][u]) ? allData[selDate][u] : {};
-            [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
-            if(uData['fasting']) s += 100;
+            let s = 0; let ud = allData[selDate]?.[u] || {};
+            [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(ud[h.id]) s += (ud[h.id].p || 0); });
+            if(isFriday && ud['kahf']) s += 40;
+            if(ud['fasting']) s += 100;
             return { n: u, s: s };
         });
 
         drawPodium('daily-podium', stats);
         updateAnnual(allData);
         updateKnights(allData);
-        
+
         document.getElementById('cards-ui').innerHTML = stats.map(st => `
             <div class="comp-card ${st.n === currentUser ? 'active' : ''}" onclick="selectUser('${st.n}')">
                 <b>${st.n}</b> <br> <span style="color:var(--gold)">${st.s} نقطة</span>
             </div>`).join('');
-        
-        if(currentUser) renderForms((allData[selDate] && allData[selDate][currentUser]) || {}, isFasting);
+
+        if(currentUser) renderForms(allData[selDate]?.[currentUser] || {}, isRamadan, isFriday);
     }
 
-    function renderForms(userData, isRamadan) {
+    function renderForms(ud, isRamadan, isFriday) {
         document.getElementById('fasting-section').style.display = isRamadan ? 'block' : 'none';
         if(isRamadan) {
-            document.getElementById('fasting-list').innerHTML = `<div class="habit-row"><span>🌙 صيام رمضان (+100)</span><input type="checkbox" ${userData['fasting']?.done?'checked':''} onchange="save('fasting',{done:this.checked, p:this.checked?100:0})"></div>`;
+            document.getElementById('fasting-list').innerHTML = `<div class="habit-row"><span>🌙 صيام اليوم (+100)</span><input type="checkbox" ${ud['fasting']?.done?'checked':''} onchange="save('fasting',{done:this.checked, p:this.checked?100:0})"></div>`;
         }
-        document.getElementById('fard-list').innerHTML = model.fard.map(h => {
-            const cur = userData[h.id]?.type;
-            return `<div class="habit-row"><span>${h.n}</span><div>${Object.entries(h.pts).map(([k,v]) => `<button class="tab-btn ${cur===k?'active':''}" style="padding:3px 7px" onclick="save('${h.id}',{type:'${k}', p:${v}})">${k=='m'?'م':'ج'}</button>`).join('')}</div></div>`;
-        }).join('');
+
+        let fards = [...model.fard];
+        if(isFriday) fards = fards.map(f => f.id==='dhuhr' ? {id:'dhuhr', n:'🕌 صلاة الجمعة', pts: {m:100, g:30, f:15}} : f);
+
+        document.getElementById('fard-list').innerHTML = fards.map(h => `
+            <div class="habit-row"><span>${h.n}</span>
+            <div style="display:flex; gap:2px;">${Object.entries(h.pts).map(([k,v]) => `
+                <button class="opt-btn ${ud[h.id]?.type===k?'selected':''}" onclick="save('${h.id}',{type:'${k}', p:${v}})">${k=='m'?'مسجد':k=='g'?'جماعة':'فرد'}</button>`).join('')}
+            </div></div>`).join('');
+
+        let extras = [...model.extra];
+        if(isFriday) extras.push({id:'kahf', n:'📖 سورة الكهف', p:40});
+
         const drawCheck = (list, tid) => {
-            document.getElementById(tid).innerHTML = list.map(h => `<div class="habit-row"><span>${h.n} (+${h.p})</span><input type="checkbox" ${userData[h.id]?.done?'checked':''} onchange="save('${h.id}',{done:this.checked, p:this.checked?${h.p}:0})"></div>`).join('');
+            document.getElementById(tid).innerHTML = list.map(h => `<div class="habit-row"><span>${h.n} (+${h.p || 0})</span><input type="checkbox" ${ud[h.id]?.done?'checked':''} onchange="save('${h.id}',{done:this.checked, p:this.checked?${h.p || 0}:0})"></div>`).join('');
         };
         drawCheck(model.sunan, 'sunan-list');
-        drawCheck(model.extra, 'extra-list');
+        drawCheck(extras, 'extra-list');
     }
 
     function save(id, val) { const d = document.getElementById('date-picker').value; db.ref(`osraty/${d}/${currentUser}/${id}`).set(val); }
@@ -248,29 +263,35 @@
         `;
     }
 
-    // تقارير الإدارة
-    function showReport(type) {
-        document.querySelectorAll('.admin-section .tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('btn-'+type).classList.add('active');
+    // نظام التقارير المطور
+    function generateReport(type) {
         db.ref('osraty').once('value', snap => {
             const data = snap.val() || {};
-            let html = `<table class="report-table"><tr><th>الاسم</th><th>النقاط</th><th>أهم الطاعات</th></tr>`;
+            let html = `<div id="report-to-print"><h2 style="text-align:center">تقرير طاعاتنا - ${type}</h2>
+                        <table class="report-table"><tr><th>الاسم</th><th>إجمالي النقاط</th><th>الحالة</th></tr>`;
             users.forEach(u => {
-                let total = 0, tasks = 0;
+                let total = 0;
                 if(type === 'daily') {
                     const d = document.getElementById('date-picker').value;
-                    const ud = data[d]?.[u] || {};
-                    Object.values(ud).forEach(t => total += (t.p || 0));
+                    Object.values(data[d]?.[u] || {}).forEach(t => total += (t.p || 0));
+                } else if (type === 'monthly') {
+                    const month = document.getElementById('date-picker').value.substring(0, 7);
+                    Object.keys(data).forEach(d => { if(d.startsWith(month)) Object.values(data[d]?.[u] || {}).forEach(t => total += (t.p || 0)); });
                 } else {
-                    Object.values(data).forEach(day => { if(day[u]) Object.values(day[u]).forEach(t => { total += (t.p || 0); tasks++; }); });
+                    Object.values(data).forEach(day => { if(day[u]) Object.values(day[u]).forEach(t => total += (t.p || 0)); });
                 }
-                html += `<tr><td>${u}</td><td>${total}</td><td>${type==='daily'?'اليوم':'تراكمي'}</td></tr>`;
+                html += `<tr><td>${u}</td><td>${total}</td><td>${total > 300 ? '🥇 ممتاز' : '🌱 مجتهد'}</td></tr>`;
             });
-            document.getElementById('report-content').innerHTML = html + `</table>`;
+            document.getElementById('report-output').innerHTML = html + `</table></div>`;
         });
     }
 
-    function toggleEmojiPicker() { document.getElementById('emoji-picker').style.display = document.getElementById('emoji-picker').style.display === 'flex' ? 'none' : 'flex'; }
+    function exportPDF() {
+        const element = document.getElementById('report-to-print');
+        if(!element) return alert("يرجى إنشاء التقرير أولاً");
+        html2pdf().from(element).save(`تقرير_طاعاتنا_${Date.now()}.pdf`);
+    }
+
     function sendMessage() {
         const inp = document.getElementById('chat-input'), user = document.getElementById('chat-user-selector').value;
         if(inp.value && user) { db.ref('osraty_chat').push({ u: user, m: inp.value }); inp.value = ''; }
@@ -278,12 +299,8 @@
 
     window.onload = () => {
         const dp = document.getElementById('date-picker');
-        dp.value = "2026-02-22"; // تعيين تاريخ اليوم افتراضياً
+        dp.value = "2026-02-22"; 
         dp.onchange = () => db.ref('osraty').once('value', s => render(s.val()||{}));
-        
-        const emojis = ["😊","😇","🌙","🕌","🕋","👏","👍","🤲","⭐"];
-        document.getElementById('emoji-list').innerHTML = emojis.map(e => `<span style="cursor:pointer;font-size:1.5rem" onclick="document.getElementById('chat-input').value+='${e}';toggleEmojiPicker()">${e}</span>`).join('');
-        
         db.ref('osraty').on('value', s => render(s.val()||{}));
         db.ref('osraty_chat').limitToLast(15).on('value', s => {
             const div = document.getElementById('chat-messages');
