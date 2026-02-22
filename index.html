@@ -6,11 +6,11 @@
   <title>ملتقى طاعاتنا 2026 | النسخة المطورة</title>
 
   <!-- Firebase (Compat) -->
-  https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js</script>
-  https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js</script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <!-- Google Fonts -->
-  https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet"/>
 
   <style>
     :root{
@@ -41,7 +41,7 @@
     #hijri-display{ display:block; color:var(--gold-light); font-size:1.2rem; font-weight:bold; margin-bottom:5px; }
     .ramadan-day-hint{ display:none; margin-top:6px; font-weight:bold; background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:6px 10px; border-radius:8px; }
 
-    /* === زر ولوحة ضبط الهجري (إضافة سابقة) === */
+    /* === زر ولوحة ضبط الهجري (إضافة) === */
     .hijri-adjust-wrap{ display:flex; gap:6px; align-items:center; justify-content:center; margin-top:6px; flex-wrap:wrap; }
     .hijri-adjust-btn{ background:#fff7d6; border:1px solid var(--gold); color:#634e1e; padding:4px 10px; border-radius:10px; cursor:pointer; font-weight:800; }
     .hijri-adjust-panel{
@@ -201,7 +201,7 @@
     <div class="date-container">
       <span id="hijri-display">جاري تحديد التاريخ الهجري...</span>
 
-      <!-- === زر ولوحة ضبط الهجري (إضافة سابقة) === -->
+      <!-- === إضافة: زر ولوحة ضبط الهجري === -->
       <div class="hijri-adjust-wrap">
         <button id="btn-hijri-panel" class="hijri-adjust-btn" title="ضبط التاريخ الهجري يدويًا">⚙️ ضبط الهجري</button>
       </div>
@@ -361,7 +361,7 @@
       {id:'isha', n:'🌃 العشاء', pts: {m:50, g:30, f:15, q:5}, d: 'م:50|ج:30|ف:15'}
     ],
     sunan: [
-      {id:'s_fajr', n:'✨ سنة الفجر', p:20}, 
+      {id:'s_fajr', n:'✨ سنة الفجر', p:20},
       {id:'s_duha', n:'☀️ صلاة الضحى', p:25},
       {id:'s_dhuhr_b', n:'✨ الظهر قبل', p:20},
       {id:'s_dhuhr_a', n:'✨ الظهر بعد', p:15},
@@ -372,10 +372,10 @@
       {id:'s_qyam', n:'🌙 قيام الليل', p:40}
     ],
     extra: [
-      {id:'azkar_s', n:'☀️ أذكار الصباح', p:30, l:'https://alazkar.today/'}, 
+      {id:'azkar_s', n:'☀️ أذكار الصباح', p:30, l:'https://alazkar.today/'},
       {id:'azkar_e', n:'🌙 أذكار المساء', p:30, l:'https://alazkar.today/'},
-      {id:'azkar_n', n:'😴 أذكار النوم', p:30, l:'https://alazkar.today/'}, 
-      {id:'mulk', n:'📖 سورة الملك', p:30, l:'https://quran.com/67'}, 
+      {id:'azkar_n', n:'😴 أذكار النوم', p:30, l:'https://alazkar.today/'},
+      {id:'mulk', n:'📖 سورة الملك', p:30, l:'https://quran.com/67'},
       {id:'baqarah_end', n:'📖 خواتيم سورة البقرة', p:20, l:'https://quran.com/2/285-286'},
       {id:'quran', n:'📖 الورد القرآني', p:50, l:'https://quran.com'}
     ]
@@ -429,7 +429,7 @@
     catch(e) { return null; }
   }
 
-  /* ==== (إضافة سابقة) تحكم يدوي للهجري ==== */
+  /* ==== (إضافة) تحكم يدوي للهجري ==== */
   const HIJRI_OFFSET_KEY = 'hijri_offset_days_2026';
   function getHijriOffset(){ return parseInt(localStorage.getItem(HIJRI_OFFSET_KEY) || '0', 10) || 0; }
   function setHijriOffset(v){ localStorage.setItem(HIJRI_OFFSET_KEY, String(v)); }
@@ -630,7 +630,7 @@
     const selectedDate = parseLocalYMD(selectedDateStr);
     const tomorrow = new Date(selectedDate); tomorrow.setDate(selectedDate.getDate() + 1);
 
-    // استخدام الهجري المصحح
+    // (استبدال) استخدام الهجري المصحح
     const hijriTomorrow = await getHijriCorrected(tomorrow);
     if (hijriTomorrow) {
       const isTomorrowFasting = isFastingDay(tomorrow.getDay(), hijriTomorrow.day, hijriTomorrow.month.en);
@@ -647,6 +647,7 @@
   async function getRemaining(userData, isFriday, selectedDateStr) {
     let rem = []; let curFard = [...model.fard]; let curExtra = [...model.extra];
     if(isFriday) curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'});
+    // (استبدال) استخدام الهجري المصحح لليوم المحدد
     const hijri = await getHijriCorrected(parseLocalYMD(selectedDateStr));
     if(hijri && isFastingDay(parseLocalYMD(selectedDateStr).getDay(), hijri.day, hijri.month.en)) if(!userData['fasting']?.done) rem.push("الصيام 🌙");
     curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
@@ -657,7 +658,7 @@
 
   function drawPodium(el, data) {
     const sorted = [...data].sort((a,b) => b.s - a.s);
-    const order = [1, 0, 2, 3]; 
+    const order = [1, 0, 2, 3];
     const steps = ['p-2', 'p-1', 'p-3', 'p-4'];
     document.getElementById(el).innerHTML = order.map((idx, i) => {
       const u = sorted[idx] || {n: '-', s: 0};
@@ -665,29 +666,29 @@
     }).join('');
   }
 
-  /* ✅ صيام رمضان بنقاط مجزية داخل رمضان فقط */
+  /* ✅ رسم النماذج + تمييز العناصر بـ data-* لدعم زر الحفظ + روابط خارجية قابلة للنقر */
   const RAMADAN_START_YMD = '2026-02-19';
-  const RAMADAN_FASTING_POINTS = 200; /* نقاط صيام يوم رمضان */
   function getRamadanDayFor(dateObj){
     const ymdSel = ymdInTz(dateObj, APP_TZ);
     const diff = Math.floor((muscatMidnightMsFromYMD(ymdSel) - muscatMidnightMsFromYMD(RAMADAN_START_YMD)) / 86400000) + 1;
     return (diff >= 1 && diff <= 30) ? diff : null;
   }
 
+  /* === نقاط صيام رمضان (مجزية) === */
+  const RAMADAN_FASTING_POINTS = 200;
+
   function renderForms(userData, isFriday, fastingDay, selectedDate) {
     const fastSection = document.getElementById('fasting-section');
     if(fastingDay) {
       fastSection.style.display = 'block';
+      let fastingLabel = "صيام تطوع (الاثنين/الخميس/البيض)";
+      const isRamadan = (document.getElementById('hijri-display').innerText.includes('رمضان')) || (ymdInTz(selectedDate, APP_TZ)==='2026-02-19');
 
-      /* خلال رمضان: إلغاء صيام التطوع واستبداله بصيام يوم رمضان بنقاط مجزية */
-      let isRamadan = (document.getElementById('hijri-display').innerText.includes('رمضان')) || (ymdInTz(selectedDate, APP_TZ)==='2026-02-19');
-      let fastingLabel, fastingPoints;
-      if (isRamadan) {
-        fastingLabel = "صيام يوم رمضان";
-        fastingPoints = RAMADAN_FASTING_POINTS; // 200
-      } else {
-        fastingLabel = "صيام تطوع (الاثنين/الخميس/البيض)";
-        fastingPoints = 100;
+      // في رمضان: فريضة صيام رمضان + نقاط مجزية، وخارجه: صيام تطوع + نقاطه المعتادة (100)
+      let fastingPoints = 100;
+      if(isRamadan){
+        fastingLabel = "فريضة صيام رمضان";
+        fastingPoints = RAMADAN_FASTING_POINTS;
       }
 
       document.getElementById('fasting-list').innerHTML = `<div class="habit-row">
@@ -722,7 +723,7 @@
         let url = h.l || null;
         if (h.id === 'quran' && rDay) url = `https://quran.com/juz/${rDay}`;
         const label = url
-          ? `${url}${h.n}</a>`
+          ? `<a class="habit-link" href="${url}" target="_blank" rel="noopener noreferrer">${h.n}</a>`
           : h.n;
         return `<div class="habit-row">
           <span>${label} <small>(+${h.p}ن)</small></span>
@@ -741,7 +742,7 @@
     const selectedDateStr = document.getElementById('date-picker').value;
     const selectedDate = parseLocalYMD(selectedDateStr);
 
-    // استخدام الهجري المصحح للعرض والمنطق
+    // (استبدال) استخدام الهجري المصحح للعرض والمنطق
     const hijri = await getHijriCorrected(selectedDate);
     if(hijri) document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
 
@@ -757,7 +758,8 @@
       let s = 0; let uData = allData[u] || {};
       [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
       if(isFriday && uData['kahf']) s += 40;
-      if(uData['fasting']) s += uData['fasting'].p || 0; /* نقاط الصيام كما حُفظت (100 خارج رمضان، 200 داخل رمضان) */
+      // ✅ اجمالي نقاط الصيام يعتمد على القيمة المخزّنة p (100 خارج رمضان / 200 في رمضان)
+      if(uData['fasting']) s += (uData['fasting'].p || 0);
       return { n: u, s: s, rem: await getRemaining(uData, isFriday, selectedDateStr) };
     }));
 
@@ -807,7 +809,7 @@
   }
   function updateAnnual() {
     db.ref('osraty').once('value', snap => {
-      const data = snap.val() || {}; 
+      const data = snap.val() || {};
       let annual = users.map(u => ({n:u, s:0}));
       let knightStats = users.reduce((acc, u) => { acc[u] = { fajr:0, fasting:0, quran:0, sunan:0, azkar:0 }; return acc; }, {});
       const dates = Object.keys(data || {}).sort().reverse().slice(0, 7);
@@ -949,9 +951,10 @@
   /* ===================================== */
   function computeDayPointsForUser(uData, isFriday){
     let s = 0;
-    [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (h && uData[h.id].p) ? uData[h.id].p : 0; });
+    [...model.fard, ...model.sunan, ...model.extra].forEach(h => { if(uData[h.id]) s += (uData[h.id].p || 0); });
     if(isFriday && uData['kahf']) s += 40;
-    if(uData['fasting']) s += uData['fasting'].p || 0; /* نقاط الصيام كما حُفظت */
+    // ✅ نقاط الصيام حسب p المخزنة (ديناميكية: 100/200)
+    if(uData['fasting']) s += (uData['fasting'].p || 0);
     return s;
   }
 
@@ -1057,7 +1060,7 @@
 <head>
 <meta charset="UTF-8">
 <title>تقرير ${modeLabel} | ${rangeLabel}</title>
-https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap">
 <style>
   :root{
     --primary:#1a4d2e; --gold:#c5a059; --gold-light:#e6cc92; --bg:#fff; --text:#1a4d2e;
