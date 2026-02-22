@@ -220,11 +220,10 @@
 
     function initEmojis() {
         const tabs = document.getElementById('emoji-tabs');
-        if(!tabs) return;
-        tabs.innerHTML = "";
+        if(!tabs) return; tabs.innerHTML = "";
         Object.keys(emojiData).forEach((category, index) => {
             const span = document.createElement('span');
-            span.style.cursor = 'pointer';
+            span.style.cssText = 'cursor:pointer; padding:2px 5px; border-radius:5px; background:#e0e0e0;';
             span.innerText = category;
             span.onclick = () => showEmojiCategory(category);
             tabs.appendChild(span);
@@ -234,40 +233,27 @@
 
     function showEmojiCategory(cat) {
         const list = document.getElementById('emoji-list');
-        list.innerHTML = emojiData[cat].map(e => `<span class="emoji-item" style="cursor:pointer" onclick="addEmoji('${e}')">${e}</span>`).join('');
-    }
-
-    function toggleEmojiPicker() {
-        const p = document.getElementById('emoji-picker');
-        p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+        list.innerHTML = emojiData[cat].map(e => `<span style="cursor:pointer; font-size:1.5rem;" onclick="addEmoji('${e}')">${e}</span>`).join('');
     }
 
     function addEmoji(emoji) {
-        document.getElementById('chat-input').value += emoji;
-        document.getElementById('emoji-picker').style.display = 'none';
-        document.getElementById('chat-input').focus();
+        const inp = document.getElementById('chat-input');
+        inp.value += emoji;
+        toggleEmojiPicker();
+        inp.focus();
     }
 
     function handleFile(input) {
         if(input.files && input.files[0]) {
-            alert("تم اختيار ملف: " + input.files[0].name);
+            alert("تم اختيار: " + input.files[0].name + " (سيتم إرسال الاسم حالياً)");
             document.getElementById('chat-input').value += ` [ملف: ${input.files[0].name}] `;
         }
     }
 
-    function format12h(timeStr) {
-        if(!timeStr) return "";
-        let [h, m] = timeStr.split(':');
-        h = parseInt(h);
-        const suffix = h >= 12 ? "م" : "ص";
-        h = h % 12 || 12;
-        return `${h}:${m} ${suffix}`;
-    }
-
-    // التعديل المطلوب حرفياً: ضبط التاريخ الهجري لسلطنة عمان
+    // التعديل المطلوب: ضبط التاريخ الهجري لسلطنة عمان
+    // استخدام adjustment=-1 لجعل 22 فبراير يوافق 4 رمضان 
     async function getHijriData(date) {
         try {
-            // استخدام adjustment=-1 لجعل 19 فبراير يوافق 1 رمضان 1447هـ
             const res = await fetch(`https://api.aladhan.com/v1/gToH/${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}?adjustment=-1`);
             const data = await res.json();
             return data.data.hijri;
@@ -280,7 +266,7 @@
         return (dayOfWeek === 1 || dayOfWeek === 4 || whiteDays.includes(parseInt(hijriDay)));
     }
 
-    // التعديل المطلوب حرفياً: تحديث عداد رمضان ليكون 19 فبراير 2026
+    // التعديل المطلوب: ضبط عداد رمضان ليكون 19 فبراير
     async function updateCountdowns() {
         const ramadanDate = new Date('February 19, 2026 00:00:00').getTime();
         setInterval(() => {
@@ -322,6 +308,15 @@
             const name = city==='Salalah'?'صلالة':'كفر الشيخ';
             document.getElementById(rowId).innerHTML = `<td>${name}</td><td>${format12h(t.Fajr)}</td><td>${format12h(t.Dhuhr)}</td><td>${format12h(t.Asr)}</td><td>${format12h(t.Maghrib)}</td><td>${format12h(t.Isha)}</td>`;
         } catch(e) { console.error("Error fetching prayers"); }
+    }
+
+    function format12h(timeStr) {
+        if(!timeStr) return "";
+        let [h, m] = timeStr.split(':');
+        h = parseInt(h);
+        const suffix = h >= 12 ? "م" : "ص";
+        h = h % 12 || 12;
+        return `${h}:${m} ${suffix}`;
     }
 
     function updateNextPrayerCountdown(now) {
@@ -385,6 +380,7 @@
         }));
 
         drawPodium('daily-podium', stats);
+        updateAnnualPodium(allData);
         updateKnights(allData);
         
         document.getElementById('cards-ui').innerHTML = stats.map(st => `
@@ -394,6 +390,7 @@
             </div>`).join('');
         
         if(currentUser) renderForms((allData[selectedDateStr] && allData[selectedDateStr][currentUser]) || {}, isFriday, fastingDay, selectedDate);
+        checkNiyaAlert(); 
     }
 
     async function getRemaining(userData, isFriday, selectedDateStr) {
@@ -453,6 +450,17 @@
         }).join('');
     }
 
+    function updateAnnualPodium(data) {
+        let annual = users.map(u => {
+            let total = 0;
+            Object.values(data).forEach(day => {
+                if(day[u]) Object.values(day[u]).forEach(task => total += (task.p || 0));
+            });
+            return { n: u, s: total };
+        });
+        drawPodium('annual-podium', annual);
+    }
+
     function updateKnights(data) {
         let knightStats = users.reduce((acc, u) => { acc[u] = { fajr:0, fasting:0, quran:0, sunan:0, azkar:0 }; return acc; }, {});
         const dates = Object.keys(data).sort().reverse().slice(0, 7);
@@ -483,6 +491,11 @@
         } else { alert("يرجى اختيار اسمك وكتابة رسالة"); }
     }
 
+    function toggleEmojiPicker() {
+        const p = document.getElementById('emoji-picker');
+        p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+    }
+
     window.onload = () => {
         const datePicker = document.getElementById('date-picker');
         datePicker.value = new Date().toISOString().split('T')[0];
@@ -496,7 +509,7 @@
         updateCountdowns();
         
         db.ref('osraty').on('value', snap => render(snap.val() || {}));
-        db.ref('osraty_chat').limitToLast(30).on('value', snap => {
+        db.ref('osraty_chat').limitToLast(20).on('value', snap => {
             const msgs = snap.val() || {};
             const div = document.getElementById('chat-messages');
             div.innerHTML = Object.values(msgs).map(m => `
