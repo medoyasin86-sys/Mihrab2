@@ -41,6 +41,19 @@
     #hijri-display{ display:block; color:var(--gold-light); font-size:1.2rem; font-weight:bold; margin-bottom:5px; }
     .ramadan-day-hint{ display:none; margin-top:6px; font-weight:bold; background:#fff3cd; color:#856404; border:1px solid #ffeeba; padding:6px 10px; border-radius:8px; }
 
+    /* === زر ولوحة ضبط الهجري (إضافة) === */
+    .hijri-adjust-wrap{ display:flex; gap:6px; align-items:center; justify-content:center; margin-top:6px; flex-wrap:wrap; }
+    .hijri-adjust-btn{ background:#fff7d6; border:1px solid var(--gold); color:#634e1e; padding:4px 10px; border-radius:10px; cursor:pointer; font-weight:800; }
+    .hijri-adjust-panel{
+      display:none; margin-top:8px; background:#fff; color:#333; border:1px solid var(--gold); border-radius:10px; padding:8px;
+    }
+    body.dark-mode .hijri-adjust-panel{ background:#252525; color:#eee; }
+    .hijri-ctrls{ display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; }
+    .btn-sm{ padding:4px 8px; border-radius:8px; border:1px solid var(--gold); background:#fdf4d7; cursor:pointer; font-weight:700; }
+    body.dark-mode .btn-sm{ background:#333; color:#fff; }
+    .badge-offset{ display:inline-block; min-width:46px; text-align:center; background:#f5efe0; border:1px dashed var(--gold); padding:3px 8px; border-radius:999px; font-weight:800; }
+    body.dark-mode .badge-offset{ background:#2b2b2b; }
+
     .prayer-times-table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:.8rem; background:rgba(0,0,0,.2); border-radius:10px; overflow:hidden; }
     .prayer-times-table th, .prayer-times-table td{ padding:5px; border:1px solid rgba(255,255,255,.1); text-align:center; }
 
@@ -187,6 +200,26 @@
 
     <div class="date-container">
       <span id="hijri-display">جاري تحديد التاريخ الهجري...</span>
+
+      <!-- === إضافة: زر ولوحة ضبط الهجري === -->
+      <div class="hijri-adjust-wrap">
+        <button id="btn-hijri-panel" class="hijri-adjust-btn" title="ضبط التاريخ الهجري يدويًا">⚙️ ضبط الهجري</button>
+      </div>
+      <div id="hijri-adjust-panel" class="hijri-adjust-panel" aria-hidden="true">
+        <div style="text-align:center; font-weight:800; margin-bottom:6px; color:#7a6b4e;">تعويض الهجري (بالأيام)</div>
+        <div class="hijri-ctrls">
+          <button class="btn-sm" id="btn-hijri-minus">− يوم</button>
+          <span class="badge-offset" id="hijri-offset-badge">0</span>
+          <button class="btn-sm" id="btn-hijri-plus">+ يوم</button>
+          <button class="btn-sm" id="btn-hijri-save">حفظ وتطبيق</button>
+          <button class="btn-sm" id="btn-hijri-reset">إعادة الضبط</button>
+        </div>
+        <div style="text-align:center; color:#7a7a7a; font-size:.85rem; margin-top:6px;">
+          يُستخدم التعويض عند حساب التاريخ الهجري وعرضه فقط.
+        </div>
+      </div>
+      <!-- === نهاية الإضافة === -->
+
       <input type="date" id="date-picker" style="border-radius:5px; border:none; padding:5px; text-align:center; font-weight:bold;">
       <div id="ramadan-day-hint" class="ramadan-day-hint">🌙 اليوم هو <b>1 رمضان</b> — تقبّل الله منا ومنكم</div>
       <div id="date-debug" class="date-debug" aria-live="polite"></div>
@@ -395,6 +428,61 @@
     try { const res = await fetch(`https://api.aladhan.com/v1/gToH/${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`); const data = await res.json(); return data.data.hijri; }
     catch(e) { return null; }
   }
+
+  /* ==== (إضافة) تحكم يدوي للهجري ==== */
+  const HIJRI_OFFSET_KEY = 'hijri_offset_days_2026';
+  function getHijriOffset(){ return parseInt(localStorage.getItem(HIJRI_OFFSET_KEY) || '0', 10) || 0; }
+  function setHijriOffset(v){ localStorage.setItem(HIJRI_OFFSET_KEY, String(v)); }
+  function addDaysLocal(d, days){ const nd = new Date(d.getFullYear(), d.getMonth(), d.getDate()+days); return nd; }
+
+  async function getHijriCorrected(date){
+    const offset = getHijriOffset();
+    const adj = addDaysLocal(date, offset);
+    return await getHijriData(adj);
+  }
+
+  // لوحة التحكم - واجهة
+  let __tmpHijriOffset = 0;
+  function toggleHijriPanel(){
+    const p = document.getElementById('hijri-adjust-panel');
+    if (!p) return;
+    const isShown = p.style.display === 'block';
+    p.style.display = isShown ? 'none' : 'block';
+    if(!isShown){ __tmpHijriOffset = getHijriOffset(); updateHijriPanelUI(); }
+  }
+  function updateHijriPanelUI(){
+    const b = document.getElementById('hijri-offset-badge'); if(b) b.textContent = String(__tmpHijriOffset);
+  }
+  function hijriOffsetMinus(){ __tmpHijriOffset -= 1; updateHijriPanelUI(); }
+  function hijriOffsetPlus(){ __tmpHijriOffset += 1; updateHijriPanelUI(); }
+
+  async function applyHijriAdjust(){
+    setHijriOffset(__tmpHijriOffset);
+    await refreshRenderOnly();
+    const p = document.getElementById('hijri-adjust-panel'); if(p) p.style.display='none';
+    // توست صغير للتأكيد
+    const toast = document.createElement('div');
+    toast.textContent = "تم تطبيق ضبط الهجري ✅";
+    toast.style.cssText = 'position:fixed;top:12px;right:12px;background:#1a4d2e;color:#fff;border:2px solid #c5a059;border-radius:12px;padding:8px 12px;z-index:2500;';
+    document.body.appendChild(toast);
+    setTimeout(()=> toast.remove(), 1500);
+  }
+  async function resetHijriAdjust(){
+    __tmpHijriOffset = 0;
+    setHijriOffset(0);
+    updateHijriPanelUI();
+    await refreshRenderOnly();
+    const p = document.getElementById('hijri-adjust-panel'); if(p) p.style.display='none';
+  }
+
+  // تحديث الرسوم فقط دون إعادة ربط مستمعي Firebase
+  async function refreshRenderOnly(){
+    const d = document.getElementById('date-picker').value || todayYMDMuscat();
+    const snap = await db.ref('osraty/' + d).once('value');
+    await render(snap.val() || {});
+  }
+  /* ==== نهاية إضافة التحكم ==== */
+
   function isFastingDay(dayOfWeek, hijriDay, hijriMonthEn) {
     if (hijriMonthEn === "Ramadan") return true;
     const whiteDays = [13, 14, 15];
@@ -541,7 +629,9 @@
     const selectedDateStr = document.getElementById('date-picker').value;
     const selectedDate = parseLocalYMD(selectedDateStr);
     const tomorrow = new Date(selectedDate); tomorrow.setDate(selectedDate.getDate() + 1);
-    const hijriTomorrow = await getHijriData(tomorrow);
+
+    // (استبدال) استخدام الهجري المصحح
+    const hijriTomorrow = await getHijriCorrected(tomorrow);
     if (hijriTomorrow) {
       const isTomorrowFasting = isFastingDay(tomorrow.getDay(), hijriTomorrow.day, hijriTomorrow.month.en);
       document.getElementById('niya-reminder').style.display = isTomorrowFasting ? 'block' : 'none';
@@ -557,7 +647,8 @@
   async function getRemaining(userData, isFriday, selectedDateStr) {
     let rem = []; let curFard = [...model.fard]; let curExtra = [...model.extra];
     if(isFriday) curExtra.push({id:'kahf', n:'🕌 سورة الكهف', p:40, l:'https://quran.com/18'});
-    const hijri = await getHijriData(parseLocalYMD(selectedDateStr));
+    // (استبدال) استخدام الهجري المصحح لليوم المحدد
+    const hijri = await getHijriCorrected(parseLocalYMD(selectedDateStr));
     if(hijri && isFastingDay(parseLocalYMD(selectedDateStr).getDay(), hijri.day, hijri.month.en)) if(!userData['fasting']?.done) rem.push("الصيام 🌙");
     curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
     model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
@@ -640,7 +731,9 @@
   async function render(allData) {
     const selectedDateStr = document.getElementById('date-picker').value;
     const selectedDate = parseLocalYMD(selectedDateStr);
-    const hijri = await getHijriData(selectedDate);
+
+    // (استبدال) استخدام الهجري المصحح للعرض والمنطق
+    const hijri = await getHijriCorrected(selectedDate);
     if(hijri) document.getElementById('hijri-display').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year}هـ`;
 
     // تصحيح ثابت: 19 فبراير 2026 = 1 رمضان، 18 فبراير = 30 شعبان (مرجع مسقط)
@@ -1066,6 +1159,19 @@
   window.onload = () => {
     if(localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
     document.getElementById('date-picker').value = todayYMDMuscat();
+
+    // ربط أزرار ضبط الهجري
+    const btnPanel = document.getElementById('btn-hijri-panel');
+    if(btnPanel) btnPanel.onclick = toggleHijriPanel;
+    const bMinus = document.getElementById('btn-hijri-minus');
+    const bPlus  = document.getElementById('btn-hijri-plus');
+    const bSave  = document.getElementById('btn-hijri-save');
+    const bReset = document.getElementById('btn-hijri-reset');
+    __tmpHijriOffset = getHijriOffset(); updateHijriPanelUI();
+    if(bMinus) bMinus.onclick = hijriOffsetMinus;
+    if(bPlus)  bPlus.onclick  = hijriOffsetPlus;
+    if(bSave)  bSave.onclick  = applyHijriAdjust;
+    if(bReset) bReset.onclick = resetHijriAdjust;
 
     populateCitySelects();
     applyCitySelection();
