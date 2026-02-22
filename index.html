@@ -164,7 +164,6 @@
 </div>
 
 <script>
-    // تهيئة Firebase
     const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -214,10 +213,61 @@
         ]
     };
 
-    // التعديل المطلوب: ضبط التاريخ الهجري لسلطنة عمان (تعديل الإزاحة)
+    const emojiData = {
+        "وجوه": ["😊", "😂", "😇", "😍", "🤩", "😎", "🤔", "😴", "🤲", "🙌", "👏", "👍"],
+        "إسلاميات": ["🕋", "🕌", "🌙", "⭐", "📖", "📿", "🌅", "🌆", "🍃", "🌸", "🕊️"]
+    };
+
+    function initEmojis() {
+        const tabs = document.getElementById('emoji-tabs');
+        if(!tabs) return;
+        tabs.innerHTML = "";
+        Object.keys(emojiData).forEach((category, index) => {
+            const span = document.createElement('span');
+            span.style.cursor = 'pointer';
+            span.innerText = category;
+            span.onclick = () => showEmojiCategory(category);
+            tabs.appendChild(span);
+            if(index === 0) showEmojiCategory(category);
+        });
+    }
+
+    function showEmojiCategory(cat) {
+        const list = document.getElementById('emoji-list');
+        list.innerHTML = emojiData[cat].map(e => `<span class="emoji-item" style="cursor:pointer" onclick="addEmoji('${e}')">${e}</span>`).join('');
+    }
+
+    function toggleEmojiPicker() {
+        const p = document.getElementById('emoji-picker');
+        p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function addEmoji(emoji) {
+        document.getElementById('chat-input').value += emoji;
+        document.getElementById('emoji-picker').style.display = 'none';
+        document.getElementById('chat-input').focus();
+    }
+
+    function handleFile(input) {
+        if(input.files && input.files[0]) {
+            alert("تم اختيار ملف: " + input.files[0].name);
+            document.getElementById('chat-input').value += ` [ملف: ${input.files[0].name}] `;
+        }
+    }
+
+    function format12h(timeStr) {
+        if(!timeStr) return "";
+        let [h, m] = timeStr.split(':');
+        h = parseInt(h);
+        const suffix = h >= 12 ? "م" : "ص";
+        h = h % 12 || 12;
+        return `${h}:${m} ${suffix}`;
+    }
+
+    // التعديل المطلوب حرفياً: ضبط التاريخ الهجري لسلطنة عمان
     async function getHijriData(date) {
         try {
-            // استخدام تعديل -1 ليوافق 19 فبراير غرة رمضان 1447هـ
+            // استخدام adjustment=-1 لجعل 19 فبراير يوافق 1 رمضان 1447هـ
             const res = await fetch(`https://api.aladhan.com/v1/gToH/${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}?adjustment=-1`);
             const data = await res.json();
             return data.data.hijri;
@@ -230,7 +280,7 @@
         return (dayOfWeek === 1 || dayOfWeek === 4 || whiteDays.includes(parseInt(hijriDay)));
     }
 
-    // التعديل المطلوب: تحديث عداد رمضان ليكون 19 فبراير 2026
+    // التعديل المطلوب حرفياً: تحديث عداد رمضان ليكون 19 فبراير 2026
     async function updateCountdowns() {
         const ramadanDate = new Date('February 19, 2026 00:00:00').getTime();
         setInterval(() => {
@@ -274,15 +324,6 @@
         } catch(e) { console.error("Error fetching prayers"); }
     }
 
-    function format12h(timeStr) {
-        if(!timeStr) return "";
-        let [h, m] = timeStr.split(':');
-        h = parseInt(h);
-        const suffix = h >= 12 ? "م" : "ص";
-        h = h % 12 || 12;
-        return `${h}:${m} ${suffix}`;
-    }
-
     function updateNextPrayerCountdown(now) {
         let info = "";
         let showAlert = false;
@@ -318,7 +359,7 @@
         currentUser = name;
         document.getElementById('user-ui').style.display = 'block';
         document.getElementById('current-user-title').innerText = `📊 لوحة طاعات: ${name}`;
-        db.ref('osraty').on('value', snap => render(snap.val() || {}));
+        db.ref('osraty').once('value', snap => render(snap.val() || {}));
     }
 
     function save(id, val) {
@@ -344,6 +385,8 @@
         }));
 
         drawPodium('daily-podium', stats);
+        updateKnights(allData);
+        
         document.getElementById('cards-ui').innerHTML = stats.map(st => `
             <div class="comp-card ${st.n === currentUser ? 'active' : ''}" onclick="selectUser('${st.n}')">
                 <b style="font-size:1.1rem">${st.n}</b> <br> <span style="color:var(--gold)">${st.s} نقطة</span>
@@ -351,17 +394,14 @@
             </div>`).join('');
         
         if(currentUser) renderForms((allData[selectedDateStr] && allData[selectedDateStr][currentUser]) || {}, isFriday, fastingDay, selectedDate);
-        checkNiyaAlert(); 
     }
 
     async function getRemaining(userData, isFriday, selectedDateStr) {
         let rem = [];
         let curFard = [...model.fard];
-        if(!userData['fasting']?.done) {
-             const d = new Date(selectedDateStr);
-             const h = await getHijriData(d);
-             if(h && isFastingDay(d.getDay(), h.day, h.month.en)) rem.push("الصيام 🌙");
-        }
+        const d = new Date(selectedDateStr);
+        const h = await getHijriData(d);
+        if(h && isFastingDay(d.getDay(), h.day, h.month.en) && !userData['fasting']?.done) rem.push("الصيام 🌙");
         curFard.forEach(f => { if(!userData[f.id]) rem.push(f.n); });
         model.sunan.forEach(s => { if(!userData[s.id]?.done) rem.push(s.n); });
         return rem.length ? rem.join('، ') : "✅ اكتملت الطاعة";
@@ -413,6 +453,29 @@
         }).join('');
     }
 
+    function updateKnights(data) {
+        let knightStats = users.reduce((acc, u) => { acc[u] = { fajr:0, fasting:0, quran:0, sunan:0, azkar:0 }; return acc; }, {});
+        const dates = Object.keys(data).sort().reverse().slice(0, 7);
+        dates.forEach(d => {
+            users.forEach(u => {
+                const ud = data[d][u] || {};
+                if(ud.fajr && ud.fajr.type === 'm') knightStats[u].fajr++;
+                if(ud.fasting && ud.fasting.done) knightStats[u].fasting++;
+                if(ud.quran && ud.quran.done) knightStats[u].quran++;
+                model.sunan.forEach(s => { if(ud[s.id] && ud[s.id].done) knightStats[u].sunan++; });
+                ['azkar_s', 'azkar_e', 'azkar_n'].forEach(a => { if(ud[a] && ud[a].done) knightStats[u].azkar++; });
+            });
+        });
+        const getBest = (key) => users.reduce((a, b) => knightStats[a][key] >= knightStats[b][key] ? a : b);
+        document.getElementById('knights-display').innerHTML = `
+            <div class="knight-card"><span class="knight-icon">🕌</span><span class="knight-title">فارس الفجر</span><span class="knight-name">${getBest('fajr')}</span></div>
+            <div class="knight-card"><span class="knight-icon">🌙</span><span class="knight-title">فارس الصيام</span><span class="knight-name">${getBest('fasting')}</span></div>
+            <div class="knight-card"><span class="knight-icon">📖</span><span class="knight-title">فارس الورد</span><span class="knight-name">${getBest('quran')}</span></div>
+            <div class="knight-card"><span class="knight-icon">🌱</span><span class="knight-title">فارس السنن</span><span class="knight-name">${getBest('sunan')}</span></div>
+            <div class="knight-card"><span class="knight-icon">📿</span><span class="knight-title">فارس الأذكار</span><span class="knight-name">${getBest('azkar')}</span></div>
+        `;
+    }
+
     function sendMessage() {
         const inp = document.getElementById('chat-input');
         const user = document.getElementById('chat-user-selector').value || currentUser;
@@ -420,26 +483,20 @@
         } else { alert("يرجى اختيار اسمك وكتابة رسالة"); }
     }
 
-    function toggleEmojiPicker() {
-        const p = document.getElementById('emoji-picker');
-        p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
-    }
-
-    // تهيئة الصفحة
     window.onload = () => {
-        const today = new Date().toISOString().split('T')[0];
         const datePicker = document.getElementById('date-picker');
-        datePicker.value = today;
+        datePicker.value = new Date().toISOString().split('T')[0];
         datePicker.onchange = () => db.ref('osraty').once('value', snap => render(snap.val() || {}));
         
         if(localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
         
+        initEmojis();
         fetchCityPrayers('Salalah', 'Oman', 'row-salalah');
         fetchCityPrayers('Kafr El-Sheikh', 'Egypt', 'row-kafr');
         updateCountdowns();
         
         db.ref('osraty').on('value', snap => render(snap.val() || {}));
-        db.ref('osraty_chat').limitToLast(20).on('value', snap => {
+        db.ref('osraty_chat').limitToLast(30).on('value', snap => {
             const msgs = snap.val() || {};
             const div = document.getElementById('chat-messages');
             div.innerHTML = Object.values(msgs).map(m => `
