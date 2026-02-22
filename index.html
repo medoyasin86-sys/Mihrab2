@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ملتقى طاعاتنا 2026 | النسخة الاحترافية</title>
+    <title>ملتقى طاعاتنا 2026 | النسخة المتكاملة</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -14,11 +14,9 @@
         body { font-family: 'Amiri', serif; background-color: var(--bg); margin: 0; padding: 10px; color: var(--text); }
         .main-container { max-width: 950px; margin: auto; background: var(--card-bg); border: 3px double var(--gold); border-radius: 20px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .header-bar { background: linear-gradient(135deg, #1a4d2e, #0a2b1a); color: white; padding: 15px; border-radius: 15px; text-align: center; position: relative; border: 2px solid var(--gold); }
-        #admin-lock { position: absolute; top: 10px; right: 10px; cursor: pointer; background: none; border: none; font-size: 1.5rem; filter: grayscale(1); }
+        #admin-lock { position: absolute; top: 10px; right: 10px; cursor: pointer; background: none; border: none; font-size: 1.5rem; opacity: 0.5; }
         
-        .admin-section { display: none; background: #fff; border: 3px solid var(--accent); border-radius: 15px; margin: 20px 0; padding: 15px; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
+        .admin-section { display: none; background: #fff; border: 3px solid var(--accent); border-radius: 15px; margin: 20px 0; padding: 15px; }
         .podium-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
         .podium-container { display: flex; justify-content: center; align-items: flex-end; height: 120px; gap: 5px; padding-bottom: 25px; }
         .podium-step { width: 45px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: white; border-radius: 8px; position: relative; font-size: 0.75rem; }
@@ -29,22 +27,20 @@
 
         .knights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin: 20px 0; }
         .knight-card { background: white; border: 1px solid var(--gold-light); border-radius: 12px; padding: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .knight-icon { font-size: 1.5rem; display: block; }
 
         .user-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        .comp-card { padding: 12px; text-align: center; border: 2px solid var(--gold-light); border-radius: 15px; cursor: pointer; background: #fff; position: relative; }
+        .comp-card { padding: 12px; text-align: center; border: 2px solid var(--gold-light); border-radius: 15px; cursor: pointer; background: #fff; }
         .comp-card.active { border-color: var(--primary); background: #f0f7f2; box-shadow: 0 0 10px var(--gold); }
-        .remaining-tasks { font-size: 0.7rem; color: #d35400; margin-top: 5px; height: 35px; overflow: hidden; }
+        .remaining-tasks { font-size: 0.75rem; color: #d35400; margin-top: 8px; background: #fff5f0; border-radius: 8px; padding: 4px; border: 1px solid #ffe0d0; }
 
         .section-card { background: white; border: 1px solid var(--gold); border-radius: 15px; margin-top: 15px; overflow: hidden; }
-        .section-title { background: var(--primary); color: white; padding: 10px; margin: 0; font-size: 1rem; }
-        .habit-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px dashed #eee; }
-        .opt-btn { font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--gold); cursor: pointer; background: #fff; }
-        .opt-btn.selected { background: var(--gold); color: white; }
+        .section-title { background: var(--primary); color: white; padding: 10px; margin: 0; font-size: 1rem; display: flex; justify-content: space-between; }
+        .habit-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px dashed #eee; }
+        .external-link { color: #2980b9; text-decoration: none; font-weight: bold; font-size: 0.9rem; }
+        .external-link:hover { text-decoration: underline; }
 
-        .report-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.85rem; }
-        .report-table th, .report-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        .report-table th { background: var(--primary); color: white; }
+        .opt-btn { font-size: 0.75rem; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--gold); cursor: pointer; background: #fff; }
+        .opt-btn.selected { background: var(--gold); color: white; }
         
         .chat-section { background: white; border: 2px solid var(--primary); border-radius: 15px; margin-top: 20px; height: 300px; display: flex; flex-direction: column; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 0.85rem; }
@@ -56,26 +52,26 @@
     <div class="header-bar">
         <button id="admin-lock" onclick="toggleAdmin()">⚙️</button>
         <h2 style="margin:0; font-family:'Reem Kufi'; color: var(--gold-light);">🕌 ملتقى طاعاتنا 2026</h2>
-        <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; margin-top: 10px;">
+        <div style="background: rgba(255,255,255,0.1); padding: 8px; border-radius: 12px; margin-top: 10px;">
             <span id="hijri-display" style="font-weight:bold; font-size:1.2rem; color:var(--gold-light);">...</span> <br>
             <input type="date" id="date-picker" style="border-radius:5px; border:none; padding:5px; margin-top:5px; font-weight:bold;">
         </div>
     </div>
 
     <div id="admin-panel" class="admin-section">
-        <h3 style="text-align:center; color:var(--accent);">📈 التقارير الإحصائية والتحليلية</h3>
-        <div style="display:flex; justify-content:center; gap:5px; margin-bottom:15px; flex-wrap:wrap;">
-            <button class="opt-btn" onclick="generateReport('daily')">اليومي</button>
-            <button class="opt-btn" onclick="generateReport('monthly')">الشهري</button>
-            <button class="opt-btn" onclick="exportPDF()">تحميل PDF</button>
+        <h3 style="text-align:center; color:var(--accent);">📈 الإدارة والتقارير</h3>
+        <div style="display:flex; justify-content:center; gap:5px; margin-bottom:15px;">
+            <button class="opt-btn" onclick="generateReport('daily')">تقرير اليوم</button>
+            <button class="opt-btn" onclick="generateReport('monthly')">تقرير الشهر</button>
+            <button class="opt-btn" style="background:var(--primary); color:#fff;" onclick="exportPDF()">تصدير PDF</button>
         </div>
-        <canvas id="reportChart" style="max-height: 250px;"></canvas>
+        <canvas id="reportChart" style="max-height: 200px;"></canvas>
         <div id="report-output"></div>
     </div>
 
     <div class="podium-section">
         <div><h4 style="text-align:center; margin:2px;">🏆 توب اليوم</h4><div id="daily-podium" class="podium-container"></div></div>
-        <div><h4 style="text-align:center; margin:2px;">✨ الترتيب السنوي</h4><div id="annual-podium" class="podium-container"></div></div>
+        <div><h4 style="text-align:center; margin:2px;">✨ السنوي</h4><div id="annual-podium" class="podium-container"></div></div>
     </div>
 
     <div class="knights-section">
@@ -91,28 +87,38 @@
         <div class="section-card" id="ramadan-card" style="border: 2px solid var(--accent);">
             <h3 class="section-title" style="background:var(--accent);">🌙 ركن الصيام</h3>
             <div class="habit-row">
-                <span>فريضة صيام اليوم (+150ن)</span>
-                <input type="checkbox" id="fast-check" style="transform: scale(1.5);">
+                <span>فريضة صيام اليوم <b>(+150ن)</b></span>
+                <input type="checkbox" id="fast-check" style="transform: scale(1.6);">
             </div>
         </div>
 
-        <div class="section-card"><h3 class="section-title">🕋 الفرائض (م: مسجد | ج: جماعة | ف: فردي)</h3><div id="fard-list"></div></div>
-        <div class="section-card"><h3 class="section-title">🌱 الرواتب والقيام</h3><div id="sunan-list"></div></div>
-        <div class="section-card"><h3 class="section-title">📿 الأذكار والورد</h3><div id="extra-list"></div></div>
+        <div class="section-card">
+            <h3 class="section-title">🕋 الفرائض <span>(م:100 | ج:30 | ف:15 | ق:5)</span></h3>
+            <div id="fard-list"></div>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">🌱 الرواتب والقيام <span>(نقاط محددة لكل سنة)</span></h3>
+            <div id="sunan-list"></div>
+        </div>
+
+        <div class="section-card">
+            <h3 class="section-title">📿 الأذكار والورد <span>(اضغط للاطلاع والقراءة)</span></h3>
+            <div id="extra-list"></div>
+        </div>
     </div>
 
     <div class="chat-section">
         <div id="chat-messages" class="chat-messages"></div>
         <div style="padding:10px; display:flex; gap:5px; background:#f0f0f0;">
             <select id="chat-user" style="padding:5px; border-radius:10px;"><option value="محمد">محمد</option><option value="شيماء">شيماء</option><option value="أحمد">أحمد</option><option value="ياسين">ياسين</option></select>
-            <input type="text" id="chat-input" style="flex:1; border-radius:20px; border:1px solid #ccc; padding:0 10px;" placeholder="رسالة تشجيعية...">
+            <input type="text" id="chat-input" style="flex:1; border-radius:20px; border:1px solid #ccc; padding:0 10px;" placeholder="رسالة...">
             <button onclick="sendMessage()" style="background:var(--primary); color:white; border:none; border-radius:50%; width:35px; height:35px;">➤</button>
         </div>
     </div>
 </div>
 
 <script>
-    // تهيئة Firebase
     const firebaseConfig = { apiKey: "AIzaSyDBa3kZK5ibQEIRRjVIHL7JIOHixX_7rVs", authDomain: "ebada-656e1.firebaseapp.com", databaseURL: "https://ebada-656e1-default-rtdb.firebaseio.com", projectId: "ebada-656e1" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -121,41 +127,44 @@
     let currentUser = null;
     let myChart = null;
 
+    // موديل العبادات مع النقاط والروابط
     const model = {
         fard: [
-            {id:'fajr', n:'الفجر', pts: {m:100, g:30, f:15}},
-            {id:'dhuhr', n:'الظهر', pts: {m:50, g:30, f:15}},
-            {id:'asr', n:'العصر', pts: {m:50, g:30, f:15}},
-            {id:'maghrib', n:'المغرب', pts: {m:50, g:30, f:15}},
-            {id:'isha', n:'العشاء', pts: {m:50, g:30, f:15}}
+            {id:'fajr', n:'الفجر', pts: {m:100, g:30, f:15, q:5}},
+            {id:'dhuhr', n:'الظهر', pts: {m:50, g:30, f:15, q:5}},
+            {id:'asr', n:'العصر', pts: {m:50, g:30, f:15, q:5}},
+            {id:'maghrib', n:'المغرب', pts: {m:50, g:30, f:15, q:5}},
+            {id:'isha', n:'العشاء', pts: {m:50, g:30, f:15, q:5}}
         ],
         sunan: [
-            {id:'s_fajr', n:'سنة الفجر', p:20}, {id:'s_dhuhr_b', n:'سنة الظهر قبل', p:20},
-            {id:'s_dhuhr_a', n:'سنة الظهر بعد', p:15}, {id:'s_maghrib', n:'سنة المغرب', p:15},
-            {id:'s_isha', n:'سنة العشاء', p:15}, {id:'s_duha', n:'صلاة الضحى', p:25},
+            {id:'s_fajr', n:'سنة الفجر', p:20}, {id:'s_duha', n:'صلاة الضحى', p:25},
+            {id:'s_dhuhr_b', n:'سنة الظهر (قبل)', p:20}, {id:'s_dhuhr_a', n:'سنة الظهر (بعد)', p:15},
+            {id:'s_maghrib', n:'سنة المغرب', p:15}, {id:'s_isha', n:'سنة العشاء', p:15},
             {id:'s_shaf', n:'الشفع والوتر', p:25}, {id:'s_qyam', n:'قيام الليل', p:40}
         ],
         extra: [
-            {id:'az_s', n:'أذكار الصباح', p:30}, {id:'az_e', n:'أذكار المساء', p:30},
-            {id:'az_n', n:'أذكار النوم', p:20}, {id:'mulk', n:'سورة الملك', p:30},
-            {id:'baqarah', n:'خواتيم البقرة', p:20}, {id:'quran', n:'الورد القرآني', p:50}
+            {id:'az_s', n:'☀️ أذكار الصباح', p:30, url:'https://www.azkary.com/صباح'},
+            {id:'az_e', n:'🌙 أذكار المساء', p:30, url:'https://www.azkary.com/مساء'},
+            {id:'quran', n:'📖 الورد القرآني', p:50, url:'https://quran.com'},
+            {id:'mulk', n:'📖 سورة الملك', p:30, url:'https://quran.com/67'},
+            {id:'baqarah', n:'📖 خواتيم البقرة', p:20, url:'https://quran.com/2/285-286'},
+            {id:'az_n', n:'😴 أذكار النوم', p:20, url:'https://www.azkary.com/نوم'}
         ]
     };
 
-    // ضبط التاريخ (عمان: 22 فبراير = 4 رمضان)
     async function getHijri(date) {
         let adjDate = new Date(date);
-        adjDate.setDate(adjDate.getDate() - 1); // تعديل يدوي لعمان
+        adjDate.setDate(adjDate.getDate() - 1); // تعديل عمان
         const res = await fetch(`https://api.aladhan.com/v1/gToH/${adjDate.getDate()}-${adjDate.getMonth()+1}-${adjDate.getFullYear()}`);
         const data = await res.json();
         return data.data.hijri;
     }
 
     function toggleAdmin() {
-        const pass = prompt("أدخل الرقم السري:");
+        const pass = prompt("الرقم السري للإدارة:");
         if(pass === "9090") {
-            const panel = document.getElementById('admin-panel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+            const p = document.getElementById('admin-panel');
+            p.style.display = p.style.display === 'block' ? 'none' : 'block';
         }
     }
 
@@ -165,59 +174,73 @@
         document.getElementById('hijri-display').innerText = `${hj.day} ${hj.month.ar} ${hj.year}هـ`;
         
         const isFriday = new Date(selDate).getDay() === 5;
-        const isRamadan = hj.month.en === "Ramadan";
 
-        // حساب نقاط كل مستخدم + المتبقي
         let stats = users.map(u => {
-            let pts = 0; let rem = [];
+            let pts = 0; let remaining = [];
             let ud = allData[selDate]?.[u] || {};
             
-            if(ud.fast) pts += 150; else rem.push("الصيام");
-            model.fard.forEach(f => { if(ud[f.id]) pts += ud[f.id].p; else rem.push(f.n); });
-            model.sunan.forEach(s => { if(ud[s.id]) pts += s.p; else rem.push(s.n); });
-            model.extra.forEach(e => { if(ud[e.id]) pts += e.p; else rem.push(e.n); });
-            if(isFriday) { if(ud.kahf) pts += 40; else rem.push("الكهف"); }
+            // الصيام
+            if(ud.fast) pts += 150; else remaining.push("الصيام");
+            // الفرائض
+            model.fard.forEach(f => {
+                if(ud[f.id]) pts += ud[f.id].p; else remaining.push(f.n);
+            });
+            // السنن
+            model.sunan.forEach(s => {
+                if(ud[s.id]) pts += s.p; else remaining.push(s.n);
+            });
+            // الأذكار والورد
+            model.extra.forEach(e => {
+                if(ud[e.id]) pts += e.p; else remaining.push(e.n);
+            });
+            if(isFriday) { if(ud.kahf) pts += 40; else remaining.push("سورة الكهف"); }
 
-            return { n: u, s: pts, r: rem.length > 3 ? rem.slice(0,3).join('، ')+'..' : rem.join('، ') };
+            return { n: u, s: pts, rem: remaining };
         });
 
-        // رسم المنصات
         drawPodium('daily-podium', stats);
         updateAnnual(allData);
         updateKnights(allData);
 
-        // بطاقات المتسابقين
+        // بطاقات المتسابقين مع المتبقي التفصيلي
         document.getElementById('cards-ui').innerHTML = stats.map(st => `
             <div class="comp-card ${st.n === currentUser ? 'active' : ''}" onclick="selectUser('${st.n}')">
-                <b>${st.n}</b> <br> <span style="color:var(--gold); font-weight:bold;">${st.s} نقطة</span>
-                <div class="remaining-tasks">⏳ المتبقي: ${st.r || '✅ تم الإنجاز'}</div>
+                <b>${st.n}</b> <br> <span style="color:var(--gold); font-size:1.1rem; font-weight:bold;">${st.s} نقطة</span>
+                <div class="remaining-tasks">
+                    <b>⏳ المتبقي:</b><br>
+                    <small>${st.rem.length > 0 ? st.rem.join(' • ') : '🏆 اكتملت المهام!'}</small>
+                </div>
             </div>`).join('');
 
-        if(currentUser) renderUserTasks(allData[selDate]?.[currentUser] || {}, isRamadan, isFriday);
+        if(currentUser) renderUserTasks(allData[selDate]?.[currentUser] || {}, isFriday);
     }
 
-    function renderUserTasks(ud, isRamadan, isFriday) {
+    function renderUserTasks(ud, isFriday) {
         document.getElementById('fast-check').checked = !!ud.fast;
         document.getElementById('fast-check').onclick = (e) => save('fast', e.target.checked);
 
-        // الفرائض
         let fards = [...model.fard];
-        if(isFriday) fards = fards.map(f => f.id === 'dhuhr' ? {id:'dhuhr', n:'صلاة الجمعة', pts:{m:100, g:30, f:15}} : f);
+        if(isFriday) fards = fards.map(f => f.id === 'dhuhr' ? {id:'dhuhr', n:'🕌 صلاة الجمعة', pts:{m:100, g:30, f:15, q:5}} : f);
         
         document.getElementById('fard-list').innerHTML = fards.map(f => `
             <div class="habit-row"><span>${f.n}</span>
-            <div style="display:flex; gap:2px;">${Object.entries(f.pts).map(([k,v]) => `
-                <button class="opt-btn ${ud[f.id]?.t===k?'selected':''}" onclick="save('${f.id}',{t:'${k}', p:${v}})">${k=='m'?'م':k=='g'?'ج':'ف'}</button>`).join('')}
+            <div style="display:flex; gap:3px;">${Object.entries(f.pts).map(([k,v]) => `
+                <button class="opt-btn ${ud[f.id]?.t===k?'selected':''}" onclick="save('${f.id}',{t:'${k}', p:${v}})">${k.toUpperCase()}</button>`).join('')}
             </div></div>`).join('');
 
         const drawCheck = (list, tid) => {
             document.getElementById(tid).innerHTML = list.map(h => `
-                <div class="habit-row"><span>${h.n} (+${h.p})</span>
-                <input type="checkbox" ${ud[h.id]?'checked':''} onclick="save('${h.id}', this.checked)"></div>`).join('');
+                <div class="habit-row">
+                    <span>
+                        ${h.url ? `<a href="${h.url}" target="_blank" class="external-link">🔗 ${h.n}</a>` : h.n} 
+                        <small>(+${h.p})</small>
+                    </span>
+                    <input type="checkbox" ${ud[h.id]?'checked':''} onclick="save('${h.id}', this.checked)">
+                </div>`).join('');
         };
         drawCheck(model.sunan, 'sunan-list');
         let extras = [...model.extra];
-        if(isFriday) extras.push({id:'kahf', n:'سورة الكهف', p:40});
+        if(isFriday) extras.push({id:'kahf', n:'📖 سورة الكهف', p:40, url:'https://quran.com/18'});
         drawCheck(extras, 'extra-list');
     }
 
@@ -229,7 +252,7 @@
     function selectUser(n) {
         currentUser = n;
         document.getElementById('user-ui').style.display = 'block';
-        document.getElementById('current-user-title').innerText = `لوحة ${n}`;
+        document.getElementById('current-user-title').innerText = `لوحة تسجيل ${n}`;
         db.ref('osraty').once('value', s => updateUI(s.val()||{}));
     }
 
@@ -245,11 +268,10 @@
     function updateAnnual(data) {
         let annual = users.map(u => {
             let total = 0;
-            Object.values(data).forEach(day => { if(day[u]) Object.values(day[u]).forEach(t => total += (t.p || (t === true ? 1 : 0))); });
-            // تصحيح نقاط الـ true (مثل الصيام والسنن)
             Object.keys(data).forEach(d => {
                 const ud = data[d][u] || {};
                 if(ud.fast) total += 150;
+                model.fard.forEach(f => total += (ud[f.id]?.p || 0));
                 model.sunan.forEach(s => { if(ud[s.id]) total += s.p; });
                 model.extra.forEach(e => { if(ud[e.id]) total += e.p; });
                 if(ud.kahf) total += 40;
@@ -260,26 +282,22 @@
     }
 
     function updateKnights(data) {
-        let knights = { fajr: '-', azkar: '-', quran: '-', sunan: '-', fast: '-' };
-        let scores = users.reduce((acc, u) => { acc[u] = { f:0, a:0, q:0, s:0, ft:0 }; return acc; }, {});
-        
+        let scores = users.reduce((acc, u) => { acc[u] = { f:0, a:0, q:0, ft:0 }; return acc; }, {});
         Object.keys(data).slice(-7).forEach(d => {
             users.forEach(u => {
                 const ud = data[d][u] || {};
                 if(ud.fajr?.t === 'm') scores[u].f++;
                 if(ud.az_s && ud.az_e) scores[u].a++;
                 if(ud.quran) scores[u].q++;
-                if(ud.s_qyam) scores[u].s++;
                 if(ud.fast) scores[u].ft++;
             });
         });
-
         const getBest = (key) => users.reduce((a, b) => scores[a][key] >= scores[b][key] ? a : b);
         document.getElementById('knights-display').innerHTML = `
-            <div class="knight-card"><span class="knight-icon">🕌</span><b>الفجر</b><br>${getBest('f')}</div>
-            <div class="knight-card"><span class="knight-icon">📿</span><b>الأذكار</b><br>${getBest('a')}</div>
-            <div class="knight-card"><span class="knight-icon">📖</span><b>الورد</b><br>${getBest('q')}</div>
-            <div class="knight-card"><span class="knight-icon">🌙</span><b>الصيام</b><br>${getBest('ft')}</div>
+            <div class="knight-card"><b>🕌 الفجر</b><br>${getBest('f')}</div>
+            <div class="knight-card"><b>📿 الأذكار</b><br>${getBest('a')}</div>
+            <div class="knight-card"><b>📖 الورد</b><br>${getBest('q')}</div>
+            <div class="knight-card"><b>🌙 الصيام</b><br>${getBest('ft')}</div>
         `;
     }
 
@@ -308,38 +326,32 @@
             if(myChart) myChart.destroy();
             myChart = new Chart(document.getElementById('reportChart'), {
                 type: 'bar',
-                data: { labels: labels, datasets: [{ label: 'نقاط الأداء', data: currentScores, backgroundColor: ['#1a4d2e', '#c5a059', '#d35400', '#900c3f'] }] }
+                data: { labels: labels, datasets: [{ label: 'الأداء التراكمي', data: currentScores, backgroundColor: '#1a4d2e' }] }
             });
 
-            let html = `<table class="report-table"><tr><th>المتسابق</th><th>النقاط</th><th>أيام النشاط</th><th>النسبة</th></tr>`;
+            let html = `<table class="report-table"><tr><th>الاسم</th><th>النقاط</th><th>الالتزام</th></tr>`;
             users.forEach((u, i) => {
-                let activeDays = Object.keys(data).filter(d => data[d][u]).length;
-                html += `<tr><td>${u}</td><td>${currentScores[i]}</td><td>${activeDays}</td><td>${Math.round((currentScores[i]/2000)*100)}%</td></tr>`;
+                html += `<tr><td>${u}</td><td>${currentScores[i]}</td><td>${Math.round((currentScores[i]/2500)*100)}%</td></tr>`;
             });
             document.getElementById('report-output').innerHTML = html + `</table>`;
         });
     }
 
-    function exportPDF() {
-        html2pdf().from(document.getElementById('report-output')).save('تقرير_الطاعات.pdf');
-    }
+    function exportPDF() { html2pdf().from(document.getElementById('report-output')).save('تقرير_التميز.pdf'); }
 
     function sendMessage() {
         const u = document.getElementById('chat-user').value;
         const m = document.getElementById('chat-input').value;
-        if(m) { db.ref('chat').push({ u, m, t: Date.now() }); document.getElementById('chat-input').value = ''; }
+        if(m) { db.ref('chat').push({ u, m }); document.getElementById('chat-input').value = ''; }
     }
 
     window.onload = () => {
         const dp = document.getElementById('date-picker');
-        dp.value = new Date().toISOString().split('T')[0];
+        dp.value = "2026-02-22";
         dp.onchange = () => db.ref('osraty').once('value', s => updateUI(s.val()||{}));
-        
         db.ref('osraty').on('value', s => updateUI(s.val()||{}));
-        db.ref('chat').limitToLast(20).on('value', s => {
-            const msgs = s.val() || {};
-            document.getElementById('chat-messages').innerHTML = Object.values(msgs).map(m => `
-                <div style="margin-bottom:5px; border-bottom:1px solid #eee;"><b>${m.u}:</b> ${m.m}</div>`).join('');
+        db.ref('chat').limitToLast(15).on('value', s => {
+            document.getElementById('chat-messages').innerHTML = Object.values(s.val()||{}).map(m => `<div><b>${m.u}:</b> ${m.m}</div>`).join('');
             const d = document.getElementById('chat-messages'); d.scrollTop = d.scrollHeight;
         });
     };
