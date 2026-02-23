@@ -1216,4 +1216,411 @@
       }).join('');
       return `
         <div class="block-title">🕋 الفرائض (تفصيل بحسب النمط)</div>
-        <di
+        <div class="h-table h-cols-6">
+          <div class="h-head">العبادة</div>
+          <div class="h-head">مسجد</div>
+          <div class="h-head">جماعة</div>
+          <div class="h-head">فرد</div>
+          <div class="h-head">قضاء</div>
+          <div class="h-head">مرات الإنجاز</div>
+          ${rows}
+        </div>`;
+    }
+
+    function genericTable(title, dict, idToName, denom){
+      const rows = Object.keys(dict).map(id=>{
+        const rec = dict[id];
+        const done = rec.done || 0;
+        const applicable = (rec.applicable != null) ? rec.applicable : denom;
+        const rate = applicable ? (done/applicable*100) : 0;
+        return `
+          <div class="h-row">
+            <div class="h-cell name">${idToName[id] || id}</div>
+            <div class="h-cell num">${done} / ${applicable}</div>
+            <div class="h-cell bar">
+              <div class="rate-bar"><div class="rate-fill" style="width:${Math.round(rate)}%"></div></div>
+              <div class="rate-val">${pctStr(rate)}</div>
+            </div>
+          </div>`;
+      }).join('');
+      return `
+        <div class="block-title">${title}</div>
+        <div class="h-table h-cols-3">
+          <div class="h-head">العبادة</div>
+          <div class="h-head">مرات الإنجاز</div>
+          <div class="h-head">النسبة</div>
+          ${rows}
+        </div>`;
+    }
+
+    function userBlockHTML(u, data){
+      const f = data.fardCounts || {m:0,g:0,f:0,q:0};
+      const top = data.topDays || [];
+
+      const avgPerActive = data.daysActive ? Math.round(data.totalPoints / data.daysActive) : 0;
+      const excellencePct  = Math.round((data.totalPoints / leaderTotal) * 100);
+      const deficiencyPct  = Math.max(0, 100 - excellencePct);
+      const adherencePct   = Math.round((data.daysActive / rangeDays) * 100);
+
+      function barsHTML(items){
+        if(!items.length) return `<div class="nodata">لا توجد بيانات مميزة في هذا المدى.</div>`;
+        const max = Math.max(...items.map(x=>x.points), 1);
+        return items.map(x=>{
+          const w = Math.round((x.points/max)*100);
+          return `
+            <div class="bar-row">
+              <div class="bar-label">${x.date}</div>
+              <div class="bar">
+                <div class="bar-fill" style="width:${w}%"></div>
+                <div class="bar-val">${x.points} ن</div>
+              </div>
+            </div>`;
+        }).join('');
+      }
+
+      const sunanBlock   = genericTable("🌱 السنن والرواتب", data.habitStats.sunan, SUNAN_NAMES, rangeDays);
+      const extraBlock   = genericTable("📿 الأذكار والورد", data.habitStats.extra, EXTRA_NAMES, rangeDays);
+      const kahfBlock    = genericTable("🕌 سورة الكهف (الجمعة فقط)", { kahf: data.habitStats.special.kahf }, {kahf:'🕌 سورة الكهف'}, rangeDays);
+      const fastBlock    = genericTable("🌙 الصيام (تطوع)", { fasting: data.habitStats.special.fasting }, {fasting:'🌙 صيام تطوع'}, rangeDays);
+      const rfastBlock   = genericTable("🌙 صيام رمضان (فرض)", { r_fasting: data.habitStats.special.r_fasting }, {r_fasting:'🌙 صيام رمضان (فرض)'}, rangeDays);
+
+      return `
+        <section class="user-card">
+          <h3>👤 ${u}</h3>
+
+          <div class="kpis">
+            <div class="kpi"><span class="kpi-title">إجمالي النقاط</span><span class="kpi-val">${data.totalPoints}</span></div>
+            <div class="kpi"><span class="kpi-title">أيام فعّالة</span><span class="kpi-val">${data.daysActive}/${rangeDays}</span></div>
+            <div class="kpi"><span class="kpi-title">متوسط/يوم</span><span class="kpi-val">${avgPerActive}</span></div>
+            <div class="kpi"><span class="kpi-title">أيّام الصيام</span><span class="kpi-val">${data.fastingCount}</span></div>
+            <div class="kpi"><span class="kpi-title">ورد قرآني</span><span class="kpi-val">${data.quranCount}</span></div>
+          </div>
+
+          <!-- نسب الأداء -->
+          <div class="rates">
+            <div class="rate">
+              <div class="rate-row"><span class="rate-label">نسبة التميُّز</span><span class="rate-val">${excellencePct}%</span></div>
+              <div class="rate-bar"><div class="rate-fill" style="width:${excellencePct}%"></div></div>
+            </div>
+            <div class="rate">
+              <div class="rate-row"><span class="rate-label">نسبة التقصير</span><span class="rate-val">${deficiencyPct}%</span></div>
+              <div class="rate-bar muted"><div class="rate-fill danger" style="width:${deficiencyPct}%"></div></div>
+            </div>
+            <div class="rate">
+              <div class="rate-row"><span class="rate-label">نسبة المواظبة</span><span class="rate-val">${adherencePct}%</span></div>
+              <div class="rate-bar info"><div class="rate-fill info" style="width:${adherencePct}%"></div></div>
+            </div>
+          </div>
+
+          <div class="sub-title">📈 أفضل 5 أيام</div>
+          <div class="bars">${barsHTML(top)}</div>
+
+          <!-- تفصيل العبادات -->
+          ${fardTable(data)}
+          ${sunanBlock}
+          ${extraBlock}
+          ${kahfBlock}
+          ${fastBlock}
+          ${rfastBlock}
+
+          <div class="fard-breakdown" style="display:flex; gap:10px; margin-top:8px; color:#534d3d; font-size:.95rem;">
+            <span>🕌 مسجد: <b>${f.m||0}</b></span>
+            <span>👥 جماعة: <b>${f.g||0}</b></span>
+            <span>🙇‍♂️ فرد: <b>${f.f||0}</b></span>
+            <span>⏱️ قضاء: <b>${f.q||0}</b></span>
+          </div>
+        </section>`;
+    }
+
+    const html = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>تقرير ${modeLabel} | ${rangeLabel}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap">
+<style>
+  :root{
+    --primary:#1a4d2e; --gold:#c5a059; --gold-light:#e6cc92; --bg:#fff; --text:#1a4d2e;
+    --muted:#6b6b6b; --border:#e6dec7; --danger:#b33a3a; --info:#2d6a4f;
+  }
+  body{ font-family:'Amiri',serif; margin:24px; background:#fff; color:var(--text); }
+  .hdr{
+    border:2px solid var(--gold); border-radius:14px; padding:14px 18px; margin-bottom:18px;
+    background:linear-gradient(135deg,#fdf7e8,#fff);
+  }
+  .hdr-title{ font-family:'Reem Kufi',sans-serif; font-size:1.35rem; margin:0 0 6px 0; color:#634e1e; }
+  .hdr-sub{ display:flex; gap:12px; flex-wrap:wrap; color:#7a6b4e; font-weight:700; }
+  .tag{ background:#fff7d6; border:1px solid var(--gold); padding:2px 8px; border-radius:999px; }
+  .small{ color:#7a7a7a; font-size:.9rem; }
+
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(360px,1fr)); gap:12px; }
+  .user-card{
+    border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+    break-inside: avoid;
+  }
+  .user-card h3{ margin:0 0 10px 0; font-family:'Reem Kufi',sans-serif; color:#0f3b22; }
+
+  .kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:8px; }
+  .kpi{ background:#f9f6ef; border:1px solid var(--border); border-radius:10px; padding:6px; text-align:center; }
+  .kpi-title{ display:block; color:#7a6b4e; font-size:.85rem; }
+  .kpi-val{ display:block; font-weight:800; font-size:1.05rem; }
+
+  .rates{ display:grid; grid-template-columns:1fr; gap:8px; margin:8px 0 10px 0; }
+  .rate-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+  .rate-label{ color:#534d3d; font-weight:800; }
+  .rate-val{ font-weight:800; color:#0f3b22; }
+  .rate-bar{ position:relative; height:14px; background:#f1ede0; border:1px solid #e0d6b8; border-radius:999px; overflow:hidden; }
+  .rate-bar.muted{ background:#f7ecec; border-color:#efd6d6; }
+  .rate-bar.info{ background:#eef6f0; border-color:#cfe4d7; }
+  .rate-fill{ height:100%; background:linear-gradient(90deg,#1a4d2e,#2d6a4f); }
+  .rate-fill.danger{ background:linear-gradient(90deg,#b33a3a,#e26a6a); }
+  .rate-fill.info{ background:linear-gradient(90deg,#2d6a4f,#5aa879); }
+
+  .sub-title{ margin:6px 0; font-weight:800; color:#7a6b4e; }
+  .bars{ display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
+  .bar-row{ display:flex; align-items:center; gap:8px; }
+  .bar-label{ width:120px; color:#6b6b6b; font-size:.9rem; }
+  .bar{ position:relative; flex:1; height:18px; background:#f1ede0; border:1px solid #e0d6b8; border-radius:999px; overflow:hidden; }
+  .bar-fill{ height:100%; background:linear-gradient(90deg,#1a4d2e,#2d6a4f); }
+  .bar-val{ position:absolute; right:8px; top:-1px; font-size:.85rem; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); }
+
+  .block-title{ margin:8px 0 6px 0; font-weight:800; color:#634e1e; }
+  .h-table{ display:grid; gap:4px; border:1px solid #e6dec7; border-radius:10px; overflow:hidden; }
+  .h-cols-6{ grid-template-columns:1.2fr repeat(5, 1fr); }
+  .h-cols-3{ grid-template-columns:1.6fr .8fr 1.2fr; }
+  .h-head{ background:#fbf6e8; border-bottom:1px solid #e6dec7; padding:6px 8px; font-weight:800; }
+  .h-row{ display:contents; }
+  .h-cell{ padding:6px 8px; border-top:1px dashed #efe7cf; }
+  .h-cell.name{ font-weight:800; color:#0f3b22; }
+  .h-cell.num{ color:#534d3d; }
+  .h-cell.bar{ display:flex; align-items:center; gap:8px; }
+  .rate-bar{ flex:1; height:12px; background:#f1ede0; border:1px solid #e0d6b8; border-radius:999px; overflow:hidden; }
+  .rate-fill{ height:100%; background:linear-gradient(90deg,#1a4d2e,#2d6a4f); }
+  .rate-val{ width:52px; text-align:end; color:#534d3d; font-weight:800; }
+
+  .fard-breakdown{ display:flex; gap:10px; margin-top:8px; color:#534d3d; font-size:.95rem; }
+  .nodata{ color:#9a8f74; background:#f9f5e9; border:1px dashed #e6dec7; padding:6px 8px; border-radius:8px; }
+
+  @media print{
+    body{ margin:12mm; }
+    .hdr, .kpi, .bar, .rate-bar, .h-head{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .user-card{ box-shadow:none; }
+  }
+</style>
+</head>
+<body>
+  <header class="hdr">
+    <div class="hdr-title">تقرير ${modeLabel} — المدة: <span class="tag">${rangeLabel}</span></div>
+    <div class="hdr-sub">
+      <span>من <span class="tag">${startYMD}</span> إلى <span class="tag">${endYMD}</span></span>
+      <span class="small">تاريخ الإصدار: ${nowStr}</span>
+    </div>
+  </header>
+
+  <main class="grid">
+    ${ Object.keys(summary).map(u => userBlockHTML(u, summary[u])).join('') }
+  </main>
+</body>
+</html>`;
+    const w = window.open('', '_blank');
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    setTimeout(()=>{ try{ w.focus(); w.print(); }catch(_){/* */} }, 700);
+  }
+
+  /* ===================================== */
+  /*          مُولِّد التقرير العام         */
+  /* ===================================== */
+  async function generateReport(mode, opts={}){
+    const ymd = document.getElementById('date-picker').value || todayYMDMuscat();
+    let startYMD, endYMD, rangeLabel, modeLabel;
+
+    if(mode === 'daily'){
+      startYMD = endYMD = ymd; rangeLabel = ymd; modeLabel = 'يومي (PDF)';
+    }else if(mode === 'weekly'){
+      const r = weekRangeFromYMD(ymd); startYMD = r.start; endYMD = r.end; rangeLabel = r.label; modeLabel = 'أسبوعي (PDF)';
+    }else if(mode === 'monthly'){
+      const r = monthRangeFromYMD(ymd); startYMD = r.start; endYMD = r.end; rangeLabel = `شهر ${r.label}`; modeLabel = 'شهري (PDF)';
+    }else if(mode === 'yearly'){
+      const r = yearRangeFromYMD(ymd); startYMD = r.start; endYMD = r.end; rangeLabel = `سنة ${r.label}`; modeLabel = 'سنوي (PDF)';
+    }else if(mode === 'custom'){
+      startYMD = opts.startYMD; endYMD = opts.endYMD;
+      if(!startYMD || !endYMD || startYMD > endYMD){ alert('حدّد مدى مخصص صحيحًا'); return; }
+      rangeLabel = `${startYMD} → ${endYMD}`; modeLabel = 'مُخصّص (PDF)';
+    }else{
+      alert('وضع التقرير غير معروف'); return;
+    }
+
+    try{
+      const {dates, summary} = await fetchRangeSummary(startYMD, endYMD);
+
+      let finalSummary = summary;
+      let mLabelPrefix = '';
+      if(opts.scope === 'individual' && opts.user){
+        // ملخص فردي فقط
+        finalSummary = { [opts.user]: summary[opts.user] || { totalPoints:0, daysActive:0, fastingCount:0, quranCount:0, fardCounts:{m:0,g:0,f:0,q:0}, days:[], topDays:[], habitStats:{ fard:{}, sunan:{}, extra:{}, special:{ fasting:{done:0}, r_fasting:{done:0, applicable:0}, kahf:{done:0, applicable:0} } } } };
+        mLabelPrefix = `فردي (${opts.user}) — `;
+      } else {
+        mLabelPrefix = 'جماعي — ';
+      }
+
+      openReportWindow({modeLabel: mLabelPrefix + modeLabel, rangeLabel, startYMD, endYMD, summary: finalSummary, dates});
+    }catch(e){
+      console.error('Report error:', e);
+      alert('تعذّر توليد التقرير. حاول مجددًا.');
+    }
+  }
+
+  /* ======= واجهة لوحة التقارير ======= */
+  function fillUsersSelect(selId){
+    const sel = document.getElementById(selId);
+    if(!sel) return;
+    sel.innerHTML = users.map(u=>`<option value="${u}">${u}</option>`).join('');
+  }
+  function toggleReportsPanelVisibility(show){
+    const panel = document.getElementById('reports-advanced-panel');
+    const badge = document.getElementById('admin-badge');
+    const daily = document.getElementById('btn-report-daily');
+    const monthly = document.getElementById('btn-report-monthly');
+    const yearly = document.getElementById('btn-report-yearly');
+    if(show){
+      panel.style.display = 'block';
+      badge.style.display = 'inline-block';
+      if(daily) daily.style.display = 'inline-block';
+      if(monthly) monthly.style.display = 'inline-block';
+      if(yearly) yearly.style.display = 'inline-block';
+    }else{
+      panel.style.display = 'none';
+      badge.style.display = 'none';
+      if(daily) daily.style.display = 'none';
+      if(monthly) monthly.style.display = 'none';
+      if(yearly) yearly.style.display = 'none';
+    }
+  }
+  function handleReportsGear(){
+    const panel = document.getElementById('reports-advanced-panel');
+    const visible = panel.style.display === 'block';
+    if(visible){
+      toggleReportsPanelVisibility(false); return;
+    }
+    const pin = prompt("أدخل الرقم السري لإدارة التقارير:");
+    if(pin === '9090'){ toggleReportsPanelVisibility(true); }
+    else if(pin !== null){ alert("الرمز غير صحيح"); }
+  }
+  function onScopeChange(){
+    const scopeSel = document.getElementById('report-scope');
+    const userSel  = document.getElementById('report-user');
+    userSel.style.display = (scopeSel.value === 'individual') ? 'inline-block' : 'none';
+  }
+  function onRangeTypeChange(){
+    const typeSel = document.getElementById('report-range-type');
+    const customWrap = document.getElementById('custom-range-wrap');
+    customWrap.style.display = (typeSel.value === 'custom') ? 'inline-flex' : 'none';
+  }
+  function generateReportFromPanel(){
+    const scope = document.getElementById('report-scope').value;
+    const user  = document.getElementById('report-user').value;
+    const rtype = document.getElementById('report-range-type').value;
+    if(scope === 'individual' && !user){ alert('اختر المستخدم للتقرير الفردي'); return; }
+    if(rtype === 'custom'){
+      const startYMD = document.getElementById('custom-start').value;
+      const endYMD   = document.getElementById('custom-end').value;
+      return generateReport('custom', { scope, user, startYMD, endYMD });
+    }
+    return generateReport(rtype, { scope, user });
+  }
+
+  async function blockUser(){
+    const u = document.getElementById('block-user-select').value;
+    const from = document.getElementById('block-from-date').value;
+    if(!u || !from) return alert('اختر المستخدم وحدّد تاريخ بداية الحظر');
+    await db.ref('blockedUsers/'+u).set({ active:true, from, updatedAt: Date.now() });
+    alert(`تم حظر "${u}" اعتبارًا من ${from}`);
+  }
+  async function unblockUser(){
+    const u = document.getElementById('block-user-select').value;
+    if(!u) return alert('اختر المستخدم');
+    await db.ref('blockedUsers/'+u).set({ active:false, updatedAt: Date.now() });
+    alert(`تم إلغاء حظر "${u}"`);
+  }
+
+  function sync() {
+    const d = document.getElementById('date-picker').value;
+    db.ref('osraty/' + d).on('value', snap => { lastAllDataCache = snap.val() || {}; render(lastAllDataCache); });
+    db.ref('osraty_chat').limitToLast(20).on('value', snap => renderChat(snap.val() || {}));
+    db.ref('blockedUsers').on('value', snap => { blockedUsers = snap.val() || {}; render(lastAllDataCache); });
+
+    getHijriData(parseLocalYMD(d)).then(apiHijri=>{
+      bindHijriOverrideListener(d, apiHijri);
+      setHijriPanelFromOverride(currentHijriOverride, apiHijri);
+    });
+
+    updateAnnual(); checkNiyaAlert();
+  }
+  async function refreshAll() { await applyCitySelection(); sync(); }
+
+  window.onload = () => {
+    if(localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
+    document.getElementById('date-picker').value = todayYMDMuscat();
+
+    document.getElementById('hijri-month-input').innerHTML = monthOptionsHTML();
+    fillUsersSelect('report-user');
+    fillUsersSelect('block-user-select');
+
+    populateCitySelects();
+    applyCitySelection();
+
+    updateCountdowns();
+    initEmojis();
+
+    document.getElementById('date-picker').onchange = () => { sync(); updateHeaderTitleForRamadan(); };
+    document.getElementById('btn-refresh').onclick = refreshAll;
+    const btnSaveAll = document.getElementById('btn-save-all'); if (btnSaveAll) btnSaveAll.onclick = saveAllChanges;
+
+    const btnDaily   = document.getElementById('btn-report-daily');
+    const btnMonthly = document.getElementById('btn-report-monthly');
+    const btnYearly  = document.getElementById('btn-report-yearly');
+    if(btnDaily)   btnDaily.onclick   = ()=> generateReport('daily',   { scope:'group' });
+    if(btnMonthly) btnMonthly.onclick = ()=> generateReport('monthly', { scope:'group' });
+    if(btnYearly)  btnYearly.onclick  = ()=> generateReport('yearly',  { scope:'group' });
+
+    document.getElementById('btn-hijri-toggle').onclick = ()=>{
+      const pn = document.getElementById('hijri-panel');
+      pn.style.display = (pn.style.display === 'block') ? 'none' : 'block';
+    };
+    document.getElementById('btn-hijri-save').onclick = saveHijriOverride;
+    document.getElementById('btn-hijri-reset').onclick = disableHijriOverride;
+
+    document.getElementById('btn-reports-gear').onclick = handleReportsGear;
+    document.getElementById('report-scope').onchange = onScopeChange;
+    document.getElementById('report-range-type').onchange = onRangeTypeChange;
+    document.getElementById('btn-generate-from-panel').onclick = generateReportFromPanel;
+
+    document.getElementById('btn-block-user').onclick = blockUser;
+    document.getElementById('btn-unblock-user').onclick = unblockUser;
+
+    sync();
+
+    if (todayYMDMuscat() === '2026-02-19') showRamadanToastOnce();
+
+    toggleRamadanDecorations();
+    updateHeaderTitleForRamadan();
+    setInterval(() => { toggleRamadanDecorations(); updateHeaderTitleForRamadan(); }, 60000);
+  };
+
+  /* ========= أحاديث ========= */
+  const ahadith = [
+    "قال ﷺ: (من صام رمضان إيماناً واحتساباً غفر له ما تقدم من ذنبه)",
+    "قال ﷺ: (تسحروا فإن في السحور بركة)",
+    "قال ﷺ: (أحب الأعمال إلى الله أدومها وإن قل)",
+    "قال ﷺ: (بني الإسلام على خمس...)",
+    "قال ﷺ: (الدعاء هو العبادة)",
+    "قال ﷺ: (كلمتان خفيفتان على اللسان، ثقيلتان في الميزان: سبحان الله وبحمده سبحان الله العظيم)",
+    "قال ﷺ: (من غدا إلى المسجد أو راح أعد الله له في الجنة نزلاً كلما غدا أو راح)"
+  ];
+</script>
+</body>
+</html>
