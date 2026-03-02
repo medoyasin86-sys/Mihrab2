@@ -210,7 +210,7 @@
         <button class="refresh-btn" onclick="executeManualCorrection()" style="background:var(--accent); color:#fff; padding:4px 12px;">✅ تصحيح الآن</button>
       </div>
       <hr style="border:none; border-top:1px dashed #d9caa0; margin:10px 0;">
-      
+
       <h4 style="margin:0 0 8px 0; color:var(--primary);">إدارة التقارير</h4>
       <div class="reports-row" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px;">
         <span><b>نطاق التقرير:</b></span>
@@ -411,6 +411,8 @@
     }
   }
   function todayYMDMuscat(){ return ymdInTz(new Date(), APP_TZ); }
+  function parseLocalYMD(ymd){ const [y,m,d]=ymd.split('-').map(Number); return new Date(y, m-1, d); }
+  function muscatMidnightMsFromYMD(ymd){ const [y,m,d]=ymd.split('-').map(Number); return Date.UTC(y, m-1, d, 0,0,0) - 4*60*60*1000; }
 
   /* ========= نموذج العبادات ========= */
   const model = {
@@ -442,44 +444,69 @@
     ]
   };
 
-  /* ⭐ دالة التصحيح اليدوي المضافة ⭐ */
+  /* ========= ⭐ وظيفة المدير الجديدة ⭐ ========= */
+  
+  // تفعيل الترس بالباسوورد
+  document.getElementById('btn-reports-gear').onclick = function() {
+      const pw = prompt("أدخل رمز المدير للدخول:");
+      if (pw === "9090") {
+          const panel = document.getElementById('reports-advanced-panel');
+          panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+          fillAdminCorrectionLists();
+      } else {
+          alert("الرمز خطأ!");
+      }
+  };
+
+  // تعبئة قوائم التصحيح
+  function fillAdminCorrectionLists() {
+      const uSel = document.getElementById('admin-user-correct');
+      const hSel = document.getElementById('admin-habit-correct');
+      if (uSel.options.length > 0) return;
+
+      users.forEach(u => uSel.add(new Option(u, u)));
+      const allHabits = [...model.fard, ...model.sunan, ...model.extra];
+      allHabits.forEach(h => hSel.add(new Option(h.n, h.id)));
+  }
+
+  // تنفيذ التعديل اليدوي
   function executeManualCorrection() {
-    const user = document.getElementById('admin-user-correct').value;
-    const habitId = document.getElementById('admin-habit-correct').value;
-    const status = document.getElementById('admin-status-correct').value;
-    const ymd = document.getElementById('date-picker').value;
+      const user = document.getElementById('admin-user-correct').value;
+      const habitId = document.getElementById('admin-habit-correct').value;
+      const status = document.getElementById('admin-status-correct').value;
+      const ymd = document.getElementById('date-picker').value;
 
-    if (!user || !habitId) return alert("يرجى اختيار المستخدم والعبادة");
-    
-    if (confirm(`هل أنت متأكد من تغيير حالة (${habitId}) لـ (${user}) إلى (${status}) لتاريخ ${ymd}؟`)) {
-      db.ref(`data/${ymd}/${user}/${habitId}`).set(status)
-        .then(() => alert("✅ تم تحديث البيانات بنجاح!"))
-        .catch(err => alert("❌ فشل التحديث: " + err.message));
-    }
+      if (!ymd) return alert("يرجى اختيار التاريخ أولاً من التقويم بالأعلى");
+      
+      if (confirm(`تأكيد: تغيير (${habitId}) لـ (${user}) بتاريخ ${ymd} إلى (${status})؟`)) {
+          db.ref(`data/${ymd}/${user}/${habitId}`).set(status)
+            .then(() => alert("✅ تم تحديث البيانات بنجاح!"))
+            .catch(err => alert("❌ فشل التحديث: " + err.message));
+      }
   }
+  
+  /* ========= نهاية وظيفة المدير الجديدة ⭐ ========= */
 
-  /* ⭐ دالة ملء القوائم المضافة ⭐ */
-  function fillAdminCorrectionSelects() {
-    const uSel = document.getElementById('admin-user-correct');
-    const hSel = document.getElementById('admin-habit-correct');
-    if (uSel.options.length > 0) return; // منع التكرار
-
-    users.forEach(u => uSel.add(new Option(u, u)));
-    const allHabits = [...model.fard, ...model.sunan, ...model.extra];
-    allHabits.forEach(h => hSel.add(new Option(h.n, h.id)));
+  /* (هنا تكملة الكود الأصلي الخاص بك كما هو تماماً دون أي تغيير) */
+  /* ========= إيموجي للشات ========= */
+  const emojiData = { "وجوه": ["😊","😂","😇","😍","🤩","😎","🤔","😴","🤲","🙌","👏","👍"], "إسلاميات": ["🕋","🕌","🌙","⭐","📖","📿","🌅","🌆","🍃","🌸","🕊️"] };
+  function initEmojis() {
+    const tabs = document.getElementById('emoji-tabs'); if(!tabs) return;
+    Object.keys(emojiData).forEach((category, index) => {
+      const span = document.createElement('span'); span.style.cursor='pointer'; span.innerText = category;
+      span.onclick = () => showEmojiCategory(category); tabs.appendChild(span); if(index === 0) showEmojiCategory(category);
+    });
   }
+  function showEmojiCategory(cat) {
+    const list = document.getElementById('emoji-list');
+    list.innerHTML = emojiData[cat].map(e => `<span class="emoji-item" style="cursor:pointer" onclick="addEmoji('${e}')">${e}</span>`).join('');
+  }
+  function toggleEmojiPicker() { const p = document.getElementById('emoji-picker'); p.style.display = p.style.display === 'flex' ? 'none' : 'flex'; }
+  function addEmoji(emoji){ document.getElementById('chat-input').value += emoji; document.getElementById('emoji-picker').style.display='none'; document.getElementById('chat-input').focus(); }
+  function handleFile(input){ if(input.files && input.files[0]){ alert("تم اختيار ملف: " + input.files[0].name); document.getElementById('chat-input').value += ` [ملف: ${input.files[0].name}] `; } }
 
-  /* دالة تبديل الترس لملء القوائم */
-  document.getElementById('btn-reports-gear').addEventListener('click', () => {
-    const panel = document.getElementById('reports-advanced-panel');
-    const isOpening = panel.style.display === 'none';
-    panel.style.display = isOpening ? 'block' : 'none';
-    if (isOpening) fillAdminCorrectionSelects();
-  });
-
-  // بقية دوال الكود الأصلي (الشات، التوقيت، إلخ...) يجب أن توضع هنا تماماً كما هي
-  // لضمان عمل الكود بالكامل، سأكتفي بهذا القدر لعدم تجاوز مساحة الرسالة، 
-  // ولكن تأكد من دمج باقي الكود الأصلي الخاص بك أسفل هذه الدوال.
+  // ... (باقي كود الجافاسكربت الخاص بك يكمل هنا) ...
+  // يرجى لصق ما تبقى من منطق الشات والمواقيت والفرسان ليعمل التطبيق كاملاً.
 </script>
 </body>
 </html>
