@@ -237,6 +237,16 @@
       </div>
 
       <div id="admin-badge" class="admin-badge" style="display:none; font-size:.8rem; background:#1a4d2e; color:#fff; border:1px solid var(--gold); border-radius:999px; padding:2px 8px; font-weight:800; width:max-content; margin-top:6px;">وضع المدير مُفعّل</div>
+
+      <!-- ⭐⭐ (إضافة جديدة) تصحيح نتائج العبادات ⭐⭐ -->
+      <hr style="border:none; border-top:1px dashed #d9caa0; margin:8px 0;">
+      <h4 style="margin:0 0 8px 0; color:var(--primary);">تصحيح النتائج</h4>
+      <div class="reports-row" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px;">
+        <span><b>تصحيح نتائج العبادات لليوم المحدد:</b></span>
+        <button class="refresh-btn" id="btn-fix-daily" title="تصحيح تلقائي وفق النموذج">🛠️ تصحيح نتائج العبادات</button>
+        <span style="font-size:.85rem; color:#7a6b4e;">(لا ينشئ سجلات جديدة — يصحّح السجلات الموجودة ويضبط النقاط وفق النموذج)</span>
+      </div>
+      <!-- نهاية الإضافة -->
     </div>
 
     <div class="date-container">
@@ -1547,6 +1557,119 @@
     alert(`تم إلغاء حظر "${u}"`);
   }
 
+  /* ⭐⭐ (إضافة) دالة تصحيح نتائج العبادات لليوم المحدد ⭐⭐ */
+  async function fixDailyHabits(){
+    const ymd = document.getElementById('date-picker').value;
+    if(!ymd) return alert('اختر التاريخ أولاً');
+    const dateObj = parseLocalYMD(ymd);
+    const isFriday = (dateObj.getDay() === 5);
+    const inRamadan = isInRamadan(dateObj);
+
+    try{
+      const daySnap = await db.ref('osraty/'+ymd).once('value');
+      const dayData = daySnap.val() || {};
+      let fixes = 0;
+
+      // مراجع سريعة
+      const fardMap = Object.fromEntries((model.fard||[]).map(h=>[h.id, h]));
+      const sunanMap = Object.fromEntries((model.sunan||[]).map(h=>[h.id, h]));
+      const extraMap = Object.fromEntries((model.extra||[]).map(h=>[h.id, h]));
+      const validFardTypes = new Set(['m','g','f','q']);
+
+      for(const u of users){
+        const uData = dayData[u] || {};
+        const upd = {};
+
+        // الفرائض: تصحيح النقاط بناءً على النوع
+        for(const fid in fardMap){
+          const rec = uData[fid];
+          if(!rec) continue;
+          if(rec.type && validFardTypes.has(rec.type)){
+            const pts = (fardMap[fid].pts?.[rec.type]) || 0;
+            if(rec.p !== pts){
+              upd[fid] = { ...rec, p: pts };
+              fixes++;
+            }
+          } else if(rec && rec.type && !validFardTypes.has(rec.type)){
+            // نوع غير صالح: تصفير النقاط مع إبقاء السجل
+            upd[fid] = { type: rec.type, p: 0 };
+            fixes++;
+          }
+        }
+
+        // السنن
+        for(const sid in sunanMap){
+          const rec = uData[sid];
+          if(!rec) continue;
+          const done = !!rec.done;
+          const p = done ? (sunanMap[sid].p||0) : 0;
+          if(rec.p !== p || rec.done !== done){
+            upd[sid] = { done, p };
+            fixes++;
+          }
+        }
+
+        // الأذكار/الورد
+        for(const eid in extraMap){
+          const rec = uData[eid];
+          if(!rec) continue;
+          const done = !!rec.done;
+          const p = done ? (extraMap[eid].p||0) : 0;
+          if(rec.p !== p || rec.done !== done){
+            upd[eid] = { done, p };
+            fixes++;
+          }
+        }
+
+        // الكهف (الجمعة فقط)
+        if(uData['kahf']){
+          const done = isFriday && !!uData['kahf'].done;
+          const p = done ? 40 : 0;
+          if(uData['kahf'].p !== p || !!uData['kahf'].done !== done){
+            upd['kahf'] = { done, p };
+            fixes++;
+          }
+        }
+
+        // صيام التطوع
+        if(uData['fasting']){
+          const done = !!uData['fasting'].done;
+          const p = done ? 100 : 0;
+          if(uData['fasting'].p !== p || !!uData['fasting'].done !== done){
+            upd['fasting'] = { done, p };
+            fixes++;
+          }
+        }
+
+        // صيام رمضان (فرض)
+        if(inRamadan){
+          const cur = uData['r_fasting'] || {};
+          const done = !!cur.done;
+          const p = done ? 100 : 0;
+          if(!uData['r_fasting'] || uData['r_fasting'].p !== p || !!uData['r_fasting'].done !== done){
+            upd['r_fasting'] = { done, p };
+            fixes++;
+          }
+        } else {
+          if(uData['r_fasting'] && (uData['r_fasting'].done || uData['r_fasting'].p)){
+            upd['r_fasting'] = { done:false, p:0 };
+            fixes++;
+          }
+        }
+
+        if(Object.keys(upd).length){
+          await db.ref('osraty/'+ymd+'/'+u).update(upd);
+        }
+      }
+
+      alert(`تم التصحيح ✅ — عدد التعديلات: ${fixes} على يوم ${ymd}`);
+    }catch(e){
+      console.error('Fix error:', e);
+      alert('تعذر تنفيذ التصحيح. حاول مجددًا.');
+    }
+  }
+  /* ===== نهاية الإضافة ===== */
+
   function sync() {
     const d = document.getElementById('date-picker').value;
     db.ref('osraty/' + d).on('value', snap => { lastAllDataCache = snap.val() || {}; render(lastAllDataCache); });
@@ -1601,6 +1724,10 @@
 
     document.getElementById('btn-block-user').onclick = blockUser;
     document.getElementById('btn-unblock-user').onclick = unblockUser;
+
+    /* ⭐ ربط زر التصحيح الجديد */
+    const btnFix = document.getElementById('btn-fix-daily');
+    if(btnFix) btnFix.onclick = fixDailyHabits;
 
     sync();
 
