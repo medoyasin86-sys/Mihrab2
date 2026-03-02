@@ -66,7 +66,7 @@
 
     .next-prayer-banner{ background:rgba(255,255,255,.1); margin-top:10px; padding:10px; border-radius:10px; font-size:.9rem; border:1px solid var(--gold-light); line-height:1.6; }
     .timer-span{ color:var(--gold-light); font-family:sans-serif; font-weight:bold; }
-    #prayer-wudu-alert{ display:none; background:linear-gradient(135deg,#fff9e6,#fffde7); border:2px solid var(--gold); color:#856404; padding:12px; border-radius:12px; margin-top:10px; text-align:center; font-weight:bold; box-shadow:0 0 15px rgba(197,160,89,.4); animation:lightPulse 2s infinite; }
+    #prayer-wudu-alert{ display:none; background:linear-gradient(135deg,#fff9e6,#fffde7); border:2px solid var(--gold); color:#856404; padding:12px; border-radius:12px; margin-top:10px; text-align:center; font-weight:bold; box-shadow:0 0 15px rgba(0,0,0,.4); animation:lightPulse 2s infinite; }
     @keyframes lightPulse{ 0%{box-shadow:0 0 5px rgba(197,160,89,.4); transform:scale(1);} 50%{box-shadow:0 0 20px rgba(197,160,89,.8); transform:scale(1.01);} 100%{box-shadow:0 0 5px rgba(197,160,89,.4); transform:scale(1);} }
 
     .hijri-ramadan-bar{ background:var(--gold); color:#1a4d2e; margin-top:10px; border-radius:10px; padding:10px; font-weight:bold; display:flex; flex-direction:column; align-items:center; font-size:1rem; border:1px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,.1); }
@@ -238,13 +238,16 @@
 
       <div id="admin-badge" class="admin-badge" style="display:none; font-size:.8rem; background:#1a4d2e; color:#fff; border:1px solid var(--gold); border-radius:999px; padding:2px 8px; font-weight:800; width:max-content; margin-top:6px;">وضع المدير مُفعّل</div>
 
-      <!-- ⭐⭐ (إضافة جديدة) تصحيح نتائج العبادات ⭐⭐ -->
+      <!-- ⭐ إضافة: وضع تصحيح/إعادة تعيين اليوم -->
       <hr style="border:none; border-top:1px dashed #d9caa0; margin:8px 0;">
       <h4 style="margin:0 0 8px 0; color:var(--primary);">تصحيح النتائج</h4>
       <div class="reports-row" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px;">
-        <span><b>تصحيح نتائج العبادات لليوم المحدد:</b></span>
-        <button class="refresh-btn" id="btn-fix-daily" title="تصحيح تلقائي وفق النموذج">🛠️ تصحيح نتائج العبادات</button>
-        <span style="font-size:.85rem; color:#7a6b4e;">(لا ينشئ سجلات جديدة — يصحّح السجلات الموجودة ويضبط النقاط وفق النموذج)</span>
+        <span><b>وضع التنفيذ:</b></span>
+        <select id="fix-mode" style="border:1px solid var(--gold); border-radius:8px; padding:4px 8px;">
+          <option value="fix">تصحيح النقاط وفق النموذج</option>
+          <option value="reset">إعادة تعيين اليوم (حذف سجلات هذا اليوم)</option>
+        </select>
+        <button class="refresh-btn" id="btn-fix-daily" title="تنفيذ حسب الوضع المحدد">🛠️ تنفيذ</button>
       </div>
       <!-- نهاية الإضافة -->
     </div>
@@ -1203,7 +1206,6 @@
     const userNames = Object.keys(summary);
     const leaderTotal = Math.max(...userNames.map(u => summary[u].totalPoints), 1);
     const rangeDays = Math.max(1, (dates || []).length);
-    const avgTotalAll = userNames.reduce((a,u)=>a+summary[u].totalPoints,0) / Math.max(1,userNames.length);
     function pctStr(x){ return `${Math.round(x)}%`; }
 
     // أسماء عرض
@@ -1221,7 +1223,7 @@
             <div class="h-cell num">جماعة: <b>${rec.g}</b></div>
             <div class="h-cell num">فرد: <b>${rec.f}</b></div>
             <div class="h-cell num">قضاء: <b>${rec.q}</b></div>
-            <div class="h-cell num">مرات إنجاز: <b>${rec.done}</b> / ${rangeDays}</div>
+            <div class="h-cell num">مرات إنجاز: <b>${rec.done}</b> / ${Math.max(1,(dates||[]).length)}</div>
           </div>`;
       }).join('');
       return `
@@ -1270,7 +1272,7 @@
       const avgPerActive = data.daysActive ? Math.round(data.totalPoints / data.daysActive) : 0;
       const excellencePct  = Math.round((data.totalPoints / leaderTotal) * 100);
       const deficiencyPct  = Math.max(0, 100 - excellencePct);
-      const adherencePct   = Math.round((data.daysActive / rangeDays) * 100);
+      const adherencePct   = Math.round((data.daysActive / Math.max(1,(dates||[]).length)) * 100);
 
       function barsHTML(items){
         if(!items.length) return `<div class="nodata">لا توجد بيانات مميزة في هذا المدى.</div>`;
@@ -1288,11 +1290,11 @@
         }).join('');
       }
 
-      const sunanBlock   = genericTable("🌱 السنن والرواتب", data.habitStats.sunan, SUNAN_NAMES, rangeDays);
-      const extraBlock   = genericTable("📿 الأذكار والورد", data.habitStats.extra, EXTRA_NAMES, rangeDays);
-      const kahfBlock    = genericTable("🕌 سورة الكهف (الجمعة فقط)", { kahf: data.habitStats.special.kahf }, {kahf:'🕌 سورة الكهف'}, rangeDays);
-      const fastBlock    = genericTable("🌙 الصيام (تطوع)", { fasting: data.habitStats.special.fasting }, {fasting:'🌙 صيام تطوع'}, rangeDays);
-      const rfastBlock   = genericTable("🌙 صيام رمضان (فرض)", { r_fasting: data.habitStats.special.r_fasting }, {r_fasting:'🌙 صيام رمضان (فرض)'}, rangeDays);
+      const sunanBlock   = genericTable("🌱 السنن والرواتب", data.habitStats.sunan, SUNAN_NAMES, Math.max(1,(dates||[]).length));
+      const extraBlock   = genericTable("📿 الأذكار والورد", data.habitStats.extra, EXTRA_NAMES, Math.max(1,(dates||[]).length));
+      const kahfBlock    = genericTable("🕌 سورة الكهف (الجمعة فقط)", { kahf: data.habitStats.special.kahf }, {kahf:'🕌 سورة الكهف'}, Math.max(1,(dates||[]).length));
+      const fastBlock    = genericTable("🌙 الصيام (تطوع)", { fasting: data.habitStats.special.fasting }, {fasting:'🌙 صيام تطوع'}, Math.max(1,(dates||[]).length));
+      const rfastBlock   = genericTable("🌙 صيام رمضان (فرض)", { r_fasting: data.habitStats.special.r_fasting }, {r_fasting:'🌙 صيام رمضان (فرض)'}, Math.max(1,(dates||[]).length));
 
       return `
         <section class="user-card">
@@ -1300,13 +1302,12 @@
 
           <div class="kpis">
             <div class="kpi"><span class="kpi-title">إجمالي النقاط</span><span class="kpi-val">${data.totalPoints}</span></div>
-            <div class="kpi"><span class="kpi-title">أيام فعّالة</span><span class="kpi-val">${data.daysActive}/${rangeDays}</span></div>
+            <div class="kpi"><span class="kpi-title">أيام فعّالة</span><span class="kpi-val">${data.daysActive}/${Math.max(1,(dates||[]).length)}</span></div>
             <div class="kpi"><span class="kpi-title">متوسط/يوم</span><span class="kpi-val">${avgPerActive}</span></div>
             <div class="kpi"><span class="kpi-title">أيّام الصيام</span><span class="kpi-val">${data.fastingCount}</span></div>
             <div class="kpi"><span class="kpi-title">ورد قرآني</span><span class="kpi-val">${data.quranCount}</span></div>
           </div>
 
-          <!-- نسب الأداء -->
           <div class="rates">
             <div class="rate">
               <div class="rate-row"><span class="rate-label">نسبة التميُّز</span><span class="rate-val">${excellencePct}%</span></div>
@@ -1325,7 +1326,6 @@
           <div class="sub-title">📈 أفضل 5 أيام</div>
           <div class="bars">${barsHTML(top)}</div>
 
-          <!-- تفصيل العبادات -->
           ${fardTable(data)}
           ${sunanBlock}
           ${extraBlock}
@@ -1363,20 +1363,13 @@
   .hdr-sub{ display:flex; gap:12px; flex-wrap:wrap; color:#7a6b4e; font-weight:700; }
   .tag{ background:#fff7d6; border:1px solid var(--gold); padding:2px 8px; border-radius:999px; }
   .small{ color:#7a7a7a; font-size:.9rem; }
-
   .grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(360px,1fr)); gap:12px; }
-  .user-card{
-    border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff;
-    box-shadow:0 2px 8px rgba(0,0,0,.04);
-    break-inside: avoid;
-  }
+  .user-card{ border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.04); break-inside: avoid; }
   .user-card h3{ margin:0 0 10px 0; font-family:'Reem Kufi',sans-serif; color:#0f3b22; }
-
   .kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:8px; }
   .kpi{ background:#f9f6ef; border:1px solid var(--border); border-radius:10px; padding:6px; text-align:center; }
   .kpi-title{ display:block; color:#7a6b4e; font-size:.85rem; }
   .kpi-val{ display:block; font-weight:800; font-size:1.05rem; }
-
   .rates{ display:grid; grid-template-columns:1fr; gap:8px; margin:8px 0 10px 0; }
   .rate-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
   .rate-label{ color:#534d3d; font-weight:800; }
@@ -1387,7 +1380,6 @@
   .rate-fill{ height:100%; background:linear-gradient(90deg,#1a4d2e,#2d6a4f); }
   .rate-fill.danger{ background:linear-gradient(90deg,#b33a3a,#e26a6a); }
   .rate-fill.info{ background:linear-gradient(90deg,#2d6a4f,#5aa879); }
-
   .sub-title{ margin:6px 0; font-weight:800; color:#7a6b4e; }
   .bars{ display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
   .bar-row{ display:flex; align-items:center; gap:8px; }
@@ -1395,7 +1387,6 @@
   .bar{ position:relative; flex:1; height:18px; background:#f1ede0; border:1px solid #e0d6b8; border-radius:999px; overflow:hidden; }
   .bar-fill{ height:100%; background:linear-gradient(90deg,#1a4d2e,#2d6a4f); }
   .bar-val{ position:absolute; right:8px; top:-1px; font-size:.85rem; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.35); }
-
   .block-title{ margin:8px 0 6px 0; font-weight:800; color:#634e1e; }
   .h-table{ display:grid; gap:4px; border:1px solid #e6dec7; border-radius:10px; overflow:hidden; }
   .h-cols-6{ grid-template-columns:1.2fr repeat(5, 1fr); }
@@ -1409,10 +1400,8 @@
   .rate-bar{ flex:1; height:12px; background:#f1ede0; border:1px solid #e0d6b8; border-radius:999px; overflow:hidden; }
   .rate-fill{ height:100%; background:linear-gradient(90deg,#1a4d2e,#2d6a4f); }
   .rate-val{ width:52px; text-align:end; color:#534d3d; font-weight:800; }
-
   .fard-breakdown{ display:flex; gap:10px; margin-top:8px; color:#534d3d; font-size:.95rem; }
   .nodata{ color:#9a8f74; background:#f9f5e9; border:1px dashed #e6dec7; padding:6px 8px; border-radius:8px; }
-
   @media print{
     body{ margin:12mm; }
     .hdr, .kpi, .bar, .rate-bar, .h-head{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
@@ -1470,7 +1459,6 @@
       let finalSummary = summary;
       let mLabelPrefix = '';
       if(opts.scope === 'individual' && opts.user){
-        // ملخص فردي فقط
         finalSummary = { [opts.user]: summary[opts.user] || { totalPoints:0, daysActive:0, fastingCount:0, quranCount:0, fardCounts:{m:0,g:0,f:0,q:0}, days:[], topDays:[], habitStats:{ fard:{}, sunan:{}, extra:{}, special:{ fasting:{done:0}, r_fasting:{done:0, applicable:0}, kahf:{done:0, applicable:0} } } } };
         mLabelPrefix = `فردي (${opts.user}) — `;
       } else {
@@ -1528,6 +1516,7 @@
   function onRangeTypeChange(){
     const typeSel = document.getElementById('report-range-type');
     const customWrap = document.getElementById('custom-range-wrap');
+    customWrap.style.display = (typeSel.value === 'custom') ? 'none' : customWrap.style.display; /* إبقاء السلوك كما هو */
     customWrap.style.display = (typeSel.value === 'custom') ? 'inline-flex' : 'none';
   }
   function generateReportFromPanel(){
@@ -1557,10 +1546,11 @@
     alert(`تم إلغاء حظر "${u}"`);
   }
 
-  /* ⭐⭐ (إضافة) دالة تصحيح نتائج العبادات لليوم المحدد ⭐⭐ */
+  /* ===== تصحيح/إعادة تعيين اليوم ===== */
   async function fixDailyHabits(){
     const ymd = document.getElementById('date-picker').value;
     if(!ymd) return alert('اختر التاريخ أولاً');
+
     const dateObj = parseLocalYMD(ymd);
     const isFriday = (dateObj.getDay() === 5);
     const inRamadan = isInRamadan(dateObj);
@@ -1570,8 +1560,7 @@
       const dayData = daySnap.val() || {};
       let fixes = 0;
 
-      // مراجع سريعة
-      const fardMap = Object.fromEntries((model.fard||[]).map(h=>[h.id, h]));
+      const fardMap  = Object.fromEntries((model.fard||[]).map(h=>[h.id, h]));
       const sunanMap = Object.fromEntries((model.sunan||[]).map(h=>[h.id, h]));
       const extraMap = Object.fromEntries((model.extra||[]).map(h=>[h.id, h]));
       const validFardTypes = new Set(['m','g','f','q']);
@@ -1580,20 +1569,15 @@
         const uData = dayData[u] || {};
         const upd = {};
 
-        // الفرائض: تصحيح النقاط بناءً على النوع
+        // الفرائض
         for(const fid in fardMap){
           const rec = uData[fid];
           if(!rec) continue;
           if(rec.type && validFardTypes.has(rec.type)){
-            const pts = (fardMap[fid].pts?.[rec.type]) || 0;
-            if(rec.p !== pts){
-              upd[fid] = { ...rec, p: pts };
-              fixes++;
-            }
-          } else if(rec && rec.type && !validFardTypes.has(rec.type)){
-            // نوع غير صالح: تصفير النقاط مع إبقاء السجل
-            upd[fid] = { type: rec.type, p: 0 };
-            fixes++;
+            const pts = fardMap[fid].pts?.[rec.type] ?? 0;
+            if(rec.p !== pts){ upd[fid] = { ...rec, p: pts }; fixes++; }
+          }else if(rec.type && !validFardTypes.has(rec.type)){
+            upd[fid] = { type: rec.type, p: 0 }; fixes++;
           }
         }
 
@@ -1603,10 +1587,7 @@
           if(!rec) continue;
           const done = !!rec.done;
           const p = done ? (sunanMap[sid].p||0) : 0;
-          if(rec.p !== p || rec.done !== done){
-            upd[sid] = { done, p };
-            fixes++;
-          }
+          if(rec.p !== p || !!rec.done !== done){ upd[sid] = { done, p }; fixes++; }
         }
 
         // الأذكار/الورد
@@ -1615,45 +1596,33 @@
           if(!rec) continue;
           const done = !!rec.done;
           const p = done ? (extraMap[eid].p||0) : 0;
-          if(rec.p !== p || rec.done !== done){
-            upd[eid] = { done, p };
-            fixes++;
-          }
+          if(rec.p !== p || !!rec.done !== done){ upd[eid] = { done, p }; fixes++; }
         }
 
-        // الكهف (الجمعة فقط)
+        // الكهف
         if(uData['kahf']){
           const done = isFriday && !!uData['kahf'].done;
           const p = done ? 40 : 0;
-          if(uData['kahf'].p !== p || !!uData['kahf'].done !== done){
-            upd['kahf'] = { done, p };
-            fixes++;
-          }
+          if(uData['kahf'].p !== p || !!uData['kahf'].done !== done){ upd['kahf'] = { done, p }; fixes++; }
         }
 
         // صيام التطوع
         if(uData['fasting']){
           const done = !!uData['fasting'].done;
           const p = done ? 100 : 0;
-          if(uData['fasting'].p !== p || !!uData['fasting'].done !== done){
-            upd['fasting'] = { done, p };
-            fixes++;
-          }
+          if(uData['fasting'].p !== p || !!uData['fasting'].done !== done){ upd['fasting'] = { done, p }; fixes++; }
         }
 
-        // صيام رمضان (فرض)
+        // صيام رمضان
         if(inRamadan){
-          const cur = uData['r_fasting'] || {};
-          const done = !!cur.done;
-          const p = done ? 100 : 0;
-          if(!uData['r_fasting'] || uData['r_fasting'].p !== p || !!uData['r_fasting'].done !== done){
-            upd['r_fasting'] = { done, p };
-            fixes++;
+          if(uData['r_fasting']){
+            const done = !!uData['r_fasting'].done;
+            const p = done ? 100 : 0;
+            if(uData['r_fasting'].p !== p || !!uData['r_fasting'].done !== done){ upd['r_fasting'] = { done, p }; fixes++; }
           }
-        } else {
+        }else{
           if(uData['r_fasting'] && (uData['r_fasting'].done || uData['r_fasting'].p)){
-            upd['r_fasting'] = { done:false, p:0 };
-            fixes++;
+            upd['r_fasting'] = { done:false, p:0 }; fixes++;
           }
         }
 
@@ -1668,7 +1637,35 @@
       alert('تعذر تنفيذ التصحيح. حاول مجددًا.');
     }
   }
-  /* ===== نهاية الإضافة ===== */
+
+  async function resetDailyHabits(){
+    const ymd = document.getElementById('date-picker').value;
+    if(!ymd) return alert('اختر التاريخ أولاً');
+    try{
+      await db.ref('osraty/'+ymd).remove();
+      const toast = document.createElement('div');
+      toast.textContent = `تمت إعادة تعيين العبادات لليوم ${ymd} ✅`;
+      toast.style.cssText = 'position:fixed;top:12px;right:12px;background:#1a4d2e;color:#fff;border:2px solid #c5a059;border-radius:12px;padding:8px 12px;z-index:2500;';
+      document.body.appendChild(toast); setTimeout(()=> toast.remove(), 2000);
+      sync();
+    }catch(e){
+      console.error('Reset error:', e);
+      alert('تعذّر إعادة التعيين. حاول مجددًا.');
+    }
+  }
+
+  function handleFixDailyClick(){
+    const mode = (document.getElementById('fix-mode')?.value) || 'fix';
+    if(mode === 'reset'){
+      const ymd = document.getElementById('date-picker').value || '';
+      const sure = confirm(`سيتم حذف سجلات اليوم (${ymd}) من قاعدة البيانات.\nهل أنت متأكد؟`);
+      if(!sure) return;
+      resetDailyHabits();
+    }else{
+      fixDailyHabits();
+    }
+  }
+  /* ===== نهاية إضافة التصحيح/إعادة التعيين ===== */
 
   function sync() {
     const d = document.getElementById('date-picker').value;
@@ -1725,9 +1722,9 @@
     document.getElementById('btn-block-user').onclick = blockUser;
     document.getElementById('btn-unblock-user').onclick = unblockUser;
 
-    /* ⭐ ربط زر التصحيح الجديد */
+    /* ربط زر التنفيذ لوضع التصحيح/إعادة التعيين */
     const btnFix = document.getElementById('btn-fix-daily');
-    if(btnFix) btnFix.onclick = fixDailyHabits;
+    if(btnFix) btnFix.onclick = handleFixDailyClick;
 
     sync();
 
